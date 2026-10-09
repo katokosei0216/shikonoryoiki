@@ -1,0 +1,6 @@
+.answer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 20px; }
+.answer-card {
+    border: 1px solid var(--gold-dark); background: #121310; padding: 20px; text-align: center;
+    display: flex; flex-direction: column; justify-content: space-between; height: 180px; transition: .2s;
+}
+.answer-card:hover { border-color: var(--gold-light); transform: translateY(-3px); }

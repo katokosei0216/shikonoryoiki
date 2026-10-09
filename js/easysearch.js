@@ -1,0 +1,1 @@
+console.log('easysearch.js 読み込み完了');

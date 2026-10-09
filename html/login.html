@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ログイン | 嗜好の領域</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="login.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+  <div class="box-card login-card">
+    <div class="subpage-heading">
+      <span></span>
+      <h1>ログイン</h1>
+      <span></span>
+    </div>
+    <form onsubmit="return false;">
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" class="form-control" required placeholder="example@domain.com">
+      </div>
+      <div class="form-group">
+        <label>パスワード</label>
+        <input type="password" class="form-control" required>
+      </div>
+      <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">ログイン</button>
+    </form>
+    <div style="text-align:center;margin-top:20px;">
+      <a href="javascript:void(0)" onclick="openModal('forgotModal')" style="color:#aaa18d;font-size:12px;">パスワードをお忘れの方はこちら</a>
+    </div>
+    <a href="newlogin.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">新規会員登録はこちら</a>
+  </div>
+</main>
+
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('forgotModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>パスワード再設定</h1>
+      <span></span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;">
+      ご登録中のメールアドレスを入力してください。<br>再設定用リンクをお送りします。
+    </p>
+    <form onsubmit="alert('再設定メールを送信しました。');closeModal('forgotModal');return false;">
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" class="form-control" required placeholder="example@domain.com">
+      </div>
+      <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">送信</button>
+    </form>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script src="login.js"></script>
+</body>
+</html>

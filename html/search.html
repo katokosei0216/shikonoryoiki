@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>詳細検索 | 嗜好の領域</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="search.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+
+  <!-- カーセンサー風 絞り込みパネル -->
+  <div class="search-panel box-card">
+    <form id="searchForm" onsubmit="return false;">
+      
+      <!-- 上部: 選んだ種別 + 商品名検索バー -->
+      <div class="search-header-bar">
+        <div class="category-badge" id="selectedCategoryBadge">◆ ウイスキー</div>
+        <div class="keyword-search-wrap">
+          <input type="text" class="form-control" placeholder="商品名・銘柄名で検索..." id="keywordInput">
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <!-- 左列: 基本仕様 (国/メーカー/価格/年代/度数) -->
+        <div>
+          <div class="filter-section-title">基本情報</div>
+          
+          <!-- 製造国 / 都道府県 (datalistによる入力補完機能付き) -->
+          <div class="form-group">
+            <label id="countryLabel">製造国</label>
+            <input type="text" class="form-control" list="countryDatalist" id="countryInput" placeholder="入力または選択...">
+            <datalist id="countryDatalist">
+              <option value="日本">
+              <option value="スコットランド">
+              <option value="アイルランド">
+              <option value="アメリカ">
+              <option value="カナダ">
+            </datalist>
+          </div>
+
+          <!-- メーカー -->
+          <div class="form-group">
+            <label>メーカー</label>
+            <input type="text" class="form-control" list="makerDatalist" placeholder="入力または選択...">
+            <datalist id="makerDatalist">
+              <option value="サントリー">
+              <option value="ニッカウヰスキー">
+              <option value="キリン">
+              <option value="獺祭（旭酒造）">
+              <option value="バカルディ">
+            </datalist>
+          </div>
+
+          <!-- 値段 下限〜上限 -->
+          <div class="form-group">
+            <label>値段</label>
+            <div class="range-group">
+              <select class="form-control">
+                <option value="">下限なし</option>
+                <option value="5000">5,000円</option>
+                <option value="10000">10,000円</option>
+                <option value="20000">20,000円</option>
+                <option value="30000">30,000円</option>
+                <option value="40000">40,000円</option>
+                <option value="50000">50,000円</option>
+                <option value="60000">60,000円</option>
+                <option value="70000">70,000円</option>
+                <option value="80000">80,000円</option>
+                <option value="90000">90,000円</option>
+                <option value="100000">100,000円</option>
+                <option value="110000">110,000円</option>
+                <option value="120000">120,000円</option>
+                <option value="130000">130,000円</option>
+                <option value="140000">140,000円</option>
+                <option value="150000">150,000円</option>
+                <option value="160000">160,000円</option>
+                <option value="170000">170,000円</option>
+                <option value="180000">180,000円</option>
+                <option value="190000">190,000円</option>
+                <option value="200000">200,000円</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control">
+                <option value="">上限なし</option>
+                <option value="5000">5,000円</option>
+                <option value="10000">10,000円</option>
+                <option value="20000">20,000円</option>
+                <option value="30000">30,000円</option>
+                <option value="40000">40,000円</option>
+                <option value="50000">50,000円</option>
+                <option value="100000">100,000円</option>
+                <option value="200000">200,000円</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 年代 (カクテル時非表示) -->
+          <div class="form-group" id="ageFilterGroup">
+            <label>年代</label>
+            <div class="range-group">
+              <select class="form-control">
+                <option value="">下限なし</option>
+                <option value="5">5年</option>
+                <option value="10">10年</option>
+                <option value="15">15年</option>
+                <option value="20">20年</option>
+                <option value="25">25年</option>
+                <option value="30">30年</option>
+                <option value="35">35年</option>
+                <option value="40">40年</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control">
+                <option value="">上限なし</option>
+                <option value="5">5年</option>
+                <option value="10">10年</option>
+                <option value="15">15年</option>
+                <option value="20">20年</option>
+                <option value="25">25年</option>
+                <option value="30">30年</option>
+                <option value="35">35年</option>
+                <option value="40">40年</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 度数 (カクテル時非表示) -->
+          <div class="form-group" id="abvFilterGroup">
+            <label>度数</label>
+            <div class="range-group">
+              <select class="form-control">
+                <option value="">下限なし</option>
+                <option value="3">3%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+                <option value="25">25%</option>
+                <option value="30">30%</option>
+                <option value="35">35%</option>
+                <option value="40">40%</option>
+                <option value="45">45%</option>
+                <option value="50">50%</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control">
+                <option value="">上限なし</option>
+                <option value="3">3%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+                <option value="20">20%</option>
+                <option value="25">25%</option>
+                <option value="30">30%</option>
+                <option value="35">35%</option>
+                <option value="40">40%</option>
+                <option value="45">45%</option>
+                <option value="50">50%</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 中列: 5段階評価指標 -->
+        <div>
+          <div class="filter-section-title">風味・テイスト（5段階）</div>
+
+          <!-- 香り: 1無〜5強 -->
+          <div class="form-group">
+            <label>香り（1: 無し 〜 5: 強い）</label>
+            <div class="rating-options">
+              <div class="rating-btn"><input type="radio" name="aroma" id="aroma1" value="1"><label for="aroma1">1</label></div>
+              <div class="rating-btn"><input type="radio" name="aroma" id="aroma2" value="2"><label for="aroma2">2</label></div>
+              <div class="rating-btn"><input type="radio" name="aroma" id="aroma3" value="3"><label for="aroma3">3</label></div>
+              <div class="rating-btn"><input type="radio" name="aroma" id="aroma4" value="4"><label for="aroma4">4</label></div>
+              <div class="rating-btn"><input type="radio" name="aroma" id="aroma5" value="5"><label for="aroma5">5</label></div>
+            </div>
+          </div>
+
+          <!-- 味: 1甘〜5苦 -->
+          <div class="form-group">
+            <label>味（1: 甘い 〜 5: 苦い）</label>
+            <div class="rating-options">
+              <div class="rating-btn"><input type="radio" name="taste" id="taste1" value="1"><label for="taste1">1</label></div>
+              <div class="rating-btn"><input type="radio" name="taste" id="taste2" value="2"><label for="taste2">2</label></div>
+              <div class="rating-btn"><input type="radio" name="taste" id="taste3" value="3"><label for="taste3">3</label></div>
+              <div class="rating-btn"><input type="radio" name="taste" id="taste4" value="4"><label for="taste4">4</label></div>
+              <div class="rating-btn"><input type="radio" name="taste" id="taste5" value="5"><label for="taste5">5</label></div>
+            </div>
+          </div>
+
+          <!-- 酸味: 1無〜5酸 -->
+          <div class="form-group">
+            <label>酸味（1: 無し 〜 5: 酸っぱい）</label>
+            <div class="rating-options">
+              <div class="rating-btn"><input type="radio" name="acidity" id="acidity1" value="1"><label for="acidity1">1</label></div>
+              <div class="rating-btn"><input type="radio" name="acidity" id="acidity2" value="2"><label for="acidity2">2</label></div>
+              <div class="rating-btn"><input type="radio" name="acidity" id="acidity3" value="3"><label for="acidity3">3</label></div>
+              <div class="rating-btn"><input type="radio" name="acidity" id="acidity4" value="4"><label for="acidity4">4</label></div>
+              <div class="rating-btn"><input type="radio" name="acidity" id="acidity5" value="5"><label for="acidity5">5</label></div>
+            </div>
+          </div>
+
+          <!-- 濃厚さ: 1無〜5濃 -->
+          <div class="form-group">
+            <label>濃厚さ（1: 無し 〜 5: 濃厚）</label>
+            <div class="rating-options">
+              <div class="rating-btn"><input type="radio" name="richness" id="richness1" value="1"><label for="richness1">1</label></div>
+              <div class="rating-btn"><input type="radio" name="richness" id="richness2" value="2"><label for="richness2">2</label></div>
+              <div class="rating-btn"><input type="radio" name="richness" id="richness3" value="3"><label for="richness3">3</label></div>
+              <div class="rating-btn"><input type="radio" name="richness" id="richness4" value="4"><label for="richness4">4</label></div>
+              <div class="rating-btn"><input type="radio" name="richness" id="richness5" value="5"><label for="richness5">5</label></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右列: 種別固有の絞り込みチェックボックス -->
+        <div>
+          <div class="filter-section-title">カテゴリー固有条件</div>
+
+          <!-- ウイスキー固有 -->
+          <div id="whiskySpecific" style="display:none;">
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="smoke"> スモーク</label>
+              <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="grain"> グレーン</label>
+              <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="malt"> モルト</label>
+              <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="blended"> ブレンデッド</label>
+            </div>
+          </div>
+
+          <!-- 日本酒固有 -->
+          <div id="sakeSpecific" style="display:none;">
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="sake_type" value="easy"> 飲みやすい</label>
+              <label class="checkbox-item"><input type="checkbox" name="sake_type" value="dry"> 辛口</label>
+              <label class="checkbox-item"><input type="checkbox" name="sake_type" value="sweet"> 甘口</label>
+            </div>
+          </div>
+
+          <!-- ワイン固有 -->
+          <div id="wineSpecific" style="display:none;">
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="wine_type" value="red"> 赤</label>
+              <label class="checkbox-item"><input type="checkbox" name="wine_type" value="white"> 白</label>
+              <label class="checkbox-item"><input type="checkbox" name="wine_type" value="sparkling"> スパークリング</label>
+              <label class="checkbox-item"><input type="checkbox" name="wine_type" value="rose"> ロゼ</label>
+            </div>
+          </div>
+
+          <!-- カクテル固有 -->
+          <div id="cocktailSpecific" style="display:none;">
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="shake"> シェイク</label>
+              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="build"> ビルド</label>
+              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="smoke"> スモーク</label>
+              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="short"> ショート</label>
+              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="long"> ロング</label>
+            </div>
+
+            <!-- フルーツ (折りたたみ) -->
+            <details class="filter-accordion">
+              <summary>フルーツ絞り込み</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lemon"> レモン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lime"> ライム</label>
+                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="peach"> ピーチ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="pine"> パイン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lychee"> ライチ</label>
+                </div>
+              </div>
+            </details>
+
+            <!-- ベース (折りたたみ) -->
+            <details class="filter-accordion">
+              <summary>ベース酒絞り込み</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="gin"> ジン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="vodka"> ウォッカ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="rum"> ラム</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="tequila"> テキーラ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="brandy"> ブランデー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="whisky"> ウィスキー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="wine"> ワイン</label>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下部アクション -->
+      <div class="search-actions">
+        <button type="button" class="clear-btn" onclick="resetFilters()">条件をクリア</button>
+        <button type="submit" class="gold-button">🔍 この条件で検索する</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 絞り込み結果一覧（easyanswerと同様の表示形式） -->
+  <div class="subpage-heading">
+    <span></span>
+    <h1>検索結果一覧</h1>
+    <span></span>
+  </div>
+  <div class="answer-grid">
+    <a href="detail.html" class="answer-card">
+      <span style="font-size:11px;color:var(--gold);">WHISKY</span>
+      <strong style="font-size:16px;color:var(--cream);">山崎 12年</strong>
+      <span style="font-size:12px;color:#aaa;">スコットランド / 43%</span>
+      <small style="color:var(--muted);">詳細を見る →</small>
+    </a>
+    <a href="detail.html" class="answer-card">
+      <span style="font-size:11px;color:var(--gold);">WHISKY</span>
+      <strong style="font-size:16px;color:var(--cream);">白州 NV</strong>
+      <span style="font-size:12px;color:#aaa;">日本 / 43%</span>
+      <small style="color:var(--muted);">詳細を見る →</small>
+    </a>
+    <a href="detail.html" class="answer-card">
+      <span style="font-size:11px;color:var(--gold);">SAKE</span>
+      <strong style="font-size:16px;color:var(--cream);">獺祭 磨き三割九分</strong>
+      <span style="font-size:12px;color:#aaa;">山口県 / 16%</span>
+      <small style="color:var(--muted);">詳細を見る →</small>
+    </a>
+    <a href="detail.html" class="answer-card">
+      <span style="font-size:11px;color:var(--gold);">COCKTAIL</span>
+      <strong style="font-size:16px;color:var(--cream);">ジントニック</strong>
+      <span style="font-size:12px;color:#aaa;">ビルド / ライム</span>
+      <small style="color:var(--muted);">詳細を見る →</small>
+    </a>
+  </div>
+
+</main>
+
+<script src="common.js"></script>
+<script src="search.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+.mypage-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+.profile-avatar-wrap { text-align: center; margin-bottom: 20px; }
+.avatar-img { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; background: #2a251a; margin: 0 auto 10px; line-height: 90px; color: var(--gold-light); }
+.card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid var(--gold-dark); padding-bottom: 8px; }
+.card-title { font-size: 18px; color: var(--gold-light); margin: 0; }
+
+.filter-button-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+.cat-btn {
+    padding: 6px 14px; font-size: 12px; cursor: pointer; border: 1px solid transparent;
+    transition: .2s; color: #fff; border-radius: 2px; opacity: .75;
+}
+.cat-btn.cat-whisky { background: linear-gradient(145deg, #a47b18, #4b350b); }
+.cat-btn.cat-cocktail { background: linear-gradient(145deg, #0a698e, #063e56); }
+.cat-btn.cat-sake { background: linear-gradient(145deg, #f5f4ef, #d3d3cc); color: #111; }
+.cat-btn.cat-wine { background: linear-gradient(145deg, #6d101b, #4c080f); }
+.cat-btn.cat-paper { background: linear-gradient(145deg, #4c4c4c, #343434); }
+.cat-btn.cat-vape { background: linear-gradient(145deg, #166d4d, #0c3f2e); }
+
+/* 複数選択・押された状態：明るく＆オレンジ色の枠 */
+.cat-btn.active {
+    opacity: 1;
+    border: 2px solid var(--orange) !important;
+    filter: brightness(1.25);
+    box-shadow: 0 0 10px rgba(255,140,0,.5);
+}
+
+.item-list-mini { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; max-height: 220px; overflow-y: auto; padding-right: 5px; }
+.mini-item-card { border: 1px solid #3d3521; background: #0e0f0d; padding: 10px; text-align: center; font-size: 12px; transition: .2s; }
+.mini-item-card:hover { border-color: var(--gold-light); }
+
+.comment-list-mini { display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto; }
+.mini-comment-card { border: 1px solid #3d3521; background: #0e0f0d; padding: 10px; font-size: 12px; }
+.mini-comment-date { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+@media (max-width: 768px) { .mypage-grid { grid-template-columns: 1fr; } }

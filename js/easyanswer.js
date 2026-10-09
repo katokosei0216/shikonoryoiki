@@ -1,0 +1,1 @@
+console.log('easyanswer.js 読み込み完了');

@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マイページ | 嗜好の領域</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="easyanswer.css">
+<link rel="stylesheet" href="mypage.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+  <div class="mypage-grid">
+    <!-- 画面左：ユーザー情報変更 -->
+    <div class="box-card">
+      <div class="card-header-flex">
+        <h2 class="card-title">会員情報設定</h2>
+      </div>
+      <div class="profile-avatar-wrap">
+        <div class="avatar-img">ICON</div>
+        <button class="icon-btn">アイコンの変更</button>
+      </div>
+      <form onsubmit="alert('変更を保存しました。');return false;">
+        <div class="form-group">
+          <label>ユーザー名</label>
+          <input type="text" class="form-control" value="ゲストユーザー">
+        </div>
+        <div class="form-group">
+          <label>メールアドレス</label>
+          <input type="email" class="form-control" value="user@example.com">
+        </div>
+        <div class="form-group">
+          <label>新しいパスワード</label>
+          <input type="password" class="form-control" placeholder="変更時のみ入力">
+        </div>
+        <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">変更を保存</button>
+      </form>
+    </div>
+
+    <!-- 画面右：お気に入り & コメント -->
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      <!-- 画面右上：お気に入り -->
+      <div class="box-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">お気に入り一覧</h2>
+          <button class="icon-btn" onclick="openModal('favModal')">拡大 ⤢</button>
+        </div>
+        <div class="item-list-mini">
+          <div class="mini-item-card">山崎12年<br><small style="color:var(--gold-light)">WHISKY</small></div>
+          <div class="mini-item-card">マルボロ<br><small style="color:var(--muted)">紙</small></div>
+          <div class="mini-item-card">獺祭 磨き三割九分<br><small style="color:#aaa">日本酒</small></div>
+        </div>
+      </div>
+
+      <!-- 画面右下：コメント -->
+      <div class="box-card">
+        <div class="card-header-flex">
+          <h2 class="card-title">投稿コメント履歴</h2>
+          <button class="icon-btn" onclick="openModal('commentModal')">拡大 ⤢</button>
+        </div>
+        <div class="comment-list-mini">
+          <div class="mini-comment-card">
+            <strong style="color:var(--gold-light)">山崎12年</strong> ★★★★★
+            <p style="margin:4px 0 0;color:#ccc;">スモーキーな香りが最高です。</p>
+            <div class="mini-comment-date">2026/10/01</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- お気に入り拡大モーダル -->
+<div class="modal-overlay" id="favModal">
+  <div class="modal-content" style="width:min(900px,100%);">
+    <button class="modal-close" onclick="closeModal('favModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>お気に入り一覧 (拡大)</h1>
+      <span></span>
+    </div>
+    <div class="filter-button-group">
+      <button class="cat-btn cat-whisky">ウイスキー</button>
+      <button class="cat-btn cat-cocktail">カクテル</button>
+      <button class="cat-btn cat-sake">日本酒</button>
+      <button class="cat-btn cat-wine">ワイン</button>
+      <button class="cat-btn cat-paper">紙</button>
+      <button class="cat-btn cat-vape">電子</button>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <input type="text" class="form-control" placeholder="名称検索...">
+    </div>
+    <div class="answer-grid" style="margin-top:0;">
+      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">山崎12年</strong><small>ウイスキー</small></a>
+      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">マルボロ</strong><small>紙タバコ</small></a>
+      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">獺祭 磨き三割九分</strong><small>日本酒</small></a>
+    </div>
+  </div>
+</div>
+
+<!-- コメント拡大モーダル -->
+<div class="modal-overlay" id="commentModal">
+  <div class="modal-content" style="width:min(900px,100%);">
+    <button class="modal-close" onclick="closeModal('commentModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>投稿コメント履歴 (拡大)</h1>
+      <span></span>
+    </div>
+    <div class="filter-button-group">
+      <button class="cat-btn cat-whisky">ウイスキー</button>
+      <button class="cat-btn cat-cocktail">カクテル</button>
+      <button class="cat-btn cat-sake">日本酒</button>
+      <button class="cat-btn cat-wine">ワイン</button>
+      <button class="cat-btn cat-paper">紙</button>
+      <button class="cat-btn cat-vape">電子</button>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;">
+      <input type="text" class="form-control" placeholder="名称検索...">
+    </div>
+    <div>
+      <div class="mini-comment-card" style="margin-bottom:10px;">
+        <strong style="color:var(--gold-light)">山崎12年</strong> ★★★★★
+        <p style="margin:4px 0 0;color:#ccc;">スモーキーで豊潤な香りが広がります。ハイボールでもロックでも楽しめます。</p>
+        <div class="mini-comment-date">2026/10/01</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script src="mypage.js"></script>
+</body>
+</html>

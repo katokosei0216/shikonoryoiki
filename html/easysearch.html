@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>簡易検索 | 嗜好の領域</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="easysearch.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+  <div class="box-card" style="width:min(700px,100%);margin:0 auto;position:relative;padding-bottom:80px;">
+    <div class="subpage-heading">
+      <span></span>
+      <h1>嗜好診断 (10の質問)</h1>
+      <span></span>
+    </div>
+    <div class="question-list">
+      <div class="question-item">
+        <div class="question-title">Q1. 好みの味わいはどちらですか？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q1" checked> 濃厚・重厚</label>
+          <label><input type="radio" name="q1"> 爽やか・スッキリ</label>
+        </div>
+      </div>
+      <div class="question-item">
+        <div class="question-title">Q2. 普段楽しむ時間帯は？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q2" checked> 夜・食後</label>
+          <label><input type="radio" name="q2"> 昼・休日</label>
+        </div>
+      </div>
+      <script>
+        for(let i=3; i<=10; i++){
+          document.write(`
+            <div class="question-item">
+              <div class="question-title">Q${i}. 質問項目のダミープレースホルダーです</div>
+              <div class="radio-options">
+                <label><input type="radio" name="q${i}" checked> 選択肢 A</label>
+                <label><input type="radio" name="q${i}"> 選択肢 B</label>
+              </div>
+            </div>
+          `);
+        }
+      </script>
+    </div>
+    <div style="position:absolute;bottom:25px;right:30px;">
+      <a href="easyanswer.html" class="gold-button">診断結果を見る →</a>
+    </div>
+  </div>
+</main>
+<script src="common.js"></script>
+<script src="easysearch.js"></script>
+</body>
+</html>

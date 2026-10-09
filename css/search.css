@@ -1,0 +1,181 @@
+.search-panel {
+    background: rgba(14, 15, 13, 0.85);
+    border: 1px solid var(--gold-dark);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+.search-header-bar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #36301e;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.category-badge {
+    background: linear-gradient(135deg, #3a3017, #665426);
+    border: 1px solid var(--gold);
+    color: var(--gold-light);
+    padding: 6px 16px;
+    font-size: 15px;
+    letter-spacing: .1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.keyword-search-wrap {
+    flex: 1;
+    min-width: 260px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* フィルターグリッド */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px 30px;
+    font-family: "Yu Gothic", sans-serif;
+}
+
+.filter-section-title {
+    font-size: 13px;
+    color: var(--gold-light);
+    border-left: 3px solid var(--gold);
+    padding-left: 8px;
+    margin-bottom: 12px;
+    font-weight: bold;
+}
+
+/* 下限・上限 プルダウンレイアウト */
+.range-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.range-group select {
+    flex: 1;
+}
+
+/* 5段階選択ラジオボタン */
+.rating-options {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+.rating-btn {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+.rating-btn input[type="radio"] {
+    display: none;
+}
+.rating-btn label {
+    display: block;
+    background: #090a09;
+    border: 1px solid #473e25;
+    color: #bbb;
+    padding: 6px 0;
+    font-size: 11px;
+    cursor: pointer;
+    transition: .2s;
+}
+.rating-btn input[type="radio"]:checked + label {
+    background: var(--gold-dark);
+    border-color: var(--gold-light);
+    color: #fff;
+    font-weight: bold;
+}
+
+/* チェックボックス群 */
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    padding: 6px 0;
+}
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #ddd;
+    cursor: pointer;
+}
+.checkbox-item input[type="checkbox"] {
+    accent-color: var(--gold);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+/* 折りたたみ (accordion) */
+details.filter-accordion {
+    border: 1px solid #38311e;
+    background: #11120e;
+    margin-top: 10px;
+    border-radius: 2px;
+}
+details.filter-accordion summary {
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--gold-light);
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+details.filter-accordion summary::-webkit-details-marker { display: none; }
+details.filter-accordion summary::after { content: "▼"; font-size: 10px; opacity: .7; }
+details.filter-accordion[open] summary::after { content: "▲"; }
+details.filter-accordion .accordion-content {
+    padding: 10px 12px 14px;
+    border-top: 1px solid #282315;
+}
+
+/* アクションボタン */
+.search-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid #36301e;
+}
+.clear-btn {
+    background: #1a1b18;
+    border: 1px solid #555;
+    color: #ccc;
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: .2s;
+    font-family: "Yu Gothic", sans-serif;
+}
+.clear-btn:hover { background: #2a2b27; color: #fff; }
+
+/* 検索結果カード表示 (easyanswerと同様) */
+.answer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+.answer-card {
+    border: 1px solid var(--gold-dark);
+    background: #121310;
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 200px;
+    transition: .2s;
+}
+.answer-card:hover { border-color: var(--gold-light); transform: translateY(-3px); }

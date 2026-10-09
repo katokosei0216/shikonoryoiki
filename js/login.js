@@ -1,0 +1,1 @@
+console.log('login.js 読み込み完了');

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>商品詳細 | 嗜好の領域</title>
+<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="detail.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+  <div class="box-card">
+    <div class="detail-grid">
+      <!-- 画面左半分 -->
+      <div>
+        <div class="detail-meta">ウイスキー | サントリー | 日本</div>
+        <h1 class="detail-title">シングルモルト 山崎12年</h1>
+        <div class="detail-image-box">商品画像エリア</div>
+        
+        <div class="fav-action-bar">
+          <button class="heart-btn" onclick="toggleFavorite()">♡ お気に入り</button>
+          <span style="font-size:13px;color:var(--muted);">登録数: <strong style="color:var(--gold-light);">1,280</strong></span>
+        </div>
+
+        <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
+          <h3 style="font-size:16px;color:var(--gold-light);margin-top:0;">口コミ・評価</h3>
+          
+          <div style="margin-bottom:20px;background:#10110e;padding:12px;border:1px solid #2d2618;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">評価をつける</div>
+            <div class="star-rating-select">
+              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+            </div>
+            <textarea class="form-control" placeholder="コメントを入力..."></textarea>
+            <button class="gold-button" style="margin-top:8px;padding:6px 12px;font-size:11px;" onclick="alert('投稿しました。');">投稿する</button>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:12px;color:var(--muted);">みんなの口コミ (3〜5件表示)</span>
+            <button class="icon-btn" onclick="openModal('detailCommentModal')">拡大 ⤢</button>
+          </div>
+          <div class="comment-list-mini" style="margin-top:10px;">
+            <div class="comment-card">
+              <div class="comment-user"><div class="avatar-img"></div> ユーザーA</div>
+              <div class="comment-text truncated">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。</div>
+            </div>
+            <div class="comment-card">
+              <div class="comment-user"><div class="avatar-img"></div> ユーザーB</div>
+              <div class="comment-text truncated">ロックにすると甘みが引き立ちます。特別な日に飲みたい一杯。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 画面右半分 -->
+      <div>
+        <div style="margin-bottom:20px;">
+          <h3 style="font-size:14px;color:var(--gold-light);margin-top:0;">タグ</h3>
+          <div>
+            <span class="tag-badge">#フルーティー</span>
+            <span class="tag-badge">#スモーキー</span>
+            <span class="tag-badge">#熟成12年</span>
+            <span class="tag-badge">#贈答用</span>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <h3 style="font-size:16px;color:var(--gold-light);margin:0;">詳細説明文</h3>
+            <button class="icon-btn" onclick="openModal('descModal')">拡大 ⤢</button>
+          </div>
+          <p style="font-size:13px;line-height:1.7;color:#ddd;">
+            繊細で複雑、深みのある味わい。日本のウイスキー発祥の地、山崎蒸溜所の生んだシングルモルトウイスキー。
+            ホワイトオーク樽熟成原酒由来の甘いバニラ香と熟した果実香が重なり合う、幾重にも及ぶ香りの重層感が特徴です。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="modal-overlay" id="loginPromptModal">
+  <div class="modal-content" style="width:min(400px,100%);text-align:center;">
+    <button class="modal-close" onclick="closeModal('loginPromptModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>ログインが必要</h1>
+      <span></span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">お気に入り機能を利用するにはログインが必要です。</p>
+    <a href="login.html" class="gold-button" style="display:block;">ログイン画面へ</a>
+  </div>
+</div>
+
+<div class="modal-overlay" id="detailCommentModal">
+  <div class="modal-content" style="width:min(800px,100%);">
+    <button class="modal-close" onclick="closeModal('detailCommentModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>口コミ一覧 (拡大)</h1>
+      <span></span>
+    </div>
+    <div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">
+      <select class="form-control" style="width:150px;">
+        <option value="">すべての星数</option>
+        <option value="5">★5のみ</option>
+        <option value="4">★4以上</option>
+      </select>
+      <input type="text" class="form-control" style="flex:1;" placeholder="名称検索...">
+    </div>
+    <div>
+      <div class="comment-card">
+        <div class="comment-user"><div class="avatar-img"></div> ユーザーA ★★★★★</div>
+        <p style="font-size:13px;color:#eee;margin:5px 0;">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。後味も余韻が長く続きます。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="descModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal('descModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h1>詳細説明文</h1>
+      <span></span>
+    </div>
+    <p style="font-size:14px;line-height:1.9;color:#eee;">
+      繊細で複雑、深みのある味わい。日本のウイスキー発祥の地、山崎蒸溜所の生んだシングルモルトウイスキー。<br><br>
+      ホワイトオーク樽熟成原酒由来の甘いバニラ香と熟した果実香が重なり合う、幾重にも及ぶ香りの重層感が特徴です。
+    </p>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script src="detail.js"></script>
+</body>
+</html>
