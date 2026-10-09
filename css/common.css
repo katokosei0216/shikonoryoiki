@@ -1,0 +1,110 @@
+:root {
+    --black: #080908;
+    --black2: #12120f;
+    --gold: #b5963e;
+    --gold-light: #e1c766;
+    --gold-dark: #55461e;
+    --cream: #eee8d7;
+    --muted: #9b9584;
+    --red: #9c161e;
+    --orange: #ff8c00;
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
+body {
+    background:
+        radial-gradient(ellipse at 50% -15%, rgba(181,150,62,.075), transparent 45%),
+        linear-gradient(180deg, #0b0c0b, #090a09 65%, #080908);
+    color: var(--cream);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    min-height: 100vh;
+}
+a { text-decoration: none; color: inherit; }
+
+/* 共通ヘッダー */
+.site-header {
+    position: relative;
+    height: 12.2vh;
+    min-height: 72px;
+    max-height: 105px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.site-header:before {
+    content: ""; position: absolute; left: 20%; right: 20%; top: 4px; height: 1px; background: #4a4026;
+}
+.header-title {
+    position: relative; width: 500px; height: 82px; max-width: 42vw;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    border: 1px solid var(--gold);
+    background: linear-gradient(180deg, rgba(32,30,22,.55), rgba(14,14,12,.25));
+}
+.header-title:before, .header-title:after {
+    content: ""; position: absolute; width: 9px; height: 9px;
+    border-color: var(--gold-light); border-style: solid;
+}
+.header-title:before { left: -1px; top: -1px; border-width: 2px 0 0 2px; }
+.header-title:after { right: -1px; bottom: -1px; border-width: 0 2px 2px 0; }
+.header-title-text { font-size: clamp(29px, 2.6vw, 47px); letter-spacing: .17em; color: #f1ebdb; line-height: 1; }
+.header-title-line { position: absolute; left: 9%; right: 9%; height: 1px; background: #66542b; }
+.header-title-line.top { top: 7px; }
+.header-title-line.bottom { bottom: 7px; }
+.header-user { position: absolute; z-index: 5; top: 50%; right: 22px; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; font-family: "Yu Gothic", sans-serif; }
+.back-button {
+    position: absolute; z-index: 5; top: 50%; left: 22px; transform: translateY(-50%);
+    border: 1px solid var(--gold-dark); background: rgba(15,15,13,.92);
+    padding: 7px 14px; color: var(--gold-light); font: 12px "Yu Gothic", sans-serif; transition: .18s;
+}
+.back-button:hover { border-color: var(--gold-light); background: #201d14; }
+.login-button {
+    border: 1px solid var(--gold-dark); background: rgba(15,15,13,.92);
+    padding: 7px 14px; color: var(--gold-light); font-size: 12px; transition: .18s;
+}
+.login-button:hover { border-color: var(--gold-light); background: #201d14; }
+
+/* 共通コンテナ・カード・フォーム部品 */
+.subpage-main { min-height: calc(100vh - 12.2vh); padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+.box-card {
+    background: linear-gradient(145deg, #171713, #211f17);
+    border: 1px solid var(--gold-dark);
+    box-shadow: 0 15px 45px rgba(0,0,0,.65), inset 0 0 25px rgba(181,150,62,.04);
+    padding: 30px; position: relative;
+}
+.subpage-heading { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; }
+.subpage-heading span { width: 42px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dark)); }
+.subpage-heading span:last-child { background: linear-gradient(90deg, var(--gold-dark), transparent); }
+.subpage-heading h1 { margin: 0; color: var(--gold-light); font-size: 24px; font-weight: 500; letter-spacing: .2em; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-group label { color: #ddd5c2; font-size: 13px; letter-spacing: .1em; }
+.form-control {
+    width: 100%; height: 40px; padding: 0 12px; color: #eee8d7; background: #090a09;
+    border: 1px solid #544a2c; outline: none; font-size: 14px; font-family: "Yu Gothic", sans-serif;
+}
+.form-control:focus { border-color: var(--gold-light); box-shadow: 0 0 0 1px rgba(225,199,102,.2); }
+textarea.form-control { height: 80px; padding: 10px; resize: vertical; }
+
+.gold-button {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 10px 20px; color: #eee6d2; background: linear-gradient(135deg,#6c571d,#a98b35,#6c571d);
+    border: 1px solid var(--gold-light); cursor: pointer; font-family: "Yu Mincho", serif;
+    font-size: 13px; letter-spacing: .1em; transition: .2s;
+}
+.gold-button:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.icon-btn { background: none; border: 1px solid var(--gold-dark); color: var(--gold-light); padding: 4px 10px; cursor: pointer; font-size: 12px; transition: .2s; }
+.icon-btn:hover { border-color: var(--gold-light); background: #252117; }
+
+/* 共通モーダル / ポップアップ */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.82); backdrop-filter: blur(4px);
+    z-index: 999; display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+    width: min(600px, 100%); background: linear-gradient(145deg, #181814, #222018);
+    border: 1px solid var(--gold); padding: 30px; position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,.9); max-height: 90vh; overflow-y: auto;
+}
+.modal-close { position: absolute; top: 15px; right: 20px; color: var(--gold-light); font-size: 24px; cursor: pointer; background: none; border: none; }

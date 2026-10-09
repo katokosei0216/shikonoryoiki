@@ -1,0 +1,94 @@
+.home-main {
+    height: calc(100vh - 12.2vh); min-height: 0; max-width: 1320px; margin: 0 auto;
+    padding: 0 25px 15px; display: grid; grid-template-rows: 43% 28% 29%;
+}
+.category-section { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 0; }
+.section-label {
+    position: relative; border: 1px solid var(--gold-dark); background: #0d0e0c; color: var(--gold-light);
+    height: 42px; min-width: 114px; padding: 0 20px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; letter-spacing: .25em; margin-bottom: 18px;
+}
+.section-label:before, .section-label:after { content: ""; position: absolute; width: 34px; height: 1px; background: var(--gold-dark); top: 50%; }
+.section-label:before { right: 100%; } .section-label:after { left: 100%; }
+.label-diamond { font-size: 7px; margin-right: 10px; color: var(--gold-light); }
+.card-grid { display: grid; gap: 14px; width: min(990px, 100%); }
+.alcohol-grid { grid-template-columns: repeat(4, 1fr); }
+.tobacco-grid { grid-template-columns: repeat(2, 268px); justify-content: center; }
+.preference-card {
+    height: 168px; position: relative; overflow: hidden; border: 1px solid rgba(220,194,111,.4);
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,.025), 0 8px 22px rgba(0,0,0,.32); transition: .18s;
+}
+.preference-card:after { content: ""; position: absolute; inset: 6px; border: 1px solid rgba(255,255,255,.10); pointer-events: none; }
+.preference-card:hover { transform: translateY(-3px); filter: brightness(1.08); }
+.card-name { position: absolute; left: 14px; top: 66px; z-index: 4; font-size: 19px; letter-spacing: .13em; text-shadow: 0 2px 4px #000; }
+.card-sub { position: absolute; left: 15px; top: 96px; z-index: 4; font: 9px "Yu Gothic", sans-serif; letter-spacing: .2em; opacity: .78; }
+
+.whisky { background: linear-gradient(145deg, #a47b18, #c29427 47%, #4b350b); }
+.cocktail { background: linear-gradient(145deg, #0a698e, #087ca1 48%, #063e56); }
+.sake { background: linear-gradient(145deg, #f5f4ef, #fff 50%, #d3d3cc); color: #111; }
+.wine { background: linear-gradient(145deg, #6d101b, #941c2a 48%, #4c080f); }
+.paper { background: linear-gradient(145deg, #4c4c4c, #686868 50%, #343434); }
+.vape { background: linear-gradient(145deg, #166d4d, #19a56c 50%, #0c3f2e); }
+.sake .card-name, .sake .card-sub { text-shadow: none; }
+
+.whisky-bottle, .sake-bottle, .wine-bottle {
+    position: absolute; z-index: 2; bottom: 26px; left: 50%; width: 38px; height: 91px;
+    border-radius: 7px 7px 4px 4px; transform: translateX(-12%); box-shadow: 5px 8px 10px #0005;
+}
+.whisky-bottle { background: linear-gradient(90deg, #3b2104, #e0a934 48%, #5b3507); }
+.whisky-bottle:before, .sake-bottle:before, .wine-bottle:before {
+    content: ""; position: absolute; left: 9px; top: -17px; width: 19px; height: 20px;
+    border: 2px solid currentColor; border-bottom: 0; background: #1c160c; border-radius: 3px 3px 0 0;
+}
+.whisky-bottle:after { content: ""; position: absolute; left: 6px; right: 6px; top: 37px; height: 26px; background: #f0d77a; }
+.rocks-glass {
+    position: absolute; z-index: 2; bottom: 25px; left: 54%; width: 49px; height: 46px;
+    border: 2px solid #e5eeeccc; border-top: 0; border-radius: 0 0 8px 8px; transform: skew(-5deg);
+}
+.rocks-glass:after { content: ""; position: absolute; width: 11px; height: 9px; background: #f6f2de77; left: 8px; top: 12px; transform: rotate(20deg); }
+.martini-glass { position: absolute; z-index: 2; left: 51%; bottom: 27px; width: 65px; height: 63px; }
+.martini-glass:before {
+    content: ""; position: absolute; left: 0; top: 0; width: 49px; height: 36px;
+    border: 2px solid #e7f6ffcc; border-top: 0; clip-path: polygon(0 0, 100% 0, 60% 100%, 40% 100%); background: #d95a8d99;
+}
+.martini-glass:after {
+    content: ""; position: absolute; left: 24px; top: 34px; width: 2px; height: 27px; background: #e7f6ffcc;
+    box-shadow: -9px 27px 0 -0.5px #e7f6ffcc, 9px 27px 0 -0.5px #e7f6ffcc;
+}
+.lemon { position: absolute; z-index: 2; left: 71%; top: 58px; width: 20px; height: 20px; border: 2px solid #ffd55d; border-radius: 50%; }
+.sake-bottle { background: linear-gradient(90deg, #e9e8e2, #fff 48%, #c9c9c3); border: 1px solid #aaa; }
+.sake-bottle:before { background: #eee; color: #aaa; }
+.sake-bottle:after { content: ""; position: absolute; left: 6px; right: 6px; top: 38px; height: 30px; background: #d34d50; }
+.ochoko { position: absolute; z-index: 2; left: 62%; bottom: 27px; width: 35px; height: 25px; border: 2px solid #aaa; border-radius: 2px 2px 8px 8px; background: #f5f4ef; }
+.wine-bottle { background: linear-gradient(90deg, #36030a, #9b1d2d 48%, #40050d); }
+.wine-bottle:before { background: #2a0207; color: #8f1724; }
+.wine-bottle:after { content: ""; position: absolute; left: 6px; right: 6px; top: 39px; height: 28px; background: #d8b896; }
+.wine-glass { position: absolute; z-index: 2; left: 61%; bottom: 27px; width: 48px; height: 58px; }
+.wine-glass:before {
+    content: ""; position: absolute; left: 0; top: 0; width: 42px; height: 34px;
+    border: 2px solid #f3e6dbbb; border-top: 0; clip-path: polygon(0 0, 100% 0, 60% 100%, 40% 100%); background: #8d1d2c66;
+}
+.wine-glass:after { content: ""; position: absolute; left: 20px; top: 33px; width: 2px; height: 24px; background: #f3e6dbbb; }
+.cigarette-pack { position: absolute; z-index: 2; left: 35%; bottom: 26px; width: 58px; height: 79px; background: #d9d9d9; border: 2px solid #aaa; box-shadow: 4px 6px 9px #0006; }
+.cigarette-pack:before { content: ""; position: absolute; inset: 9px; border: 1px solid #888; }
+.cigarette-pack b { position: absolute; left: 18px; top: 25px; color: #555; font-size: 17px; }
+.cigarette { position: absolute; z-index: 2; left: 54%; bottom: 38px; width: 62px; height: 11px; background: linear-gradient(90deg,#f0ead9 78%,#b8732d 78%); transform: rotate(-17deg); }
+.smoke { position: absolute; z-index: 2; color: #eee9; font-size: 34px; }
+.smoke-one { left: 66%; top: 35px; } .smoke-two { left: 61%; top: 34px; }
+.vape-device { position: absolute; z-index: 2; left: 49%; bottom: 26px; width: 27px; height: 99px; border-radius: 6px; background: linear-gradient(90deg,#0b3325,#5bd7a0 50%,#0b4832); box-shadow: 4px 7px 11px #0006; }
+.vape-device:before { content: ""; position: absolute; left: 7px; top: -13px; width: 13px; height: 14px; background: #26302d; border-radius: 3px 3px 0 0; }
+.vape-device:after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 20px; height: 18px; border: 1px solid #b6f5d6aa; }
+
+.bottom-navigation { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px; align-items: center; width: min(990px, 100%); margin: 0 auto; }
+.bottom-panel { height: 94px; position: relative; display: flex; align-items: center; gap: 17px; padding: 0 23px; border: 1px solid var(--gold-dark); overflow: hidden; transition: .18s; }
+.bottom-panel:hover { transform: translateY(-3px); border-color: var(--gold-light); }
+.search-panel { background: linear-gradient(115deg, #171713, #25231c); }
+.mypage-panel { background: linear-gradient(115deg, #700d13, #a91720 50%, #7a0e14); }
+.panel-icon { color: var(--gold-light); font-size: 36px; line-height: 1; }
+.panel-text { display: flex; flex-direction: column; gap: 5px; }
+.panel-text strong { font-size: 17px; letter-spacing: .15em; }
+.panel-text small { font: 9px "Yu Gothic", sans-serif; color: #d5ccb7aa; }
+.panel-arrow { margin-left: auto; color: var(--gold-light); font-size: 21px; }
+.flag-icon { width: 50px; height: 55px; position: relative; display: block; }
+.flag-icon:before { content: ""; position: absolute; left: 8px; top: 0; width: 3px; height: 55px; background: #f0c96a; }
+.flag-icon i { position: absolute; left: 11px; top: 6px; width: 39px; height: 29px; background: #ed3a42; clip-path: polygon(0 0, 100% 0, 77% 50%, 100% 100%, 0 100%); }
