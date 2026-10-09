@@ -1,0 +1,1 @@
+console.log('index.js 読み込み完了');
