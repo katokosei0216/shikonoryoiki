@@ -22,6 +22,30 @@ body {
 a { text-decoration: none; color: inherit; }
 
 /* 共通ヘッダー */
+:root {
+    --black: #080908;
+    --black2: #12120f;
+    --gold: #b5963e;
+    --gold-light: #e1c766;
+    --gold-dark: #55461e;
+    --cream: #eee8d7;
+    --muted: #9b9584;
+    --red: #9c161e;
+    --orange: #ff8c00;
+}
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; }
+body {
+    background:
+        radial-gradient(ellipse at 50% -15%, rgba(181,150,62,.075), transparent 45%),
+        linear-gradient(180deg, #0b0c0b, #090a09 65%, #080908);
+    color: var(--cream);
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+    min-height: 100vh;
+}
+a { text-decoration: none; color: inherit; }
+
+/* 共通ヘッダー */
 .site-header {
     position: relative;
     height: 12.2vh;
@@ -51,18 +75,80 @@ a { text-decoration: none; color: inherit; }
 .header-title-line { position: absolute; left: 9%; right: 9%; height: 1px; background: #66542b; }
 .header-title-line.top { top: 7px; }
 .header-title-line.bottom { bottom: 7px; }
-.header-user { position: absolute; z-index: 5; top: 50%; right: 22px; transform: translateY(-50%); display: flex; align-items: center; gap: 8px; font-family: "Yu Gothic", sans-serif; }
+
+.header-user {
+    position: absolute; z-index: 5; top: 50%; right: 22px; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 8px; font-family: "Yu Gothic", sans-serif;
+}
+
+/* 左側のボタン全体を配置する親コンテナ */
+.header-left {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    left: 22px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px; /* ボタン同士の隙間 */
+}
+
+/* 戻るボタンのスタイル */
 .back-button {
-    position: absolute; z-index: 5; top: 50%; left: 22px; transform: translateY(-50%);
-    border: 1px solid var(--gold-dark); background: rgba(15,15,13,.92);
-    padding: 7px 14px; color: var(--gold-light); font: 12px "Yu Gothic", sans-serif; transition: .18s;
+    border: 1px solid var(--gold-dark);
+    background: rgba(15,15,13,.92);
+    padding: 7px 14px;
+    color: var(--gold-light);
+    font: 12px "Yu Gothic", sans-serif;
+    transition: .18s;
+    text-decoration: none;
+    white-space: nowrap;
 }
-.back-button:hover { border-color: var(--gold-light); background: #201d14; }
+.back-button:hover {
+    border-color: var(--gold-light);
+    background: #201d14;
+}
+
 .login-button {
-    border: 1px solid var(--gold-dark); background: rgba(15,15,13,.92);
-    padding: 7px 14px; color: var(--gold-light); font-size: 12px; transition: .18s;
+    border: 1px solid var(--gold-dark);
+    background: rgba(15,15,13,.92);
+    padding: 7px 14px;
+    color: var(--gold-light);
+    font-size: 12px;
+    transition: .18s;
 }
-.login-button:hover { border-color: var(--gold-light); background: #201d14; }
+.login-button:hover {
+    border-color: var(--gold-light);
+    background: #201d14;
+}
+/* 左側のボタン全体を配置する親コンテナ */
+.header-left {
+    position: absolute;
+    z-index: 5;
+    top: 50%;
+    left: 22px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px; /* ボタン同士の隙間 */
+}
+
+/* 戻るボタンのスタイル（position: absolute を削除） */
+.back-button {
+    border: 1px solid var(--gold-dark);
+    background: rgba(15,15,13,.92);
+    padding: 7px 14px;
+    color: var(--gold-light);
+    font: 12px "Yu Gothic", sans-serif;
+    transition: .18s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.back-button:hover {
+    border-color: var(--gold-light);
+    background: #201d14;
+}
 
 /* 共通コンテナ・カード・フォーム部品 */
 .subpage-main { min-height: calc(100vh - 12.2vh); padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
