@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     catBadge.textContent = '◆ ' + (categoryNames[category] || 'お酒');
   }
 
-  // 2. 製造国 vs 製造都道府県 の切り替え
+  // 2. 製造国 vs 製造都道府県 の切り替え（カクテル以外の場合のみ処理）
   const countryLabel = document.getElementById('countryLabel');
   const countryInput = document.getElementById('countryInput');
   const countryList = document.getElementById('countryDatalist');
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <option value="山形県">
       `;
     }
-  } else {
+  } else if (category !== 'cocktail') {
     if (countryLabel) countryLabel.textContent = '製造国';
     if (countryInput) countryInput.placeholder = '例: スコットランド, 日本...';
     if (countryList) {
@@ -48,15 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 3. カクテルのみ 年代・度数を非表示
-  const ageGroup = document.getElementById('ageFilterGroup');
-  const abvGroup = document.getElementById('abvFilterGroup');
-  if (category === 'cocktail') {
-    if (ageGroup) ageGroup.style.display = 'none';
-    if (abvGroup) abvGroup.style.display = 'none';
-  } else {
-    if (ageGroup) ageGroup.style.display = 'flex';
-    if (abvGroup) abvGroup.style.display = 'flex';
+  // 3. カクテルのみ「基本情報」セクション全体を非表示にする
+  const basicInfoSection = document.getElementById('basicInfoSection');
+  if (basicInfoSection) {
+    if (category === 'cocktail') {
+      basicInfoSection.style.display = 'none';
+    } else {
+      basicInfoSection.style.display = 'block';
+    }
   }
 
   // 4. 種別固有のチェックボックス切り替え
