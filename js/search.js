@@ -68,9 +68,40 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sakeOpts) sakeOpts.style.display = (category === 'sake') ? 'block' : 'none';
   if (wineOpts) wineOpts.style.display = (category === 'wine') ? 'block' : 'none';
   if (cocktailOpts) cocktailOpts.style.display = (category === 'cocktail') ? 'block' : 'none';
+
+  // 5. 5段階評価ボタンの2回目クリックで選択解除する処理（確実動作版）
+  const ratingInputs = document.querySelectorAll('.rating-options input[type="radio"]');
+
+  ratingInputs.forEach(radio => {
+    // マウスが押された瞬間の状態を記録しておく
+    radio.addEventListener('mousedown', function() {
+      this.dataset.wasChecked = this.checked ? "true" : "false";
+    });
+
+    // クリックされたときの処理
+    radio.addEventListener('click', function() {
+      // 「もともと選択されていた状態」でクリックされた場合はチェックを外す
+      if (this.dataset.wasChecked === "true") {
+        this.checked = false;
+        this.dataset.wasChecked = "false";
+        this.dispatchEvent(new Event('change', { bubbles: true }));
+      } else {
+        this.dataset.wasChecked = "true";
+        // 同じグループの他のボタンの状態をリセット
+        document.querySelectorAll(`input[type="radio"][name="${this.name}"]`).forEach(other => {
+          if (other !== this) other.dataset.wasChecked = "false";
+        });
+      }
+    });
+  });
 });
 
 function resetFilters() {
   const form = document.getElementById('searchForm');
-  if (form) form.reset();
+  if (form) {
+    form.reset();
+    document.querySelectorAll('.rating-options input[type="radio"]').forEach(radio => {
+      radio.dataset.wasChecked = "false";
+    });
+  }
 }
