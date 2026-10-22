@@ -88,7 +88,7 @@
       <h1>ログインが必要</h1>
       <span></span>
     </div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="loginPromptText">お気に入り機能を利用するにはログインが必要です。</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="loginPromptText">お気に入り機能を利用するにはログインが必要です。[cite: 5]</p>
     <a href="login.html" class="gold-button" style="display:block;">ログイン画面へ</a>
   </div>
 </div>
@@ -102,10 +102,14 @@
       <span></span>
     </div>
     <div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">
+      <!-- 星1〜星5まで個別に選べるようにプルダウンメニューを拡張 -->
       <select class="form-control" style="width:150px;">
         <option value="">すべての星数</option>
-        <option value="5">★5のみ</option>
-        <option value="4">★4以上</option>
+        <option value="5">★5</option>
+        <option value="4">★4</option>
+        <option value="3">★3</option>
+        <option value="2">★2</option>
+        <option value="1">★1</option>
       </select>
       <input type="text" class="form-control" style="flex:1;" placeholder="名称検索...">
     </div>
