@@ -29,10 +29,11 @@
           <div style="margin-bottom:20px;background:#10110e;padding:12px;border:1px solid #2d2618;">
             <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">評価をつける</div>
             <div class="star-rating-select">
-              <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+              <span class="star" data-index="1">★</span><span class="star" data-index="2">★</span><span class="star" data-index="3">★</span><span class="star" data-index="4">★</span><span class="star" data-index="5">★</span>
             </div>
-            <textarea class="form-control" placeholder="コメントを入力..."></textarea>
-            <button class="gold-button" style="margin-top:8px;padding:6px 12px;font-size:11px;" onclick="alert('投稿しました。');">投稿する</button>
+            <textarea class="form-control" id="commentTextarea" placeholder="コメントを入力..."></textarea>
+            <!-- 投稿ボタン押下時にログインモーダルを表示するよう修正 -->
+            <button class="gold-button" id="submitCommentBtn" style="margin-top:8px;padding:6px 12px;font-size:11px;">投稿する</button>
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -87,7 +88,7 @@
       <h1>ログインが必要</h1>
       <span></span>
     </div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">お気に入り機能を利用するにはログインが必要です。</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="loginPromptText">お気に入り機能を利用するにはログインが必要です。</p>
     <a href="login.html" class="gold-button" style="display:block;">ログイン画面へ</a>
   </div>
 </div>
@@ -134,5 +135,101 @@
 
 <script src="../js/common.js"></script>
 <script src="../js/detail.js"></script>
+
+<!-- 追加機能の実装スクリプト -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. 星評価の2回目クリックで選択解除（および見た目の切り替え）の処理
+  const stars = document.querySelectorAll('.star-rating-select .star');
+  let currentRating = 0; // 現在選択されている評価 (0は未選択)
+
+  stars.forEach((star, index) => {
+    const ratingValue = index + 1;
+
+    // ホバー時の見た目制御（任意）
+    star.addEventListener('mouseenter', () => {
+      stars.forEach((s, i) => {
+        if (i <= index) {
+          s.style.color = 'var(--gold-light, #d4af37)';
+        } else {
+          s.style.color = '';
+        }
+      });
+    });
+
+    // クリック時の処理
+    star.addEventListener('click', () => {
+      if (currentRating === ratingValue) {
+        // すでに選択されている星をもう一度クリックした場合：未選択に戻す
+        currentRating = 0;
+        stars.forEach(s => s.style.color = '');
+      } else {
+        // 新しく選択した場合
+        currentRating = ratingValue;
+        stars.forEach((s, i) => {
+          if (i < ratingValue) {
+            s.style.color = 'var(--gold-light, #d4af37)';
+          } else {
+            s.style.color = '';
+          }
+        });
+      }
+    });
+  });
+
+  // マウスが星エリア外に出たとき、現在の選択状態の色に戻す
+  const starContainer = document.querySelector('.star-rating-select');
+  if (starContainer) {
+    starContainer.addEventListener('mouseleave', () => {
+      stars.forEach((s, i) => {
+        if (i < currentRating) {
+          s.style.color = 'var(--gold-light, #d4af37)';
+        } else {
+          s.style.color = '';
+        }
+      });
+    });
+  }
+
+  const loginPromptModal = document.getElementById('loginPromptModal');
+  const loginPromptText = document.getElementById('loginPromptText');
+
+  // 2. コメント欄にフォーカスしようとした際にログイン画面モーダルを表示する
+  const commentTextarea = document.getElementById('commentTextarea');
+  if (commentTextarea) {
+    commentTextarea.addEventListener('focus', (e) => {
+      commentTextarea.blur(); // 入力を防ぐためフォーカスを外す
+
+      if (loginPromptText) {
+        loginPromptText.textContent = '口コミを投稿するにはログインが必要です。[cite: 5]';
+      }
+
+      if (typeof openModal === 'function') {
+        openModal('loginPromptModal');
+      } else if (loginPromptModal) {
+        loginPromptModal.classList.add('active');
+      }
+    });
+  }
+
+  // 3. 「投稿する」ボタンを押した際にもログイン画面モーダルを表示する
+  const submitCommentBtn = document.getElementById('submitCommentBtn');
+  if (submitCommentBtn) {
+    submitCommentBtn.addEventListener('click', (e) => {
+      e.preventDefault(); // フォーム送信や通常の動きをストップ
+
+      if (loginPromptText) {
+        loginPromptText.textContent = '口コミを投稿するにはログインが必要です。[cite: 5]';
+      }
+
+      if (typeof openModal === 'function') {
+        openModal('loginPromptModal');
+      } else if (loginPromptModal) {
+        loginPromptModal.classList.add('active');
+      }
+    });
+  }
+});
+</script>
 </body>
 </html>
