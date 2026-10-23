@@ -1,1 +1,22 @@
 .newlogin-card { width: min(440px, 100%); margin: 0 auto; }
+
+  /* パスワード入力欄と目アイコンのレイアウト調整 */
+  .password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .password-input-wrap .form-control {
+    padding-right: 40px;
+  }
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }

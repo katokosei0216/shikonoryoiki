@@ -6,28 +6,6 @@
 <title>新規会員登録 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/register.css">
-<style>
-  /* パスワード入力欄と目アイコンのレイアウト調整 */
-  .password-input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .password-input-wrap .form-control {
-    padding-right: 40px;
-  }
-  .toggle-password-btn {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    color: var(--gold-light);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-    line-height: 1;
-  }
-</style>
 </head>
 <body class="subpage-body register-page">
 <header id="siteHeader"></header>
@@ -38,21 +16,26 @@
       <h1>新規会員登録</h1>
       <span></span>
     </div>
-    <form id="registerForm">
+
+    <!-- エラーメッセージ表示用エリア（初期状態は非表示） -->
+    <p id="errorMessage" style="color: #ff4d4f; text-align: center; margin-bottom: 15px; font-weight: bold; display: none;"></p>
+
+    <!-- 処理を行うPHPファイルへPOST送信 -->
+    <form action="register.php" method="POST">
       <div class="form-group">
         <label>ユーザー名</label>
-        <input type="text" id="regUsername" class="form-control" required placeholder="お名前 / ニックネーム">
+        <input type="text" name="user_name" id="regUsername" class="form-control" required placeholder="お名前 / ニックネーム">
       </div>
       <div class="form-group">
         <label>メールアドレス</label>
-        <input type="email" id="regEmail" class="form-control" required placeholder="example@domain.com">
+        <input type="email" name="email" id="regEmail" class="form-control" required placeholder="example@domain.com">
       </div>
       
       <!-- パスワード -->
       <div class="form-group">
         <label>パスワード</label>
         <div class="password-input-wrap">
-          <input type="password" id="regPassword" class="form-control" required placeholder="パスワードを入力">
+          <input type="password" name="password" id="regPassword" class="form-control" required placeholder="パスワードを入力">
           <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('regPassword', this)">👁</button>
         </div>
       </div>
@@ -61,17 +44,27 @@
       <div class="form-group">
         <label>パスワード（確認）</label>
         <div class="password-input-wrap">
-          <input type="password" id="regConfirmPassword" class="form-control" required placeholder="確認のため再入力">
+          <input type="password" name="confirm_password" id="regConfirmPassword" class="form-control" required placeholder="確認のため再入力">
           <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('regConfirmPassword', this)">👁</button>
         </div>
       </div>
 
       <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">登録する</button>
     </form>
-    <a href="login.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">ログイン画面へ戻る</a>
+    <a href="login.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;text-decoration:none;">ログイン画面へ戻る</a>
   </div>
 </main>
 <script src="../js/common.js"></script>
 <script src="../js/register.js"></script>
+<script>
+  // URLのパラメータからエラーメッセージを受け取って表示する処理
+  const urlParams = new URLSearchParams(window.location.search);
+  const errorMsg = urlParams.get('error');
+  if (errorMsg) {
+    const errP = document.getElementById('errorMessage');
+    errP.textContent = errorMsg;
+    errP.style.display = 'block';
+  }
+</script>
 </body>
 </html>
