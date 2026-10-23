@@ -16,17 +16,22 @@
       <h1>ログイン</h1>
       <span></span>
     </div>
-    <form onsubmit="return false;">
+
+    <!-- エラーメッセージ表示用エリア（初期状態は非表示） -->
+    <p id="errorMessage" style="color: #ff4d4f; text-align: center; margin-bottom: 15px; font-weight: bold; display: none;"></p>
+
+    <!-- login.php へPOST送信 -->
+    <form id="loginForm" action="../php/login.php" method="POST">
       <div class="form-group">
         <label>メールアドレス</label>
-        <input type="email" class="form-control" required placeholder="example@domain.com">
+        <input type="email" name="email" id="loginEmail" class="form-control" required maxlength="255" autocomplete="username" placeholder="example@domain.com">
       </div>
-      
+
       <!-- パスワード（目アイコン付き） -->
       <div class="form-group">
         <label>パスワード</label>
         <div class="password-input-wrap">
-          <input type="password" id="loginPassword" class="form-control" required placeholder="パスワードを入力">
+          <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="current-password" placeholder="パスワードを入力">
           <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword', this)">👁</button>
         </div>
       </div>
@@ -36,7 +41,7 @@
     <div style="text-align:center;margin-top:20px;">
       <a href="javascript:void(0)" onclick="openModal('forgotModal')" style="color:#aaa18d;font-size:12px;">パスワードをお忘れの方はこちら</a>
     </div>
-    <a href="newlogin.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">新規会員登録はこちら</a>
+    <a href="register.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">新規会員登録はこちら</a>
   </div>
 </main>
 
@@ -51,7 +56,7 @@
     <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;">
       ご登録中のメールアドレスを入力してください。<br>再設定用リンクをお送りします。
     </p>
-    <form onsubmit="alert('再設定メールを送信しました。');closeModal('forgotModal');return false;">
+    <form onsubmit="alert('この機能は現在準備中です。');closeModal('forgotModal');return false;">
       <div class="form-group">
         <label>メールアドレス</label>
         <input type="email" class="form-control" required placeholder="example@domain.com">
@@ -63,20 +68,5 @@
 
 <script src="../js/common.js"></script>
 <script src="../js/login.js"></script>
-<script>
-  // パスワードの伏字/表示切り替え関数
-  function togglePasswordVisibility(inputId, btn) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-
-    if (input.type === 'password') {
-      input.type = 'text';
-      btn.textContent = '👁'; // 非表示アイコン
-    } else {
-      input.type = 'password';
-      btn.textContent = '👁'; // 表示アイコン
-    }
-  }
-</script>
 </body>
 </html>

@@ -20,22 +20,22 @@
     <!-- エラーメッセージ表示用エリア（初期状態は非表示） -->
     <p id="errorMessage" style="color: #ff4d4f; text-align: center; margin-bottom: 15px; font-weight: bold; display: none;"></p>
 
-    <!-- 処理を行うPHPファイルへPOST送信 -->
-   <form action="../php/register.php" method="POST">
+    <!-- id="registerForm" を追加（register.js が使う） -->
+    <form id="registerForm" action="../php/register.php" method="POST">
       <div class="form-group">
         <label>ユーザー名</label>
-        <input type="text" name="user_name" id="regUsername" class="form-control" required placeholder="お名前 / ニックネーム">
+        <input type="text" name="user_name" id="regUsername" class="form-control" required maxlength="50" placeholder="お名前 / ニックネーム">
       </div>
       <div class="form-group">
         <label>メールアドレス</label>
-        <input type="email" name="email" id="regEmail" class="form-control" required placeholder="example@domain.com">
+        <input type="email" name="email" id="regEmail" class="form-control" required maxlength="255" placeholder="example@domain.com">
       </div>
-      
+
       <!-- パスワード -->
       <div class="form-group">
         <label>パスワード</label>
         <div class="password-input-wrap">
-          <input type="password" name="password" id="regPassword" class="form-control" required placeholder="パスワードを入力">
+          <input type="password" name="password" id="regPassword" class="form-control" required placeholder="8文字以上で入力">
           <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('regPassword', this)">👁</button>
         </div>
       </div>
@@ -56,15 +56,5 @@
 </main>
 <script src="../js/common.js"></script>
 <script src="../js/register.js"></script>
-<script>
-  // URLのパラメータからエラーメッセージを受け取って表示する処理
-  const urlParams = new URLSearchParams(window.location.search);
-  const errorMsg = urlParams.get('error');
-  if (errorMsg) {
-    const errP = document.getElementById('errorMessage');
-    errP.textContent = errorMsg;
-    errP.style.display = 'block';
-  }
-</script>
 </body>
 </html>
