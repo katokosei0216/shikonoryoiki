@@ -11,7 +11,7 @@
 <header id="siteHeader"></header>
 <main class="subpage-main">
 
-  <!-- カーセンサー風 絞り込みパネル -->
+  <!-- 絞り込みパネル -->
   <div class="search-panel box-card">
     <form id="searchForm" onsubmit="return false;">
       
@@ -216,15 +216,47 @@
               <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="malt"> モルト</label>
               <label class="checkbox-item"><input type="checkbox" name="whisky_type" value="blended"> ブレンデッド</label>
             </div>
+
+            <!-- おすすめの飲み方 (折りたたみ) -->
+            <details class="filter-accordion" style="margin-top:10px;">
+              <summary>おすすめの飲み方</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="soda"> ソーダ割(ハイボール)</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="water"> 水割り</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="twiceup"> 常温水割(トワイスアップ)</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="hot"> お湯割り(ホットウイスキー)</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="straight"> ストレート</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="rock"> ロック</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="halfrock"> ハーフロック</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="mist"> ミスト</label>
+                  <label class="checkbox-item"><input type="checkbox" name="whisky_way" value="float"> ウイスキーフロート</label>
+                </div>
+              </div>
+            </details>
           </div>
 
           <!-- 日本酒固有 -->
           <div id="sakeSpecific" style="display:none;">
             <div class="checkbox-group">
-              <label class="checkbox-item"><input type="checkbox" name="sake_type" value="easy"> 飲みやすい</label>
+              <label class="checkbox-item"><input type="checkbox" name="sake_type" value="easy"> 呑みやすい</label>
               <label class="checkbox-item"><input type="checkbox" name="sake_type" value="dry"> 辛口</label>
               <label class="checkbox-item"><input type="checkbox" name="sake_type" value="sweet"> 甘口</label>
             </div>
+
+            <!-- おすすめの飲み方 (折りたたみ) -->
+            <details class="filter-accordion" style="margin-top:10px;">
+              <summary>おすすめの飲み方</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="sake_way" value="soda"> ソーダ割り</label>
+                  <label class="checkbox-item"><input type="checkbox" name="sake_way" value="reishu"> 冷酒</label>
+                  <label class="checkbox-item"><input type="checkbox" name="sake_way" value="hiya"> 冷や</label>
+                  <label class="checkbox-item"><input type="checkbox" name="sake_way" value="kan"> 燗酒</label>
+                  <label class="checkbox-item"><input type="checkbox" name="sake_way" value="rock"> ロック</label>
+                </div>
+              </div>
+            </details>
           </div>
 
           <!-- ワイン固有 -->
@@ -235,35 +267,77 @@
               <label class="checkbox-item"><input type="checkbox" name="wine_type" value="sparkling"> スパークリング</label>
               <label class="checkbox-item"><input type="checkbox" name="wine_type" value="rose"> ロゼ</label>
             </div>
+
+            <!-- おすすめの飲み方 (折りたたみ) -->
+            <details class="filter-accordion" style="margin-top:10px;">
+              <summary>おすすめの飲み方</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="spritzer"> ソーダ割(スプリッツァー)</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="hot"> ホット</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="operator"> オペレーター</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="kir"> キール</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="kitty"> キティ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="calimocho"> カリモーチョ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="american_lemonade"> アメリカン・レモネード</label>
+                  <label class="checkbox-item"><input type="checkbox" name="wine_way" value="sangria"> サングリア</label>
+                </div>
+              </div>
+            </details>
           </div>
 
           <!-- カクテル固有 -->
           <div id="cocktailSpecific" style="display:none;">
-            <div class="checkbox-group">
-              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="shake"> シェイク</label>
-              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="build"> ビルド</label>
-              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="smoke"> スモーク</label>
-              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="short"> ショート</label>
-              <label class="checkbox-item"><input type="checkbox" name="cocktail_style" value="long"> ロング</label>
-            </div>
-
-            <!-- フルーツ (折りたたみ) -->
+            <!-- 製法 (折りたたみ) -->
             <details class="filter-accordion">
-              <summary>フルーツ絞り込み</summary>
+              <summary>製法</summary>
               <div class="accordion-content">
                 <div class="checkbox-group">
-                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lemon"> レモン</label>
-                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lime"> ライム</label>
-                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="peach"> ピーチ</label>
-                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="pine"> パイン</label>
-                  <label class="checkbox-item"><input type="checkbox" name="fruit" value="lychee"> ライチ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="shake"> シェイク</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="build"> ビルド</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="smoke"> スモーク</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="short"> ショート</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="long_stir"> ロングステア</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="blend"> ブレンド</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="muddle"> マドル</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="layer"> レイヤー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="cocktail_method" value="float"> フロート</label>
                 </div>
               </div>
             </details>
 
-            <!-- ベース (折りたたみ) -->
-            <details class="filter-accordion">
-              <summary>ベース酒絞り込み</summary>
+            <!-- 素材 (折りたたみ) -->
+            <details class="filter-accordion" style="margin-top:8px;">
+              <summary>素材</summary>
+              <div class="accordion-content">
+                <div class="checkbox-group">
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="lemon"> レモン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="lime"> ライム</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="peach"> ピーチ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="pine"> パイン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="lychee_orange"> ライチオレンジ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="grapefruit"> グレープフルーツ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="cranberry"> クランベリー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="passionfruit"> パッションフルーツ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="coconut"> ココナッツ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="coffee"> コーヒー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="tomato"> トマト</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="mint"> ミント</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="ginger"> ジンジャー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="milk_cream"> ミルク・クリーム</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="eggwhite"> 卵白</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="honey"> 蜂蜜</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="apple"> りんご</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="melon"> メロン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="berry"> ベリー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="material" value="tea"> 茶</label>
+                </div>
+              </div>
+            </details>
+
+            <!-- ベース酒 (折りたたみ) -->
+            <details class="filter-accordion" style="margin-top:8px;">
+              <summary>ベース酒</summary>
               <div class="accordion-content">
                 <div class="checkbox-group">
                   <label class="checkbox-item"><input type="checkbox" name="base" value="gin"> ジン</label>
@@ -272,7 +346,14 @@
                   <label class="checkbox-item"><input type="checkbox" name="base" value="tequila"> テキーラ</label>
                   <label class="checkbox-item"><input type="checkbox" name="base" value="brandy"> ブランデー</label>
                   <label class="checkbox-item"><input type="checkbox" name="base" value="whisky"> ウィスキー</label>
-                  <label class="checkbox-item"><input type="checkbox" name="base" value="wine"> ワイン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="wine_liqueur"> ワインリキュール</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="sparkling_wine"> 発泡ワイン</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="beer"> ビール</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="cachaca"> カシャッサ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="pisco"> ピスコ</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="mezcal"> メスカル</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="sherry"> シェリー</label>
+                  <label class="checkbox-item"><input type="checkbox" name="base" value="vermouth"> ベルモット</label>
                 </div>
               </div>
             </details>
@@ -288,7 +369,7 @@
     </form>
   </div>
 
-  <!-- 絞り込み結果一覧（easyanswerと同様の表示形式） -->
+  <!-- 絞り込み結果一覧 -->
   <div class="subpage-heading">
     <span></span>
     <h1>検索結果一覧</h1>

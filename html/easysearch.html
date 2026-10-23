@@ -6,6 +6,19 @@
 <title>簡易検索 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/easysearch.css">
+<style>
+  /* 5択の選択肢を縦並びにして見やすくするスタイル */
+  .radio-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .radio-options label {
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
 </head>
 <body class="subpage-body">
 <header id="siteHeader"></header>
@@ -17,33 +30,127 @@
       <span></span>
     </div>
     <div class="question-list">
+      
+      <!-- Q1 -->
       <div class="question-item">
-        <div class="question-title">Q1. 好みの味わいはどちらですか？</div>
+        <div class="question-title">Q1. 今のあなたの気分は？</div>
         <div class="radio-options">
-          <label><input type="radio" name="q1" checked> 濃厚・重厚</label>
-          <label><input type="radio" name="q1"> 爽やか・スッキリ</label>
+          <label><input type="radio" name="q1" checked> A. 今日は最高！気分がいい</label>
+          <label><input type="radio" name="q1"> B. ちょっと落ち込んでいる</label>
+          <label><input type="radio" name="q1"> C. 疲れている・イライラしている</label>
+          <label><input type="radio" name="q1"> D. 穏やかで落ち着いている</label>
+          <label><input type="radio" name="q1"> E. 退屈で刺激が欲しい</label>
         </div>
       </div>
+
+      <!-- Q2 -->
       <div class="question-item">
-        <div class="question-title">Q2. 普段楽しむ時間帯は？</div>
+        <div class="question-title">Q2. 自分に一つだけプレゼントするなら？</div>
         <div class="radio-options">
-          <label><input type="radio" name="q2" checked> 夜・食後</label>
-          <label><input type="radio" name="q2"> 昼・休日</label>
+          <label><input type="radio" name="q2" checked> A. 癒やしと安らぎ</label>
+          <label><input type="radio" name="q2"> B. ちょっとした贅沢</label>
+          <label><input type="radio" name="q2"> C. いつもどおりの安定</label>
+          <label><input type="radio" name="q2"> D. 新しい刺激</label>
+          <label><input type="radio" name="q2"> E. 自分へのご褒美</label>
         </div>
       </div>
-      <script>
-        for(let i=3; i<=10; i++){
-          document.write(`
-            <div class="question-item">
-              <div class="question-title">Q${i}. 質問項目のダミープレースホルダーです</div>
-              <div class="radio-options">
-                <label><input type="radio" name="q${i}" checked> 選択肢 A</label>
-                <label><input type="radio" name="q${i}"> 選択肢 B</label>
-              </div>
-            </div>
-          `);
-        }
-      </script>
+
+      <!-- Q3 -->
+      <div class="question-item">
+        <div class="question-title">Q3. 誰かと過ごすならどんな時間がいい？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q3" checked> A. 友達と</label>
+          <label><input type="radio" name="q3"> B. 大切な人と</label>
+          <label><input type="radio" name="q3"> C. 知らない誰かと</label>
+          <label><input type="radio" name="q3"> D. 仕事仲間と</label>
+          <label><input type="radio" name="q3"> E. 一人で</label>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question-item">
+        <div class="question-title">Q4. 聴きたい音楽はどんなもの？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q4" checked> A. 心が落ち着くチル系</label>
+          <label><input type="radio" name="q4"> B. しっとりとしたバラード系</label>
+          <label><input type="radio" name="q4"> C. 気分が上がるポップス系</label>
+          <label><input type="radio" name="q4"> D. ノリの良いロック系</label>
+          <label><input type="radio" name="q4"> E. 音に浸れるジャズ系</label>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="question-item">
+        <div class="question-title">Q5. おつまみはなに？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q5" checked> A. 塩気のあるもの</label>
+          <label><input type="radio" name="q5"> B. 甘い物</label>
+          <label><input type="radio" name="q5"> C. さっぱりした物</label>
+          <label><input type="radio" name="q5"> D. 考慮しない</label>
+          <label><input type="radio" name="q5"> E. なし</label>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="question-item">
+        <div class="question-title">Q6. どんな酔い方をしたい？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q6" checked> A. ほとんどシラフ</label>
+          <label><input type="radio" name="q6"> B. ほろ酔いで心地よく</label>
+          <label><input type="radio" name="q6"> C. 気分よく楽しく</label>
+          <label><input type="radio" name="q6"> D. ぺろぺろの泥酔</label>
+          <label><input type="radio" name="q6"> E. オールではくまで</label>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="question-item">
+        <div class="question-title">Q7. どんな雰囲気に浸りたい？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q7" checked> A. にぎやかにワイワイ</label>
+          <label><input type="radio" name="q7"> B. 華やかな楽しさ</label>
+          <label><input type="radio" name="q7"> C. 落ち着いた心で</label>
+          <label><input type="radio" name="q7"> D. 静かにしっぽり</label>
+          <label><input type="radio" name="q7"> E. 妖艶な怪しさ</label>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="question-item">
+        <div class="question-title">Q8. 気温は心地いい？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q8" checked> A. 外に出たくない暑さ</label>
+          <label><input type="radio" name="q8"> B. 眠くなる暖かさ</label>
+          <label><input type="radio" name="q8"> C. 心地よい気温</label>
+          <label><input type="radio" name="q8"> D. 川のせせらぎのような涼しさ</label>
+          <label><input type="radio" name="q8"> E. 人肌恋しい寒さ</label>
+        </div>
+      </div>
+
+      <!-- Q9 (追加) -->
+      <div class="question-item">
+        <div class="question-title">Q9. 休日の一番の過ごし方は？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q9" checked> A. アクティブに出かける</label>
+          <label><input type="radio" name="q9"> B. 家でゆっくり映画鑑賞</label>
+          <label><input type="radio" name="q9"> C. 趣味に没頭する</label>
+          <label><input type="radio" name="q9"> D. 友人と集まる</label>
+          <label><input type="radio" name="q9"> E. 特に予定を決めずダラダラ</label>
+        </div>
+      </div>
+
+      <!-- Q10 (追加) -->
+      <div class="question-item">
+        <div class="question-title">Q10. 今、一番求めているものは？</div>
+        <div class="radio-options">
+          <label><input type="radio" name="q10" checked> A. 日常からの解放感</label>
+          <label><input type="radio" name="q10"> B. 心の安らぎ</label>
+          <label><input type="radio" name="q10"> C. 新しい発見や出会い</label>
+          <label><input type="radio" name="q10"> D. 確かな実績や充実感</label>
+          <label><input type="radio" name="q10"> E. 気心の知れた時間</label>
+        </div>
+      </div>
+
     </div>
     <div style="position:absolute;bottom:25px;right:30px;">
       <a href="easyanswer.html" class="gold-button">診断結果を見る →</a>
