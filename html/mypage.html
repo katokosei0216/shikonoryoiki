@@ -7,8 +7,30 @@
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/easyanswer.css">
 <link rel="stylesheet" href="../css/mypage.css">
+<style>
+  /* パスワード入力欄と目アイコンのレイアウト調整 */
+  .password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .password-input-wrap .form-control {
+    padding-right: 40px;
+  }
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+</style>
 </head>
-<body class="subpage-body">
+<body class="subpage-body mypage-page">
 <header id="siteHeader"></header>
 <main class="subpage-main">
   <div class="mypage-grid">
@@ -21,19 +43,34 @@
         <div class="avatar-img">ICON</div>
         <button class="icon-btn">アイコンの変更</button>
       </div>
-      <form onsubmit="alert('変更を保存しました。');return false;">
+      <form id="profileForm">
         <div class="form-group">
           <label>ユーザー名</label>
-          <input type="text" class="form-control" value="ゲストユーザー">
+          <input type="text" id="usernameInput" class="form-control" value="ゲストユーザー">
         </div>
         <div class="form-group">
           <label>メールアドレス</label>
-          <input type="email" class="form-control" value="user@example.com">
+          <input type="email" id="emailInput" class="form-control" value="user@example.com">
         </div>
+        
+        <!-- 新しいパスワード -->
         <div class="form-group">
           <label>新しいパスワード</label>
-          <input type="password" class="form-control" placeholder="変更時のみ入力">
+          <div class="password-input-wrap">
+            <input type="password" id="newPasswordInput" class="form-control" placeholder="変更時のみ入力">
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newPasswordInput', this)">👁</button>
+          </div>
         </div>
+
+        <!-- 新しいパスワード（確認） -->
+        <div class="form-group">
+          <label>新しいパスワード（確認）</label>
+          <div class="password-input-wrap">
+            <input type="password" id="confirmPasswordInput" class="form-control" placeholder="確認のため再入力">
+            <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirmPasswordInput', this)">👁</button>
+          </div>
+        </div>
+
         <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">変更を保存</button>
       </form>
     </div>
@@ -126,6 +163,27 @@
         <div class="mini-comment-date">2026/10/01</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 既存パスワード確認用モーダル（メール・パスワード変更時用） -->
+<div class="modal-overlay" id="currentPasswordModal">
+  <div class="modal-content" style="width:min(400px,100%);">
+    <button class="modal-close" onclick="closeModal('currentPasswordModal')">×</button>
+    <div class="subpage-heading">
+      <span></span>
+      <h2>本人確認</h2>
+      <span></span>
+    </div>
+    <p style="font-size:13px;color:#ccc;margin-bottom:15px;">メールアドレスまたはパスワードの変更には現在のパスワードが必要です。</p>
+    <div class="form-group">
+      <label>現在のパスワード</label>
+      <div class="password-input-wrap">
+        <input type="password" id="currentPasswordInput" class="form-control" placeholder="現在のパスワードを入力">
+        <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('currentPasswordInput', this)">👁</button>
+      </div>
+    </div>
+    <button type="button" class="gold-button" style="width:100%;margin-top:15px;" onclick="verifyAndSubmit()">確認して保存</button>
   </div>
 </div>
 

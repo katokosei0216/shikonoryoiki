@@ -6,8 +6,30 @@
 <title>新規会員登録 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/newlogin.css">
+<style>
+  /* パスワード入力欄と目アイコンのレイアウト調整 */
+  .password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .password-input-wrap .form-control {
+    padding-right: 40px;
+  }
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+</style>
 </head>
-<body class="subpage-body">
+<body class="subpage-body register-page">
 <header id="siteHeader"></header>
 <main class="subpage-main">
   <div class="box-card newlogin-card">
@@ -16,19 +38,34 @@
       <h1>新規会員登録</h1>
       <span></span>
     </div>
-    <form onsubmit="return false;">
+    <form id="registerForm">
       <div class="form-group">
         <label>ユーザー名</label>
-        <input type="text" class="form-control" required placeholder="お名前 / ニックネーム">
+        <input type="text" id="regUsername" class="form-control" required placeholder="お名前 / ニックネーム">
       </div>
       <div class="form-group">
         <label>メールアドレス</label>
-        <input type="email" class="form-control" required placeholder="example@domain.com">
+        <input type="email" id="regEmail" class="form-control" required placeholder="example@domain.com">
       </div>
+      
+      <!-- パスワード -->
       <div class="form-group">
         <label>パスワード</label>
-        <input type="password" class="form-control" required>
+        <div class="password-input-wrap">
+          <input type="password" id="regPassword" class="form-control" required placeholder="パスワードを入力">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('regPassword', this)">👁</button>
+        </div>
       </div>
+
+      <!-- パスワード（確認） -->
+      <div class="form-group">
+        <label>パスワード（確認）</label>
+        <div class="password-input-wrap">
+          <input type="password" id="regConfirmPassword" class="form-control" required placeholder="確認のため再入力">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('regConfirmPassword', this)">👁</button>
+        </div>
+      </div>
+
       <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">登録する</button>
     </form>
     <a href="login.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">ログイン画面へ戻る</a>

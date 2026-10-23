@@ -6,8 +6,30 @@
 <title>ログイン | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/login.css">
+<style>
+  /* パスワード入力欄と目アイコンのレイアウト調整 */
+  .password-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .password-input-wrap .form-control {
+    padding-right: 40px;
+  }
+  .toggle-password-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--gold-light);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px;
+    line-height: 1;
+  }
+</style>
 </head>
-<body class="subpage-body">
+<body class="subpage-body login-page">
 <header id="siteHeader"></header>
 <main class="subpage-main">
   <div class="box-card login-card">
@@ -21,10 +43,16 @@
         <label>メールアドレス</label>
         <input type="email" class="form-control" required placeholder="example@domain.com">
       </div>
+      
+      <!-- パスワード（目アイコン付き） -->
       <div class="form-group">
         <label>パスワード</label>
-        <input type="password" class="form-control" required>
+        <div class="password-input-wrap">
+          <input type="password" id="loginPassword" class="form-control" required placeholder="パスワードを入力">
+          <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('loginPassword', this)">👁</button>
+        </div>
       </div>
+
       <button type="submit" class="gold-button" style="width:100%;margin-top:10px;">ログイン</button>
     </form>
     <div style="text-align:center;margin-top:20px;">
@@ -57,5 +85,20 @@
 
 <script src="../js/common.js"></script>
 <script src="../js/login.js"></script>
+<script>
+  // パスワードの伏字/表示切り替え関数
+  function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    if (input.type === 'password') {
+      input.type = 'text';
+      btn.textContent = '👁'; // 非表示アイコン
+    } else {
+      input.type = 'password';
+      btn.textContent = '👁'; // 表示アイコン
+    }
+  }
+</script>
 </body>
 </html>
