@@ -1,4 +1,4 @@
-console.log('newlogin.js 読み込み完了');
+console.log('register.js 読み込み完了');
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('registerForm');
