@@ -17,19 +17,8 @@
       <span></span>
     </div>
     <p style="text-align:center;color:var(--muted);font-size:13px;">あなたに最適な提案です。クリックで詳細へ移動します。</p>
-    <div class="answer-grid">
-      <script>
-        for(let i=1; i<=10; i++){
-          document.write(`
-            <a href="detail.html" class="answer-card">
-              <span style="font-size:11px;color:var(--gold);">RECOMMEND #${i}</span>
-              <strong style="font-size:16px;color:var(--cream);">提案銘柄名 #${i}</strong>
-              <small style="color:var(--muted);">クリックして詳細を見る</small>
-            </a>
-          `);
-        }
-      </script>
-    </div>
+    <p id="scoreLine" style="text-align:center;color:var(--gold-light);font-size:14px;margin:8px 0 0;"></p>
+    <div class="answer-grid" id="answerGrid"></div>
   </div>
 </main>
 <script src="../js/common.js"></script>

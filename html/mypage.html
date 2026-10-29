@@ -7,28 +7,6 @@
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/easyanswer.css">
 <link rel="stylesheet" href="../css/mypage.css">
-<style>
-  /* パスワード入力欄と目アイコンのレイアウト調整 */
-  .password-input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .password-input-wrap .form-control {
-    padding-right: 40px;
-  }
-  .toggle-password-btn {
-    position: absolute;
-    right: 10px;
-    background: none;
-    border: none;
-    color: var(--gold-light);
-    cursor: pointer;
-    font-size: 16px;
-    padding: 4px;
-    line-height: 1;
-  }
-</style>
 </head>
 <body class="subpage-body mypage-page">
 <header id="siteHeader"></header>
@@ -41,23 +19,23 @@
       </div>
       <div class="profile-avatar-wrap">
         <div class="avatar-img">ICON</div>
-        <button class="icon-btn">アイコンの変更</button>
+        <button type="button" class="icon-btn">アイコンの変更</button>
       </div>
       <form id="profileForm">
         <div class="form-group">
           <label>ユーザー名</label>
-          <input type="text" id="usernameInput" class="form-control" value="ゲストユーザー">
+          <input type="text" id="usernameInput" class="form-control" maxlength="50">
         </div>
         <div class="form-group">
           <label>メールアドレス</label>
-          <input type="email" id="emailInput" class="form-control" value="user@example.com">
+          <input type="email" id="emailInput" class="form-control" maxlength="255">
         </div>
-        
+
         <!-- 新しいパスワード -->
         <div class="form-group">
           <label>新しいパスワード</label>
           <div class="password-input-wrap">
-            <input type="password" id="newPasswordInput" class="form-control" placeholder="変更時のみ入力">
+            <input type="password" id="newPasswordInput" class="form-control" placeholder="変更時のみ入力" autocomplete="new-password">
             <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('newPasswordInput', this)">👁</button>
           </div>
         </div>
@@ -66,7 +44,7 @@
         <div class="form-group">
           <label>新しいパスワード（確認）</label>
           <div class="password-input-wrap">
-            <input type="password" id="confirmPasswordInput" class="form-control" placeholder="確認のため再入力">
+            <input type="password" id="confirmPasswordInput" class="form-control" placeholder="確認のため再入力" autocomplete="new-password">
             <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('confirmPasswordInput', this)">👁</button>
           </div>
         </div>
@@ -81,28 +59,18 @@
       <div class="box-card">
         <div class="card-header-flex">
           <h2 class="card-title">お気に入り一覧</h2>
-          <button class="icon-btn" onclick="openModal('favModal')">拡大 ⤢</button>
+          <button type="button" class="icon-btn" onclick="openModal('favModal')">拡大 ⤢</button>
         </div>
-        <div class="item-list-mini">
-          <div class="mini-item-card">山崎12年<br><small style="color:var(--gold-light)">WHISKY</small></div>
-          <div class="mini-item-card">マルボロ<br><small style="color:var(--muted)">紙</small></div>
-          <div class="mini-item-card">獺祭 磨き三割九分<br><small style="color:#aaa">日本酒</small></div>
-        </div>
+        <div class="item-list-mini" id="favMini"></div>
       </div>
 
       <!-- 画面右下：コメント -->
       <div class="box-card">
         <div class="card-header-flex">
           <h2 class="card-title">投稿コメント履歴</h2>
-          <button class="icon-btn" onclick="openModal('commentModal')">拡大 ⤢</button>
+          <button type="button" class="icon-btn" onclick="openModal('commentModal')">拡大 ⤢</button>
         </div>
-        <div class="comment-list-mini">
-          <div class="mini-comment-card">
-            <strong style="color:var(--gold-light)">山崎12年</strong> ★★★★★
-            <p style="margin:4px 0 0;color:#ccc;">スモーキーな香りが最高です。</p>
-            <div class="mini-comment-date">2026/10/01</div>
-          </div>
-        </div>
+        <div class="comment-list-mini" id="commentMini"></div>
       </div>
     </div>
   </div>
@@ -111,65 +79,55 @@
 <!-- お気に入り拡大モーダル -->
 <div class="modal-overlay" id="favModal">
   <div class="modal-content" style="width:min(900px,100%);">
-    <button class="modal-close" onclick="closeModal('favModal')">×</button>
+    <button type="button" class="modal-close" onclick="closeModal('favModal')">×</button>
     <div class="subpage-heading">
       <span></span>
       <h1>お気に入り一覧 (拡大)</h1>
       <span></span>
     </div>
     <div class="filter-button-group">
-      <button class="cat-btn cat-whisky">ウイスキー</button>
-      <button class="cat-btn cat-cocktail">カクテル</button>
-      <button class="cat-btn cat-sake">日本酒</button>
-      <button class="cat-btn cat-wine">ワイン</button>
-      <button class="cat-btn cat-paper">紙</button>
-      <button class="cat-btn cat-vape">電子</button>
+      <button type="button" class="cat-btn cat-whisky"   data-category="whisky">ウイスキー</button>
+      <button type="button" class="cat-btn cat-cocktail" data-category="cocktail">カクテル</button>
+      <button type="button" class="cat-btn cat-sake"     data-category="sake">日本酒</button>
+      <button type="button" class="cat-btn cat-wine"     data-category="wine">ワイン</button>
+      <button type="button" class="cat-btn cat-paper"    data-category="cigarette">紙</button>
+      <button type="button" class="cat-btn cat-vape"     data-category="vape">電子</button>
     </div>
     <div class="form-group" style="margin-bottom:20px;">
       <input type="text" class="form-control" placeholder="名称検索...">
     </div>
-    <div class="answer-grid" style="margin-top:0;">
-      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">山崎12年</strong><small>ウイスキー</small></a>
-      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">マルボロ</strong><small>紙タバコ</small></a>
-      <a href="detail.html" class="answer-card"><strong style="color:var(--gold-light)">獺祭 磨き三割九分</strong><small>日本酒</small></a>
-    </div>
+    <div class="answer-grid" id="favList" style="margin-top:0;"></div>
   </div>
 </div>
 
 <!-- コメント拡大モーダル -->
 <div class="modal-overlay" id="commentModal">
   <div class="modal-content" style="width:min(900px,100%);">
-    <button class="modal-close" onclick="closeModal('commentModal')">×</button>
+    <button type="button" class="modal-close" onclick="closeModal('commentModal')">×</button>
     <div class="subpage-heading">
       <span></span>
       <h1>投稿コメント履歴 (拡大)</h1>
       <span></span>
     </div>
     <div class="filter-button-group">
-      <button class="cat-btn cat-whisky">ウイスキー</button>
-      <button class="cat-btn cat-cocktail">カクテル</button>
-      <button class="cat-btn cat-sake">日本酒</button>
-      <button class="cat-btn cat-wine">ワイン</button>
-      <button class="cat-btn cat-paper">紙</button>
-      <button class="cat-btn cat-vape">電子</button>
+      <button type="button" class="cat-btn cat-whisky"   data-category="whisky">ウイスキー</button>
+      <button type="button" class="cat-btn cat-cocktail" data-category="cocktail">カクテル</button>
+      <button type="button" class="cat-btn cat-sake"     data-category="sake">日本酒</button>
+      <button type="button" class="cat-btn cat-wine"     data-category="wine">ワイン</button>
+      <button type="button" class="cat-btn cat-paper"    data-category="cigarette">紙</button>
+      <button type="button" class="cat-btn cat-vape"     data-category="vape">電子</button>
     </div>
     <div class="form-group" style="margin-bottom:20px;">
       <input type="text" class="form-control" placeholder="名称検索...">
     </div>
-    <div>
-      <div class="mini-comment-card" style="margin-bottom:10px;">
-        <strong style="color:var(--gold-light)">山崎12年</strong> ★★★★★
-        <p style="margin:4px 0 0;color:#ccc;">スモーキーで豊潤な香りが広がります。ハイボールでもロックでも楽しめます。</p>
-        <div class="mini-comment-date">2026/10/01</div>
-      </div>
-    </div>
+    <div id="commentList"></div>
   </div>
 </div>
 
 <!-- 既存パスワード確認用モーダル（メール・パスワード変更時用） -->
 <div class="modal-overlay" id="currentPasswordModal">
   <div class="modal-content" style="width:min(400px,100%);">
-    <button class="modal-close" onclick="closeModal('currentPasswordModal')">×</button>
+    <button type="button" class="modal-close" onclick="closeModal('currentPasswordModal')">×</button>
     <div class="subpage-heading">
       <span></span>
       <h2>本人確認</h2>
@@ -179,7 +137,7 @@
     <div class="form-group">
       <label>現在のパスワード</label>
       <div class="password-input-wrap">
-        <input type="password" id="currentPasswordInput" class="form-control" placeholder="現在のパスワードを入力">
+        <input type="password" id="currentPasswordInput" class="form-control" placeholder="現在のパスワードを入力" autocomplete="current-password">
         <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility('currentPasswordInput', this)">👁</button>
       </div>
     </div>

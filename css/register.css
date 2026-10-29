@@ -12,6 +12,7 @@
   .toggle-password-btn {
     position: absolute;
     right: 10px;
+    
     background: none;
     border: none;
     color: var(--gold-light);
