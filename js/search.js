@@ -102,9 +102,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('searchForm');
   const grid = document.getElementById('resultGrid');
   const countEl = document.getElementById('resultCount');
+  const pagerEl = document.getElementById('pager');
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  function renderPager(current, total) {
+    pagerEl.innerHTML = '';
+    if (total <= 1) return;
+    const add = (label, page, disabled = false, active = false) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'clear-btn';
+      b.textContent = label;
+      b.disabled = disabled;
+      if (active) { b.style.borderColor = 'var(--gold)'; b.style.color = 'var(--gold)'; }
+      if (disabled) b.style.opacity = '0.4';
+      if (!disabled && !active) b.addEventListener('click', () => {
+        runSearch(page);
+        window.scrollTo({ top: grid.offsetTop - 200, behavior: 'smooth' });
+      });
+      pagerEl.appendChild(b);
+    };
+    add('← 前へ', current - 1, current === 1);
+    // 現在ページの前後2ページ + 先頭・末尾を表示
+    let last = 0;
+    for (let i = 1; i <= total; i++) {
+      if (i === 1 || i === total || Math.abs(i - current) <= 2) {
+        if (last && i - last > 1) {
+          const dots = document.createElement('span');
+          dots.textContent = '…';
+          dots.style.color = 'var(--muted)';
+          pagerEl.appendChild(dots);
+        }
+        add(String(i), i, false, i === current);
+        last = i;
+      }
+    }
+    add('次へ →', current + 1, current === total);
+  }
 
   async function runSearch(page = 1) {
     const q = new URLSearchParams(new FormData(form));
@@ -115,7 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'error');
 
-      countEl.textContent = `${data.total} 件見つかりました`;
+      const totalPages = Math.max(1, Math.ceil(data.total / data.per_page));
+      const from = data.total ? (data.page - 1) * data.per_page + 1 : 0;
+      const to = Math.min(data.page * data.per_page, data.total);
+      countEl.textContent = `${data.total} 件見つかりました（${from}〜${to} 件を表示）`;
+      renderPager(data.page, totalPages);
       grid.innerHTML = data.items.map(p => {
         const sub = [
           p.prefecture || p.country_name || p.base_liquor_name,
@@ -133,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error(e);
       countEl.textContent = '検索に失敗しました。';
       grid.innerHTML = '';
+      pagerEl.innerHTML = '';
     }
   }
 
