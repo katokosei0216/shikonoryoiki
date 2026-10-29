@@ -1,18 +1,8 @@
 <?php
-<<<<<<< Updated upstream
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-=======
-session_start();
-header('Content-Type: application/json; charset=utf-8');
->>>>>>> Stashed changes
-
 // ===== データベース接続設定 =====
 $host    = 'localhost';
 $db      = 'shikodb';
-$dbUser  = 'root';
+$user    = 'root';
 $pass    = 'password';
 $charset = 'utf8mb4';
 
@@ -23,157 +13,75 @@ $options = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-// JSONを返して終了する
-function out(array $arr, int $code = 200): void {
-    http_response_code($code);
-    echo json_encode($arr, JSON_UNESCAPED_UNICODE);
+// 登録画面へエラー付きで戻す（このPHPは php/ フォルダ、HTMLは html/ フォルダにある）
+function redirect_error(string $message): void {
+    header('Location: ../html/register.html?error=' . urlencode($message));
     exit;
 }
 
 try {
-    $pdo = new PDO($dsn, $dbUser, $pass, $options);
+    $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (PDOException $e) {
+    // 開発中は画面にも原因を出す。公開時は下の exit のメッセージを固定文にすること
     error_log('DB接続失敗: ' . $e->getMessage());
-    out(['ok' => false, 'message' => 'データベース接続に失敗しました。'], 500);
+    exit('データベース接続失敗: ' . $e->getMessage());
 }
 
-// ===== ログイン確認 =====
-if (empty($_SESSION['user_id'])) {
-    out(['ok' => false, 'message' => 'ログインしてください。'], 401);
+// POST以外でアクセスされた場合は登録画面へ戻す
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: ../html/register.html');
+    exit;
 }
-$uid = $_SESSION['user_id'];
 
-// CSRFトークン
-if (empty($_SESSION['csrf'])) {
-    $_SESSION['csrf'] = bin2hex(random_bytes(32));
+$user_name        = trim($_POST['user_name'] ?? '');
+$email            = trim($_POST['email'] ?? '');
+$password         = $_POST['password'] ?? '';
+$confirm_password = $_POST['confirm_password'] ?? '';
+
+// ===== バリデーション =====
+if ($user_name === '' || $email === '' || $password === '' || $confirm_password === '') {
+    redirect_error('すべての項目を入力してください。');
+}
+if (mb_strlen($user_name) > 50) {
+    redirect_error('ユーザー名は50文字以内で入力してください。');
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
+    redirect_error('有効なメールアドレスを入力してください。');
+}
+if (mb_strlen($password) < 8) {
+    redirect_error('パスワードは8文字以上で入力してください。');
+}
+if (strlen($password) > 72) {   // bcrypt は72バイトまで
+    redirect_error('パスワードは72バイト以内（半角で72文字程度）で入力してください。');
+}
+if ($password !== $confirm_password) {
+    redirect_error('パスワードが一致しません。');
 }
 
 try {
-
-    // ============================================================
-    // POST: プロフィール保存
-    // ============================================================
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $data = json_decode(file_get_contents('php://input'), true) ?? [];
-
-        if (!hash_equals($_SESSION['csrf'], $data['csrf'] ?? '')) {
-            out(['ok' => false, 'message' => '不正なリクエストです。'], 400);
-        }
-
-        $name    = trim($data['name'] ?? '');
-        $email   = trim($data['email'] ?? '');
-        $newPass = $data['newPassword'] ?? '';
-        $current = $data['currentPassword'] ?? '';
-
-        // ----- バリデーション -----
-        if ($name === '' || $email === '') {
-            out(['ok' => false, 'message' => 'ユーザー名とメールアドレスを入力してください。']);
-        }
-        if (mb_strlen($name) > 50) {
-            out(['ok' => false, 'message' => 'ユーザー名は50文字以内で入力してください。']);
-        }
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
-            out(['ok' => false, 'message' => '有効なメールアドレスを入力してください。']);
-        }
-        if ($newPass !== '' && (mb_strlen($newPass) < 8 || strlen($newPass) > 72)) {
-            out(['ok' => false, 'message' => 'パスワードは8文字以上72バイト以内で入力してください。']);
-        }
-
-        // 現在の登録内容を取得
-        $stmt = $pdo->prepare('SELECT email, password_hash FROM users WHERE user_id = ?');
-        $stmt->execute([$uid]);
-        $cur = $stmt->fetch();
-        if (!$cur) {
-            out(['ok' => false, 'message' => 'ユーザーが見つかりません。'], 404);
-        }
-
-        $emailChanged = ($email !== $cur['email']);
-        $passChanged  = ($newPass !== '');
-
-        // メールまたはパスワードを変更する場合は、現在のパスワードを確認
-        if ($emailChanged || $passChanged) {
-            if ($current === '' || !password_verify($current, $cur['password_hash'])) {
-                out(['ok' => false, 'message' => '現在のパスワードが正しくありません。']);
-            }
-        }
-
-        // メールアドレスの重複チェック(自分以外)
-        if ($emailChanged) {
-            $stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = ? AND user_id <> ?');
-            $stmt->execute([$email, $uid]);
-            if ($stmt->fetch()) {
-                out(['ok' => false, 'message' => 'このメールアドレスは既に使用されています。']);
-            }
-        }
-
-        // 更新
-        if ($passChanged) {
-            $stmt = $pdo->prepare(
-                'UPDATE users SET user_name = ?, email = ?, password_hash = ? WHERE user_id = ?'
-            );
-            $stmt->execute([$name, $email, password_hash($newPass, PASSWORD_DEFAULT), $uid]);
-        } else {
-            $stmt = $pdo->prepare(
-                'UPDATE users SET user_name = ?, email = ? WHERE user_id = ?'
-            );
-            $stmt->execute([$name, $email, $uid]);
-        }
-
-        out(['ok' => true, 'message' => '変更を保存しました。']);
+    // メールアドレスの重複チェック（★ users ではなく user_id を取得する）
+    $stmt = $pdo->prepare('SELECT user_id FROM users WHERE email = ?');
+    $stmt->execute([$email]);
+    if ($stmt->fetch()) {
+        redirect_error('このメールアドレスは既に使用されています。');
     }
 
-    // ============================================================
-    // GET: マイページ表示用データ
-    // ============================================================
+    // パスワードのハッシュ化
+    $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-    // ユーザー情報
-    $stmt = $pdo->prepare('SELECT user_name, email FROM users WHERE user_id = ?');
-    $stmt->execute([$uid]);
-    $me = $stmt->fetch();
-    if (!$me) {
-        out(['ok' => false, 'message' => 'ユーザーが見つかりません。'], 404);
-    }
+    // データベースへ登録
+    $stmt = $pdo->prepare('INSERT INTO users (user_name, email, password_hash) VALUES (?, ?, ?)');
+    $stmt->execute([$user_name, $email, $password_hash]);
 
-    // カテゴリ(絞り込みボタン用)
-    $categories = $pdo->query(
-        'SELECT category_code, category_name FROM categories ORDER BY sort_order'
-    )->fetchAll();
-
-    // お気に入り
-    $stmt = $pdo->prepare('
-        SELECT p.product_id, p.product_name, p.image_path,
-               c.category_code, c.category_name
-        FROM favorites f
-        JOIN products p   ON p.product_id = f.product_id
-        JOIN categories c ON c.category_id = p.category_id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-    ');
-    $stmt->execute([$uid]);
-    $favorites = $stmt->fetchAll();
-
-    // 自分が書いた口コミ
-    $stmt = $pdo->prepare('
-        SELECT r.rating, r.comment, r.created_at,
-               p.product_id, p.product_name
-        FROM reviews r
-        JOIN products p ON p.product_id = r.product_id
-        WHERE r.user_id = ?
-        ORDER BY r.created_at DESC
-    ');
-    $stmt->execute([$uid]);
-    $reviews = $stmt->fetchAll();
-
-    out([
-        'ok'         => true,
-        'csrf'       => $_SESSION['csrf'],
-        'user'       => $me,
-        'categories' => $categories,
-        'favorites'  => $favorites,
-        'reviews'    => $reviews,
-    ]);
+    // 登録成功時はログイン画面へ
+    header('Location: ../html/login.html');
+    exit;
 
 } catch (PDOException $e) {
-    error_log('プロフィール処理エラー: ' . $e->getMessage());
-    out(['ok' => false, 'message' => 'データベースエラーが発生しました。'], 500);
+    // 同時登録などでメールが重複した場合（UNIQUE制約違反）
+    if ($e->getCode() === '23000') {
+        redirect_error('このメールアドレスは既に使用されています。');
+    }
+    error_log('会員登録エラー: ' . $e->getMessage());
+    redirect_error('データベースエラーが発生しました。');
 }
