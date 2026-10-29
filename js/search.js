@@ -1,3 +1,6 @@
+// search.php の場所（search.html からの相対パス）。置き場所に合わせてここだけ変更する
+const SEARCH_API = '../php/search.php';
+
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const category = params.get('category') || 'whisky';
@@ -94,6 +97,48 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // 6. 検索実行と結果描画
+  const form = document.getElementById('searchForm');
+  const grid = document.getElementById('resultGrid');
+  const countEl = document.getElementById('resultCount');
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  async function runSearch(page = 1) {
+    const q = new URLSearchParams(new FormData(form));
+    q.set('category', category);
+    q.set('page', page);
+    try {
+      const res = await fetch(SEARCH_API + '?' + q.toString());
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+
+      countEl.textContent = `${data.total} 件見つかりました`;
+      grid.innerHTML = data.items.map(p => {
+        const sub = [
+          p.prefecture || p.country_name || p.base_liquor_name,
+          p.abv ? p.abv + '%' : null
+        ].filter(Boolean).join(' / ');
+        return `
+          <a href="detail.html?id=${encodeURIComponent(p.product_id)}" class="answer-card">
+            <span style="font-size:11px;color:var(--gold);">${esc(category.toUpperCase())}</span>
+            <strong style="font-size:16px;color:var(--cream);">${esc(p.product_name)}</strong>
+            <span style="font-size:12px;color:#aaa;">${esc(sub)}</span>
+            <small style="color:var(--muted);">詳細を見る →</small>
+          </a>`;
+      }).join('') || '<p style="color:var(--muted)">該当する商品がありません。</p>';
+    } catch (e) {
+      console.error(e);
+      countEl.textContent = '検索に失敗しました。';
+      grid.innerHTML = '';
+    }
+  }
+
+  window.runSearch = runSearch;
+  form.addEventListener('submit', () => runSearch(1));
+  runSearch(1); // 初期表示
 });
 
 function resetFilters() {
@@ -103,5 +148,6 @@ function resetFilters() {
     document.querySelectorAll('.rating-options input[type="radio"]').forEach(radio => {
       radio.dataset.wasChecked = "false";
     });
+    if (window.runSearch) window.runSearch(1);
   }
 }

@@ -1,4 +1,9 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // セッションの Cookie 設定(JavaScriptから読めない・別サイトからの送信では送らない)
 session_set_cookie_params([
     'lifetime' => 0,
