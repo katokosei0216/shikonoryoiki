@@ -79,7 +79,7 @@ function buildHeader(isPublicPage, loggedIn) {
     <div class="header-user" id="headerUser"></div>
   `;
 
-  // ログイン画面・新規登録画面・マイページにはユーザーエリアを出さない
+  // ログイン画面・新規登録画面・マイページにはユーザーエリアを出さないよ
   if (isAuthOrMyPage) return;
 
   const userArea = document.getElementById('headerUser');
