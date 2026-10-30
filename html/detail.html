@@ -14,10 +14,10 @@
     <div class="detail-grid">
       <!-- 画面左半分 -->
       <div>
-        <div class="detail-meta">ウイスキー | サントリー | 日本</div>
-        <h1 class="detail-title">シングルモルト 山崎12年</h1>
-        <div class="detail-image-box">商品画像エリア</div>
-        
+        <div class="detail-meta" id="detailMeta">読み込み中...</div>
+        <h1 class="detail-title" id="detailTitle">読み込み中...</h1>
+        <div class="detail-image-box" id="detailImage"></div>
+
         <div class="fav-action-bar">
           <button class="heart-btn" onclick="toggleFavorite()">♡ お気に入り</button>
           <span style="font-size:13px;color:var(--muted);">登録数: <strong style="color:var(--gold-light);">1,280</strong></span>
@@ -25,14 +25,13 @@
 
         <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
           <h3 style="font-size:16px;color:var(--gold-light);margin-top:0;">口コミ・評価</h3>
-          
+
           <div style="margin-bottom:20px;background:#10110e;padding:12px;border:1px solid #2d2618;">
             <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">評価をつける</div>
             <div class="star-rating-select">
               <span class="star" data-index="1">★</span><span class="star" data-index="2">★</span><span class="star" data-index="3">★</span><span class="star" data-index="4">★</span><span class="star" data-index="5">★</span>
             </div>
             <textarea class="form-control" id="commentTextarea" placeholder="コメントを入力..."></textarea>
-            <!-- 投稿ボタン押下時にログインモーダルを表示するよう修正 -->
             <button class="gold-button" id="submitCommentBtn" style="margin-top:8px;padding:6px 12px;font-size:11px;">投稿する</button>
           </div>
 
@@ -56,13 +55,13 @@
       <!-- 画面右半分 -->
       <div>
         <div style="margin-bottom:20px;">
+          <h3 style="font-size:14px;color:var(--gold-light);margin-top:0;">商品情報</h3>
+          <div id="specList"></div>
+        </div>
+
+        <div style="margin-bottom:20px;">
           <h3 style="font-size:14px;color:var(--gold-light);margin-top:0;">タグ</h3>
-          <div>
-            <span class="tag-badge">#フルーティー</span>
-            <span class="tag-badge">#スモーキー</span>
-            <span class="tag-badge">#熟成12年</span>
-            <span class="tag-badge">#贈答用</span>
-          </div>
+          <div id="tagList"></div>
         </div>
 
         <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
@@ -70,10 +69,7 @@
             <h3 style="font-size:16px;color:var(--gold-light);margin:0;">詳細説明文</h3>
             <button class="icon-btn" onclick="openModal('descModal')">拡大 ⤢</button>
           </div>
-          <p style="font-size:13px;line-height:1.7;color:#ddd;">
-            繊細で複雑、深みのある味わい。日本のウイスキー発祥の地、山崎蒸溜所の生んだシングルモルトウイスキー。
-            ホワイトオーク樽熟成原酒由来の甘いバニラ香と熟した果実香が重なり合う、幾重にも及ぶ香りの重層感が特徴です。
-          </p>
+          <p id="descText" style="font-size:13px;line-height:1.7;color:#ddd;"></p>
         </div>
       </div>
     </div>
@@ -88,7 +84,7 @@
       <h1>ログインが必要</h1>
       <span></span>
     </div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="loginPromptText">お気に入り機能を利用するにはログインが必要です。[cite: 5]</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;" id="loginPromptText">お気に入り機能を利用するにはログインが必要です。</p>
     <a href="login.html" class="gold-button" style="display:block;">ログイン画面へ</a>
   </div>
 </div>
@@ -102,7 +98,6 @@
       <span></span>
     </div>
     <div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">
-      <!-- 星1〜星5まで個別に選べるようにプルダウンメニューを拡張 -->
       <select class="form-control" style="width:150px;">
         <option value="">すべての星数</option>
         <option value="5">★5</option>
@@ -130,110 +125,11 @@
       <h1>詳細説明文</h1>
       <span></span>
     </div>
-    <p style="font-size:14px;line-height:1.9;color:#eee;">
-      繊細で複雑、深みのある味わい。日本のウイスキー発祥の地、山崎蒸溜所の生んだシングルモルトウイスキー。<br><br>
-      ホワイトオーク樽熟成原酒由来の甘いバニラ香と熟した果実香が重なり合う、幾重にも及ぶ香りの重層感が特徴です。
-    </p>
+    <p id="descModalText" style="font-size:14px;line-height:1.9;color:#eee;"></p>
   </div>
 </div>
 
 <script src="../js/common.js"></script>
 <script src="../js/detail.js"></script>
-
-<!-- 追加機能の実装スクリプト -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. 星評価の2回目クリックで選択解除（および見た目の切り替え）の処理
-  const stars = document.querySelectorAll('.star-rating-select .star');
-  let currentRating = 0; // 現在選択されている評価 (0は未選択)
-
-  stars.forEach((star, index) => {
-    const ratingValue = index + 1;
-
-    // ホバー時の見た目制御（任意）
-    star.addEventListener('mouseenter', () => {
-      stars.forEach((s, i) => {
-        if (i <= index) {
-          s.style.color = 'var(--gold-light, #d4af37)';
-        } else {
-          s.style.color = '';
-        }
-      });
-    });
-
-    // クリック時の処理
-    star.addEventListener('click', () => {
-      if (currentRating === ratingValue) {
-        // すでに選択されている星をもう一度クリックした場合：未選択に戻す
-        currentRating = 0;
-        stars.forEach(s => s.style.color = '');
-      } else {
-        // 新しく選択した場合
-        currentRating = ratingValue;
-        stars.forEach((s, i) => {
-          if (i < ratingValue) {
-            s.style.color = 'var(--gold-light, #d4af37)';
-          } else {
-            s.style.color = '';
-          }
-        });
-      }
-    });
-  });
-
-  // マウスが星エリア外に出たとき、現在の選択状態の色に戻す
-  const starContainer = document.querySelector('.star-rating-select');
-  if (starContainer) {
-    starContainer.addEventListener('mouseleave', () => {
-      stars.forEach((s, i) => {
-        if (i < currentRating) {
-          s.style.color = 'var(--gold-light, #d4af37)';
-        } else {
-          s.style.color = '';
-        }
-      });
-    });
-  }
-
-  const loginPromptModal = document.getElementById('loginPromptModal');
-  const loginPromptText = document.getElementById('loginPromptText');
-
-  // 2. コメント欄にフォーカスしようとした際にログイン画面モーダルを表示する
-  const commentTextarea = document.getElementById('commentTextarea');
-  if (commentTextarea) {
-    commentTextarea.addEventListener('focus', (e) => {
-      commentTextarea.blur(); // 入力を防ぐためフォーカスを外す
-
-      if (loginPromptText) {
-        loginPromptText.textContent = '口コミを投稿するにはログインが必要です。[cite: 5]';
-      }
-
-      if (typeof openModal === 'function') {
-        openModal('loginPromptModal');
-      } else if (loginPromptModal) {
-        loginPromptModal.classList.add('active');
-      }
-    });
-  }
-
-  // 3. 「投稿する」ボタンを押した際にもログイン画面モーダルを表示する
-  const submitCommentBtn = document.getElementById('submitCommentBtn');
-  if (submitCommentBtn) {
-    submitCommentBtn.addEventListener('click', (e) => {
-      e.preventDefault(); // フォーム送信や通常の動きをストップ
-
-      if (loginPromptText) {
-        loginPromptText.textContent = '口コミを投稿するにはログインが必要です。[cite: 5]';
-      }
-
-      if (typeof openModal === 'function') {
-        openModal('loginPromptModal');
-      } else if (loginPromptModal) {
-        loginPromptModal.classList.add('active');
-      }
-    });
-  }
-});
-</script>
 </body>
 </html>
