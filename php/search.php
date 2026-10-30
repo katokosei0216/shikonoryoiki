@@ -62,6 +62,48 @@ try {
     $categoryId = $stmt->fetchColumn();
     if ($categoryId === false) fail(400, 'invalid category');
 
+        // ---- 絞り込み候補の取得（mode=options）----
+    if (in_str('mode') === 'options') {
+        if ($category === 'sake') {
+            // 日本酒: 製造都道府県
+            $stmt = $pdo->prepare(
+                'SELECT DISTINCT sd.prefecture AS name
+                 FROM products p
+                 JOIN sake_details sd ON sd.product_id = p.product_id
+                 WHERE p.category_id = ? AND sd.prefecture IS NOT NULL AND sd.prefecture <> \'\'
+                 ORDER BY sd.prefecture'
+            );
+            $stmt->execute([(int)$categoryId]);
+            $countries = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } else {
+            $stmt = $pdo->prepare(
+                'SELECT DISTINCT c.country_name AS name
+                 FROM products p
+                 JOIN countries c ON c.country_id = p.country_id
+                 WHERE p.category_id = ?
+                 ORDER BY c.country_name'
+            );
+            $stmt->execute([(int)$categoryId]);
+            $countries = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT DISTINCT m.maker_name AS name
+             FROM products p
+             JOIN makers m ON m.maker_id = p.maker_id
+             WHERE p.category_id = ? AND m.maker_name IS NOT NULL AND m.maker_name <> \'\'
+             ORDER BY m.maker_name'
+        );
+        $stmt->execute([(int)$categoryId]);
+        $makers = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        echo json_encode([
+            'countries' => $countries,
+            'makers'    => $makers,
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $joins = [
         'LEFT JOIN countries c ON c.country_id = p.country_id',
         'LEFT JOIN makers m ON m.maker_id = p.maker_id',

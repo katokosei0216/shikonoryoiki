@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const category = params.get('category') || 'whisky';
 
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
   const categoryNames = {
     whisky: 'ウイスキー',
     cocktail: 'カクテル',
@@ -20,34 +23,31 @@ document.addEventListener('DOMContentLoaded', () => {
     catBadge.textContent = '◆ ' + (categoryNames[category] || 'お酒');
   }
 
-  // 2. 製造国 vs 製造都道府県 の切り替え（カクテル以外の場合のみ処理）
+  // 2. 製造国 vs 製造都道府県 の切り替え（ラベルのみ。候補はDBから取得）
   const countryLabel = document.getElementById('countryLabel');
   const countryInput = document.getElementById('countryInput');
   const countryList = document.getElementById('countryDatalist');
-  
+  const makerList = document.getElementById('makerDatalist');
+
   if (category === 'sake') {
     if (countryLabel) countryLabel.textContent = '製造都道府県';
     if (countryInput) countryInput.placeholder = '例: 新潟県, 京都府...';
-    if (countryList) {
-      countryList.innerHTML = `
-        <option value="新潟県">
-        <option value="京都府">
-        <option value="兵庫県">
-        <option value="秋田県">
-        <option value="山形県">
-      `;
-    }
   } else if (category !== 'cocktail') {
     if (countryLabel) countryLabel.textContent = '製造国';
     if (countryInput) countryInput.placeholder = '例: スコットランド, 日本...';
-    if (countryList) {
-      countryList.innerHTML = `
-        <option value="日本">
-        <option value="スコットランド">
-        <option value="アイルランド">
-        <option value="アメリカ">
-        <option value="カナダ">
-      `;
+  }
+
+  // DBから候補を取得して datalist に反映
+  async function loadOptions() {
+    try {
+      const res = await fetch(SEARCH_API + '?mode=options&category=' + encodeURIComponent(category));
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+      const toOptions = arr => arr.map(v => `<option value="${esc(v)}">`).join('');
+      if (countryList) countryList.innerHTML = toOptions(data.countries || []);
+      if (makerList) makerList.innerHTML = toOptions(data.makers || []);
+    } catch (e) {
+      console.error('候補の取得に失敗しました', e);
     }
   }
 
@@ -103,9 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const grid = document.getElementById('resultGrid');
   const countEl = document.getElementById('resultCount');
   const pagerEl = document.getElementById('pager');
-
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
-    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
   function renderPager(current, total) {
     pagerEl.innerHTML = '';
@@ -179,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.runSearch = runSearch;
   form.addEventListener('submit', () => runSearch(1));
+  loadOptions();
   runSearch(1); // 初期表示
 });
 
