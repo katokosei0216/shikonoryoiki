@@ -1,16 +1,47 @@
 // ★ログイン状態の確認ログ(ブラウザの F12 → Console に出る)。直ったら false にする
 const DEBUG_AUTH = true;
 
+// ログインなしで見せてよいページ(<body> の class で判定する)
+const PUBLIC_PAGE_CLASSES = ['login-page', 'register-page'];
+
+// ログインの確認が終わるまで、ページの中身を見せない
+document.documentElement.style.visibility = 'hidden';
+
 document.addEventListener('DOMContentLoaded', async () => {
+  let redirecting = false;
+  try {
+    const isPublicPage = PUBLIC_PAGE_CLASSES.some(c => document.body.classList.contains(c));
+
+    // ログイン状態はサーバーのセッションで判定する(localStorage は使わない)
+    let loggedIn = false;
+    if (!isPublicPage) {
+      loggedIn = await checkLogin();
+      isLoggedIn = loggedIn;   // 他のスクリプトが参照する共通の変数にも反映
+
+      // ★ログインが必要なページ: 未ログインならログイン画面へ(中身は見せないまま移動する)
+      if (!loggedIn) {
+        redirecting = true;
+        window.location.replace('login.html');
+        return;
+      }
+    }
+
+    buildHeader(isPublicPage, loggedIn);
+  } finally {
+    // 移動しないときだけ、ページを表示する
+    if (!redirecting) document.documentElement.style.visibility = '';
+  }
+});
+
+// ヘッダーを組み立てる
+function buildHeader(isPublicPage, loggedIn) {
   const header = document.getElementById('siteHeader');
   if (!header) return;
 
   const isHome = document.body.classList.contains('home-body');
 
   // ログイン画面、新規登録画面、マイページかどうか
-  const isAuthOrMyPage = document.body.classList.contains('login-page') ||
-                         document.body.classList.contains('register-page') ||
-                         document.body.classList.contains('mypage-page');
+  const isAuthOrMyPage = isPublicPage || document.body.classList.contains('mypage-page');
 
   // --- 左側のボタン群を生成 ---
   let leftButtonsHtml = '';
@@ -35,8 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   header.className = 'site-header';
-  // 左側は .header-left(common.css)で配置。右側(.header-user)は空で作り、
-  // ログイン状態の確認後に中身を入れる
+  // 左側は .header-left(common.css)で配置。右側(.header-user)は空で作り、あとで中身を入れる
   header.innerHTML = `
     <div class="header-left">
       ${leftButtonsHtml}
@@ -52,10 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ログイン画面・新規登録画面・マイページにはユーザーエリアを出さない
   if (isAuthOrMyPage) return;
 
-  // ログイン状態はサーバーのセッションで判定する(localStorage は使わない)
-  const loggedIn = await checkLogin();
-  isLoggedIn = loggedIn;   // 他のスクリプトが参照する共通の変数にも反映
-
   const userArea = document.getElementById('headerUser');
   if (!userArea) return;
 
@@ -69,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     userArea.innerHTML = `<a href="login.html" class="login-button">ログイン</a>`;
   }
-});
+}
 
 // サーバーに問い合わせて、ログイン中かどうかを返す
 async function checkLogin() {
@@ -94,10 +120,10 @@ async function handleLogout() {
       body: '{}'
     });
   } catch (e) {
-    // 通信に失敗しても、画面はトップへ戻す
+    // 通信に失敗しても、画面はログイン画面へ戻す
   }
   alert('ログアウトしました');
-  window.location.href = 'index.html';
+  window.location.href = 'login.html';
 }
 
 // モーダル開閉汎用関数
