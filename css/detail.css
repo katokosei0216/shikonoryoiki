@@ -2,8 +2,12 @@
 .detail-meta { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
 .detail-title { font-size: 28px; color: var(--gold-light); margin: 0 0 15px; }
 .detail-image-box {
-    width: 100%; height: 260px; background: #090a09; border: 1px solid var(--gold-dark);
+    width: 100%; height: 320px; background: #090a09; border: 1px solid var(--gold-dark);
     display: flex; align-items: center; justify-content: center; color: var(--muted); margin-bottom: 15px;
+    padding: 12px; box-sizing: border-box;
+}
+.detail-image-box img {
+    display: block; width: 100%; height: 100%; object-fit: contain;
 }
 .fav-action-bar { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
 .heart-btn {

@@ -33,6 +33,35 @@ const METHOD_LABELS = { shake: 'シェイク', build: 'ビルド', stir: 'ステ
 const GLASS_LABELS  = { short: 'ショート', long: 'ロング' };
 const WINE_LABELS   = { '泡': 'スパークリング' };
 
+// 商品画像は assets/products/{画像番号}.webp に統一。
+// 既存DBではウイスキー/日本酒は image_path に画像番号が入り、
+// ワイン/カクテルは NULL のため商品IDとカテゴリから画像番号を補完する。
+const IMAGE_ID_RANGES = {
+  whisky:   { min: 1,   max: 100, offset: 1000 },
+  sake:     { min: 101, max: 200, offset: 1900 },
+  wine:     { min: 201, max: 300, offset: 2800 },
+  cocktail: { min: 301, max: 400, offset: 3700 }
+};
+
+function resolveProductImageUrl(p) {
+  const stored = String(p.image_path ?? '').trim();
+  // DBに保存されている画像番号（例: 1001, 2099）
+  if (/^\d{4}$/.test(stored)) {
+    return `../assets/products/${stored}.webp`;
+  }
+  // 画像URLが明示されている場合は従来の動作も維持
+  if (stored) return stored;
+
+  // DBの image_path が NULL のワイン/カクテルにも対応
+  const range = IMAGE_ID_RANGES[p.category_code];
+  const productId = Number(p.product_id);
+  if (range && Number.isInteger(productId) &&
+      productId >= range.min && productId <= range.max) {
+    return `../assets/products/${productId + range.offset}.webp`;
+  }
+  return '';
+}
+
 // 商品情報から「基本スペック」の行を組み立てる
 function buildSpecRows(p, d, code) {
   const rows = [];
@@ -91,17 +120,17 @@ function renderProduct(data) {
   setText('detailTitle', p.product_name);
   document.title = p.product_name + ' | 嗜好の領域';
 
-  // 画像（読み込めなければ「画像なし」）
+  // 商品画像（4カテゴリ合計400商品に対応）
   const imgBox = document.getElementById('detailImage');
   if (imgBox) {
-    if (p.image_path) {
+    const imageUrl = resolveProductImageUrl(p);
+    if (imageUrl) {
       const img = document.createElement('img');
-      img.alt = p.product_name;
-      img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;';
+      img.alt = `${p.product_name}の商品画像`;
+      img.decoding = 'async';
       img.onerror = () => { imgBox.textContent = '画像なし'; };
-      img.src = p.image_path;
-      imgBox.innerHTML = '';
-      imgBox.appendChild(img);
+      imgBox.replaceChildren(img);
+      img.src = imageUrl;
     } else {
       imgBox.textContent = '画像なし';
     }
