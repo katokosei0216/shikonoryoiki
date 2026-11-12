@@ -25,21 +25,27 @@
 
         <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
           <h3 style="font-size:16px;color:var(--gold-light);margin-top:0;">口コミ・評価</h3>
-
+          <!-- ① 口コミ・評価の見出しの下に平均を出す場所を足す -->
+          <div id="reviewSummary" style="font-size:13px;color:var(--gold-light);margin-bottom:10px;"></div>
           <div style="margin-bottom:20px;background:#10110e;padding:12px;border:1px solid #2d2618;">
             <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">評価をつける</div>
             <div class="star-rating-select">
               <span class="star" data-index="1">★</span><span class="star" data-index="2">★</span><span class="star" data-index="3">★</span><span class="star" data-index="4">★</span><span class="star" data-index="5">★</span>
             </div>
             <textarea class="form-control" id="commentTextarea" placeholder="コメントを入力..."></textarea>
-            <button class="gold-button" id="submitCommentBtn" style="margin-top:8px;padding:6px 12px;font-size:11px;">投稿する</button>
+            <div style="display:flex; align-items:center;">
+              <button class="gold-button" id="submitCommentBtn" style="margin-top:8px;padding:6px 12px;font-size:11px;">投稿する</button>
+              <!-- ② 投稿するボタンの右に削除ボタンを足す -->
+              <button class="icon-btn" id="deleteReviewBtn" type="button" style="display:none;margin-top:8px;margin-left:8px;">削除する</button>
+            </div>
           </div>
 
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:12px;color:var(--muted);">みんなの口コミ (3〜5件表示)</span>
             <button class="icon-btn" onclick="openModal('detailCommentModal')">拡大 ⤢</button>
           </div>
-          <div class="comment-list-mini" style="margin-top:10px;">
+          <!-- ③ 画面の小さい一覧に id を付ける -->
+          <div class="comment-list-mini" id="reviewListMini" style="margin-top:10px;">
             <div class="comment-card">
               <div class="comment-user"><div class="avatar-img"></div> ユーザーA</div>
               <div class="comment-text truncated">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。</div>
@@ -98,7 +104,8 @@
       <span></span>
     </div>
     <div style="display:flex;gap:15px;margin-bottom:20px;flex-wrap:wrap;">
-      <select class="form-control" style="width:150px;">
+      <!-- ④ 拡大モーダルの3か所に id を付ける (1つ目) -->
+      <select class="form-control" id="reviewStarFilter" style="width:150px;">
         <option value="">すべての星数</option>
         <option value="5">★5</option>
         <option value="4">★4</option>
@@ -106,9 +113,11 @@
         <option value="2">★2</option>
         <option value="1">★1</option>
       </select>
-      <input type="text" class="form-control" style="flex:1;" placeholder="名称検索...">
+      <!-- ④ 拡大モーダルの3か所に id を付ける (2つ目) -->
+      <input type="text" class="form-control" id="reviewKeyword" style="flex:1;" placeholder="コメント・ユーザー名で検索...">
     </div>
-    <div>
+    <!-- ④ 拡大モーダルの3か所に id を付ける (3つ目) -->
+    <div id="reviewListModal">
       <div class="comment-card">
         <div class="comment-user"><div class="avatar-img"></div> ユーザーA ★★★★★</div>
         <p style="font-size:13px;color:#eee;margin:5px 0;">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。後味も余韻が長く続きます。</p>
