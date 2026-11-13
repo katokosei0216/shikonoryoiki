@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>紙タバコ詳細検索 | 嗜好の領域</title>
+<link rel="stylesheet" href="../css/common.css">
+<link rel="stylesheet" href="../css/search.css">
+</head>
+<body class="subpage-body">
+<header id="siteHeader"></header>
+<main class="subpage-main">
+
+  <!-- 絞り込みパネル -->
+  <div class="search-panel box-card">
+    <form id="searchForm" onsubmit="return false;">
+
+      <!-- 上部: 種別 + 商品名検索バー -->
+      <div class="search-header-bar">
+        <div class="category-badge">◆ 紙タバコ</div>
+        <div class="keyword-search-wrap">
+          <input type="text" class="form-control" name="keyword" placeholder="銘柄名で検索..." id="keywordInput">
+        </div>
+      </div>
+
+      <div class="filter-grid">
+        <!-- 左列: 基本情報 (ブランド/メーカー/値段/並び順) -->
+        <div>
+          <div class="filter-section-title">基本情報</div>
+
+          <div class="form-group">
+            <label>ブランド</label>
+            <input type="text" class="form-control" name="brand" list="brandDatalist" placeholder="例: メビウス, マールボロ...">
+            <datalist id="brandDatalist"></datalist>
+          </div>
+
+          <div class="form-group">
+            <label>メーカー</label>
+            <input type="text" class="form-control" name="maker" list="makerDatalist" placeholder="入力または選択...">
+            <datalist id="makerDatalist"></datalist>
+          </div>
+
+          <div class="form-group">
+            <label>値段（1箱）</label>
+            <div class="range-group">
+              <select class="form-control" name="price_min">
+                <option value="">下限なし</option>
+                <option value="300">300円</option>
+                <option value="400">400円</option>
+                <option value="450">450円</option>
+                <option value="500">500円</option>
+                <option value="550">550円</option>
+                <option value="600">600円</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control" name="price_max">
+                <option value="">上限なし</option>
+                <option value="300">300円</option>
+                <option value="400">400円</option>
+                <option value="450">450円</option>
+                <option value="500">500円</option>
+                <option value="550">550円</option>
+                <option value="600">600円</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>並び順</label>
+            <select class="form-control" name="sort">
+              <option value="rank">おすすめ順（タール低い順の比較順）</option>
+              <option value="tar_asc">タール量が少ない順</option>
+              <option value="tar_desc">タール量が多い順</option>
+              <option value="nic_asc">ニコチン量が少ない順</option>
+              <option value="price_asc">値段が安い順</option>
+              <option value="price_desc">値段が高い順</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 中列: タール・ニコチン -->
+        <div>
+          <div class="filter-section-title">表示値</div>
+
+          <div class="form-group">
+            <label>タール量（mg）</label>
+            <div class="range-group">
+              <select class="form-control" name="tar_min">
+                <option value="">下限なし</option>
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+                <option value="12">12</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control" name="tar_max">
+                <option value="">上限なし</option>
+                <option value="1">1</option>
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+                <option value="14">14</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>ニコチン量（mg）</label>
+            <div class="range-group">
+              <select class="form-control" name="nic_min">
+                <option value="">下限なし</option>
+                <option value="0.1">0.1</option>
+                <option value="0.3">0.3</option>
+                <option value="0.5">0.5</option>
+                <option value="0.7">0.7</option>
+                <option value="1.0">1.0</option>
+              </select>
+              <span style="color:var(--muted)">〜</span>
+              <select class="form-control" name="nic_max">
+                <option value="">上限なし</option>
+                <option value="0.1">0.1</option>
+                <option value="0.3">0.3</option>
+                <option value="0.5">0.5</option>
+                <option value="0.7">0.7</option>
+                <option value="1.0">1.0</option>
+                <option value="1.2">1.2</option>
+              </select>
+            </div>
+          </div>
+
+          <p style="color:var(--muted);font-size:12px;line-height:1.7;margin-top:12px;">
+            ※ 表示値が低くても健康リスクが低いわけではありません。<br>
+            ※ 20歳以上向けの情報です。
+          </p>
+        </div>
+
+        <!-- 右列: 香味・サイズ・パッケージ -->
+        <div>
+          <div class="filter-section-title">カテゴリー固有条件</div>
+
+          <div class="form-group">
+            <label>香味</label>
+            <div class="checkbox-group">
+              <label class="checkbox-item"><input type="checkbox" name="flavor[]" value="regular"> レギュラー</label>
+              <label class="checkbox-item"><input type="checkbox" name="flavor[]" value="menthol"> メンソール</label>
+              <label class="checkbox-item"><input type="checkbox" name="flavor[]" value="capsule"> カプセル</label>
+              <label class="checkbox-item"><input type="checkbox" name="flavor[]" value="flavor"> 香り付き</label>
+            </div>
+          </div>
+
+          <details class="filter-accordion" open>
+            <summary>サイズ</summary>
+            <div class="accordion-content">
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="size[]" value="short"> ショート</label>
+                <label class="checkbox-item"><input type="checkbox" name="size[]" value="king"> 標準(KS)</label>
+                <label class="checkbox-item"><input type="checkbox" name="size[]" value="long"> ロング(100's)</label>
+                <label class="checkbox-item"><input type="checkbox" name="size[]" value="slim"> スリム</label>
+              </div>
+            </div>
+          </details>
+
+          <details class="filter-accordion" style="margin-top:8px;" open>
+            <summary>パッケージ</summary>
+            <div class="accordion-content">
+              <div class="checkbox-group">
+                <label class="checkbox-item"><input type="checkbox" name="pack[]" value="soft"> ソフト</label>
+                <label class="checkbox-item"><input type="checkbox" name="pack[]" value="box"> ボックス</label>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 下部アクション -->
+      <div class="search-actions">
+        <button type="button" class="clear-btn" id="resetBtn">条件をクリア</button>
+        <button type="submit" class="gold-button">🔍 この条件で検索する</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 絞り込み結果一覧 -->
+  <div class="subpage-heading">
+    <span></span>
+    <h1>検索結果一覧</h1>
+    <span></span>
+  </div>
+  <div id="resultCount" style="color:var(--muted);text-align:center;margin-bottom:12px;"></div>
+  <div class="answer-grid" id="resultGrid"></div>
+  <div id="pager" style="display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;margin:24px 0;"></div>
+
+</main>
+
+<script src="../js/common.js?v=20261112-backfix1"></script>
+<script>
+// search_cigarette.php の場所（このHTMLからの相対パス）。置き場所に合わせてここだけ変更する
+const CIGARETTE_API = '../php/search_cigarette.php';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const form = document.getElementById('searchForm');
+  const grid = document.getElementById('resultGrid');
+  const countEl = document.getElementById('resultCount');
+  const pagerEl = document.getElementById('pager');
+  const brandList = document.getElementById('brandDatalist');
+  const makerList = document.getElementById('makerDatalist');
+
+  // ブランド・メーカー候補をDBから取得
+  async function loadOptions() {
+    try {
+      const res = await fetch(CIGARETTE_API + '?mode=options');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+      const toOptions = arr => arr.map(v => `<option value="${esc(v)}">`).join('');
+      brandList.innerHTML = toOptions(data.brands || []);
+      makerList.innerHTML = toOptions(data.makers || []);
+    } catch (e) {
+      console.error('候補の取得に失敗しました', e);
+    }
+  }
+
+  function renderPager(current, total) {
+    pagerEl.innerHTML = '';
+    if (total <= 1) return;
+    const add = (label, page, disabled = false, active = false) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'clear-btn';
+      b.textContent = label;
+      b.disabled = disabled;
+      if (active) { b.style.borderColor = 'var(--gold)'; b.style.color = 'var(--gold)'; }
+      if (disabled) b.style.opacity = '0.4';
+      if (!disabled && !active) b.addEventListener('click', () => {
+        runSearch(page);
+        window.scrollTo({ top: grid.offsetTop - 200, behavior: 'smooth' });
+      });
+      pagerEl.appendChild(b);
+    };
+    add('← 前へ', current - 1, current === 1);
+    let last = 0;
+    for (let i = 1; i <= total; i++) {
+      if (i === 1 || i === total || Math.abs(i - current) <= 2) {
+        if (last && i - last > 1) {
+          const dots = document.createElement('span');
+          dots.textContent = '…';
+          dots.style.color = 'var(--muted)';
+          pagerEl.appendChild(dots);
+        }
+        add(String(i), i, false, i === current);
+        last = i;
+      }
+    }
+    add('次へ →', current + 1, current === total);
+  }
+
+  async function runSearch(page = 1) {
+    const q = new URLSearchParams(new FormData(form));
+    q.set('page', page);
+    try {
+      const res = await fetch(CIGARETTE_API + '?' + q.toString());
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'error');
+
+      const totalPages = Math.max(1, Math.ceil(data.total / data.per_page));
+      const from = data.total ? (data.page - 1) * data.per_page + 1 : 0;
+      const to = Math.min(data.page * data.per_page, data.total);
+      countEl.textContent = `${data.total} 件見つかりました（${from}〜${to} 件を表示）`;
+      renderPager(data.page, totalPages);
+
+      grid.innerHTML = data.items.map(p => {
+        const sub = [
+          p.brand,
+          `タール ${Number(p.tar_mg)}mg`,
+          `ニコチン ${Number(p.nicotine_mg)}mg`,
+          p.price ? p.price + '円' : null
+        ].filter(Boolean).join(' / ');
+        return `
+          <a href="detail.html?id=${encodeURIComponent(p.product_id)}&amp;from=search&amp;category=cigarette" class="answer-card">
+            <span style="font-size:11px;color:var(--gold);">${esc(p.flavor_type || 'CIGARETTE')}</span>
+            <strong style="font-size:16px;color:var(--cream);">${esc(p.product_name)}</strong>
+            <span style="font-size:12px;color:#aaa;">${esc(sub)}</span>
+            <small style="color:var(--muted);">詳細を見る →</small>
+          </a>`;
+      }).join('') || '<p style="color:var(--muted)">該当する商品がありません。</p>';
+    } catch (e) {
+      console.error(e);
+      countEl.textContent = '検索に失敗しました。';
+      grid.innerHTML = '';
+      pagerEl.innerHTML = '';
+    }
+  }
+
+  form.addEventListener('submit', () => runSearch(1));
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    form.reset();
+    runSearch(1);
+  });
+
+  loadOptions();
+  runSearch(1); // 初期表示
+});
+</script>
+</body>
+</html>

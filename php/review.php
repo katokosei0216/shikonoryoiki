@@ -1,4 +1,3 @@
-<?php
 // php/review.php : 口コミ・評価(一覧 / 投稿・更新 / 削除)
 //   GET  ?product_id=N
 //        … その商品の口コミ一覧・平均・自分の口コミ・合言葉(csrf)
@@ -6,10 +5,17 @@
 //        … 投稿。自分が既に書いている商品なら、その口コミを更新する(1人1商品につき1件)
 //   POST {"csrf":"...", "action":"delete", "review_id":N}
 //        … 自分の口コミを削除する(他の人の口コミは消せない)
+<?php
+
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+header('Content-Type: application/json; charset=utf-8');
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
-session_start();
+// session.php を共通化
+require_once __DIR__ . '/session.php';
 
 // ===== データベース接続設定 =====
 $host    = 'localhost';
