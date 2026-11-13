@@ -3,7 +3,9 @@ const SEARCH_API = '../php/search.php';
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
-  const category = params.get('category') || 'whisky';
+  // 旧リンク(category=paper)も紙タバコ(cigarette)として扱う
+  const rawCategory = params.get('category') || 'whisky';
+  const category = (rawCategory === 'paper') ? 'cigarette' : rawCategory;
 
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
     ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -13,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cocktail: 'カクテル',
     sake: '日本酒',
     wine: 'ワイン',
-    paper: '紙タバコ',
+    cigarette: '紙タバコ',
     vape: '電子タバコ'
   };
 
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const countryInput = document.getElementById('countryInput');
   const countryList = document.getElementById('countryDatalist');
   const makerList = document.getElementById('makerDatalist');
+  const brandList = document.getElementById('brandDatalist');
 
   if (category === 'sake') {
     if (countryLabel) countryLabel.textContent = '製造都道府県';
@@ -46,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const toOptions = arr => arr.map(v => `<option value="${esc(v)}">`).join('');
       if (countryList) countryList.innerHTML = toOptions(data.countries || []);
       if (makerList) makerList.innerHTML = toOptions(data.makers || []);
+      if (brandList) brandList.innerHTML = toOptions(data.brands || []);
     } catch (e) {
       console.error('候補の取得に失敗しました', e);
     }
@@ -66,11 +70,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const sakeOpts = document.getElementById('sakeSpecific');
   const wineOpts = document.getElementById('wineSpecific');
   const cocktailOpts = document.getElementById('cocktailSpecific');
+  const paperOpts = document.getElementById('paperSpecific');
 
   if (whiskyOpts) whiskyOpts.style.display = (category === 'whisky') ? 'block' : 'none';
   if (sakeOpts) sakeOpts.style.display = (category === 'sake') ? 'block' : 'none';
   if (wineOpts) wineOpts.style.display = (category === 'wine') ? 'block' : 'none';
   if (cocktailOpts) cocktailOpts.style.display = (category === 'cocktail') ? 'block' : 'none';
+  if (paperOpts) paperOpts.style.display = (category === 'cigarette') ? 'block' : 'none';
+
+  // 4-2. 紙たばこ: 不要な項目を隠し、値段の選択肢を紙たばこ向けに差し替える
+  if (category === 'cigarette') {
+    ['scoreSection', 'countryFilterGroup', 'ageFilterGroup', 'abvFilterGroup'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    const yen = [300, 400, 450, 500, 550, 600];
+    document.querySelectorAll('select[name="price_min"], select[name="price_max"]').forEach(sel => {
+      const first = sel.options[0].outerHTML; // 「下限なし」「上限なし」
+      sel.innerHTML = first + yen.map(v => `<option value="${v}">${v}円</option>`).join('');
+    });
+  }
 
   // 5. 5段階評価ボタンの2回目クリックで選択解除する処理（確実動作版）
   const ratingInputs = document.querySelectorAll('.rating-options input[type="radio"]');
@@ -154,10 +173,17 @@ document.addEventListener('DOMContentLoaded', () => {
       countEl.textContent = `${data.total} 件見つかりました（${from}〜${to} 件を表示）`;
       renderPager(data.page, totalPages);
       grid.innerHTML = data.items.map(p => {
-        const sub = [
-          p.prefecture || p.country_name || p.base_liquor_name,
-          p.abv ? p.abv + '%' : null
-        ].filter(Boolean).join(' / ');
+        const sub = (category === 'cigarette')
+          ? [
+              p.brand,
+              p.tar_mg != null ? `タール ${Number(p.tar_mg)}mg` : null,
+              p.nicotine_mg != null ? `ニコチン ${Number(p.nicotine_mg)}mg` : null,
+              p.price ? p.price + '円' : null
+            ].filter(Boolean).join(' / ')
+          : [
+              p.prefecture || p.country_name || p.base_liquor_name,
+              p.abv ? p.abv + '%' : null
+            ].filter(Boolean).join(' / ');
         return `
           <a href="detail.html?id=${encodeURIComponent(p.product_id)}&amp;from=search&amp;category=${encodeURIComponent(category)}" class="answer-card">
             <span style="font-size:11px;color:var(--gold);">${esc(category.toUpperCase())}</span>
