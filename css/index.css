@@ -79,16 +79,73 @@
 .vape-device:before { content: ""; position: absolute; left: 7px; top: -13px; width: 13px; height: 14px; background: #26302d; border-radius: 3px 3px 0 0; }
 .vape-device:after { content: ""; position: absolute; left: 8px; right: 8px; bottom: 20px; height: 18px; border: 1px solid #b6f5d6aa; }
 
-.bottom-navigation { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px; align-items: center; width: min(990px, 100%); margin: 0 auto; }
-.bottom-panel { height: 94px; position: relative; display: flex; align-items: center; gap: 17px; padding: 0 23px; border: 1px solid var(--gold-dark); overflow: hidden; transition: .18s; }
-.bottom-panel:hover { transform: translateY(-3px); border-color: var(--gold-light); }
-.search-panel { background: linear-gradient(115deg, #171713, #25231c); }
-.mypage-panel { background: linear-gradient(115deg, #700d13, #a91720 50%, #7a0e14); }
-.panel-icon { color: var(--gold-light); font-size: 36px; line-height: 1; }
-.panel-text { display: flex; flex-direction: column; gap: 5px; }
-.panel-text strong { font-size: 17px; letter-spacing: .15em; }
-.panel-text small { font: 9px "Yu Gothic", sans-serif; color: #d5ccb7aa; }
-.panel-arrow { margin-left: auto; color: var(--gold-light); font-size: 21px; }
-.flag-icon { width: 50px; height: 55px; position: relative; display: block; }
-.flag-icon:before { content: ""; position: absolute; left: 8px; top: 0; width: 3px; height: 55px; background: #f0c96a; }
-.flag-icon i { position: absolute; left: 11px; top: 6px; width: 39px; height: 29px; background: #ed3a42; clip-path: polygon(0 0, 100% 0, 77% 50%, 100% 100%, 0 100%); }
+/* --- 下部ナビゲーション（上部カードと統一した外枠・二重枠・質感） --- */
+.bottom-navigation { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: center; width: min(990px, 100%); margin: 0 auto; }
+.bottom-panel {
+    height: 98px; position: relative; display: flex; align-items: center; gap: 16px; padding: 0 22px;
+    border: 1px solid rgba(220,194,111,.45);
+    box-shadow: inset 0 0 0 5px rgba(255,255,255,.025), 0 8px 22px rgba(0,0,0,.32);
+    overflow: hidden; transition: .18s;
+}
+/* 上部カード(.preference-card:after)と完全に揃えた内側の二重細線フレーム */
+.bottom-panel:after {
+    content: ""; position: absolute; inset: 5px; border: 1px solid rgba(255,255,255,.10); pointer-events: none;
+}
+.bottom-panel:hover {
+    transform: translateY(-3px); border-color: var(--gold-light); filter: brightness(1.1);
+}
+.bottom-panel:hover:after {
+    border-color: rgba(220,194,111,.28);
+}
+
+/* お酒の簡易検索：琥珀（ウイスキー・ワインの深み）ベース */
+.search-panel.alcohol-search {
+    background: linear-gradient(135deg, #3c2808, #5c3f0e 50%, #241804);
+}
+/* タバコの簡易検索：スモーキーチャコール＆ディープグリーンベース */
+.search-panel.tobacco-search {
+    background: linear-gradient(135deg, #1b2824, #2f433c 50%, #141c1a);
+}
+/* マイページ：既存の重厚なクリムゾンレッド */
+.mypage-panel {
+    background: linear-gradient(115deg, #700d13, #a91720 50%, #7a0e14);
+}
+
+/* ミニアイコン（CSSオブジェクトで上部の世界観と統一） */
+.panel-visual {
+    width: 44px; height: 48px; position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+/* お酒用ミニ・ロックグラス */
+.mini-glass:before {
+    content: ""; position: absolute; bottom: 8px; width: 26px; height: 26px;
+    border: 2px solid #f0d77a; border-top: 0; border-radius: 0 0 5px 5px;
+    background: linear-gradient(180deg, transparent 35%, rgba(224,169,52,.55) 35%);
+    transform: skew(-4deg);
+}
+.mini-glass:after {
+    content: ""; position: absolute; bottom: 13px; left: 15px; width: 7px; height: 6px;
+    background: rgba(255,250,230,.55); transform: rotate(18deg);
+}
+/* タバコ用ミニ・シガレット＆煙 */
+.mini-cigarette:before {
+    content: ""; position: absolute; bottom: 15px; left: 4px; width: 34px; height: 7px;
+    background: linear-gradient(90deg, #f0ead9 74%, #c47a32 74%);
+    transform: rotate(-22deg); box-shadow: 0 2px 4px rgba(0,0,0,.4);
+}
+
+/* テキスト＆サブタグ（.section-label や .card-sub とトーンを統一） */
+.panel-text { display: flex; flex-direction: column; gap: 3px; z-index: 2; }
+.panel-tag {
+    display: inline-flex; align-items: center; font: 9px "Yu Gothic", sans-serif;
+    letter-spacing: .22em; color: var(--gold-light); opacity: .9;
+}
+.tag-diamond { font-size: 6px; margin-right: 5px; }
+.panel-text strong { font-size: 16px; letter-spacing: .12em; text-shadow: 0 2px 4px rgba(0,0,0,.65); }
+.panel-text small { font: 10px "Yu Gothic", sans-serif; color: #e2dac6cc; letter-spacing: .05em; }
+
+.panel-arrow { margin-left: auto; color: var(--gold-light); font-size: 19px; z-index: 2; transition: transform .18s; }
+.bottom-panel:hover .panel-arrow { transform: translateX(3px); }
+
+.flag-icon { width: 44px; height: 48px; position: relative; display: block; flex-shrink: 0; }
+.flag-icon:before { content: ""; position: absolute; left: 7px; top: 2px; width: 3px; height: 44px; background: #f0c96a; }
+.flag-icon i { position: absolute; left: 10px; top: 7px; width: 33px; height: 24px; background: #ed3a42; clip-path: polygon(0 0, 100% 0, 77% 50%, 100% 100%, 0 100%); }
