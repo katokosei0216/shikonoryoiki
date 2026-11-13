@@ -19,7 +19,7 @@ html, body { width: 100%; height: 100%; margin: 0; }
 body {
     background:
         radial-gradient(ellipse at 50% -15%, rgba(181,150,62,.075), transparent 45%),
-        linear-gradient(180deg, #0b0c0b, #090a09 65%, #080908);
+        linear-gradient(180deg, #302414, #3b3731 65%, #272015);
     color: var(--cream);
     font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
     min-height: 100vh;

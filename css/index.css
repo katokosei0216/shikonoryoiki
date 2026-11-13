@@ -23,12 +23,12 @@
 .card-name { position: absolute; left: 14px; top: 66px; z-index: 4; font-size: 19px; letter-spacing: .13em; text-shadow: 0 2px 4px #000; }
 .card-sub { position: absolute; left: 15px; top: 96px; z-index: 4; font: 9px "Yu Gothic", sans-serif; letter-spacing: .2em; opacity: .78; }
 
-.whisky { background: linear-gradient(145deg, #a47b18, #c29427 47%, #4b350b); }
-.cocktail { background: linear-gradient(145deg, #0a698e, #087ca1 48%, #063e56); }
-.sake { background: linear-gradient(145deg, #f5f4ef, #fff 50%, #d3d3cc); color: #111; }
-.wine { background: linear-gradient(145deg, #6d101b, #941c2a 48%, #4c080f); }
-.paper { background: linear-gradient(145deg, #4c4c4c, #686868 50%, #343434); }
-.vape { background: linear-gradient(145deg, #166d4d, #19a56c 50%, #0c3f2e); }
+.whisky { background: linear-gradient(145deg, #9e6f31, #fcb559 48%, #9e6f31); }
+.cocktail { background: linear-gradient(145deg, #f85aa9, #e2168d 48%, #006894); }
+.sake { background: linear-gradient(145deg, #c5c4be, #fff 50%, #8f8f8f); color: #111; }
+.wine { background: linear-gradient(145deg, #f52f46, #fa8391 48%, #b90000d0); }
+.paper { background: linear-gradient(145deg, #8a8989, #a39c9c 50%, #8a8989); }
+.vape { background: linear-gradient(145deg, #1d9166, #1cb175 50%, #177452); }
 .sake .card-name, .sake .card-sub { text-shadow: none; }
 
 /* 既存の .whisky-bottle ～ .vape-device:after を削除して以下に置き換え */
@@ -95,37 +95,30 @@
 
 /* お酒の簡易検索：琥珀（ウイスキー・ワインの深み）ベース */
 .search-panel.alcohol-search {
-    background: linear-gradient(135deg, #3c2808, #5c3f0e 50%, #241804);
+    background: linear-gradient(135deg, #ff9101, #cc7401 50%, #da831198);
 }
 /* タバコの簡易検索：スモーキーチャコール＆ディープグリーンベース */
 .search-panel.tobacco-search {
-    background: linear-gradient(135deg, #1b2824, #2f433c 50%, #141c1a);
+    background: linear-gradient(135deg, #6fa090, #326955 50%, #478b79);
 }
 /* マイページ：既存の重厚なクリムゾンレッド */
 .mypage-panel {
-    background: linear-gradient(115deg, #700d13, #a91720 50%, #7a0e14);
+    background: linear-gradient(115deg, #50a7c9, #217cd1 50%, #0440c2);
 }
 
-/* ミニアイコン（CSSオブジェクトで上部の世界観と統一） */
-.panel-visual {
-    width: 44px; height: 48px; position: relative; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+/* 下部パネル用アイコンのスタイル */
+.panel-icon {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    flex-shrink: 0;
+    z-index: 2;
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.4));
+    transition: transform 0.18s ease;
 }
-/* お酒用ミニ・ロックグラス */
-.mini-glass:before {
-    content: ""; position: absolute; bottom: 8px; width: 26px; height: 26px;
-    border: 2px solid #f0d77a; border-top: 0; border-radius: 0 0 5px 5px;
-    background: linear-gradient(180deg, transparent 35%, rgba(224,169,52,.55) 35%);
-    transform: skew(-4deg);
-}
-.mini-glass:after {
-    content: ""; position: absolute; bottom: 13px; left: 15px; width: 7px; height: 6px;
-    background: rgba(255,250,230,.55); transform: rotate(18deg);
-}
-/* タバコ用ミニ・シガレット＆煙 */
-.mini-cigarette:before {
-    content: ""; position: absolute; bottom: 15px; left: 4px; width: 34px; height: 7px;
-    background: linear-gradient(90deg, #f0ead9 74%, #c47a32 74%);
-    transform: rotate(-22deg); box-shadow: 0 2px 4px rgba(0,0,0,.4);
+
+.bottom-panel:hover .panel-icon {
+    transform: scale(1.08);
 }
 
 /* テキスト＆サブタグ（.section-label や .card-sub とトーンを統一） */

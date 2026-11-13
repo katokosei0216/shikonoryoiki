@@ -224,7 +224,7 @@ function togglePasswordVisibility(inputId, btn) {
 
   if (input.type === 'password') {
     input.type = 'text';
-    btn.textContent = '🙈';
+    btn.textContent = '👁';
   } else {
     input.type = 'password';
     btn.textContent = '👁';

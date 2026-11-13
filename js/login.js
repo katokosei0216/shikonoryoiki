@@ -26,7 +26,7 @@ function togglePasswordVisibility(inputId, btn) {
 
   if (input.type === 'password') {
     input.type = 'text';
-    btn.textContent = '🙈'; // 表示中 → 隠すボタン
+    btn.textContent = '👁'; // 表示中 → 隠すボタン
   } else {
     input.type = 'password';
     btn.textContent = '👁'; // 非表示中 → 表示するボタン
