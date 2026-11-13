@@ -11,6 +11,7 @@ const CATEGORY_NAMES = {
   sake: '日本酒',
   wine: 'ワイン',
   paper: '紙タバコ',
+  cigarette: '紙タバコ',
   vape: '電子タバコ'
 };
 
@@ -42,8 +43,18 @@ const IMAGE_ID_RANGES = {
   whisky:   { min: 1,   max: 100, offset: 1000 },
   sake:     { min: 101, max: 200, offset: 1900 },
   wine:     { min: 201, max: 300, offset: 2800 },
-  cocktail: { min: 301, max: 400, offset: 3700 }
+  cocktail: { min: 301, max: 400, offset: 3700 },
+  // 紙タバコ: 商品ID 401〜500 に対して画像6001.webp〜6100.webp
+  cigarette: { min: 401, max: 500, offset: 5600 }
 };
+
+function getCategoryImageUrl(p) {
+  const range = IMAGE_ID_RANGES[p.category_code];
+  const productId = Number(p.product_id);
+  if (!range || !Number.isInteger(productId) ||
+      productId < range.min || productId > range.max) return '';
+  return `../assets/products/${productId + range.offset}.webp`;
+}
 
 function resolveProductImageUrl(p) {
   const stored = String(p.image_path ?? '').trim();
@@ -54,14 +65,8 @@ function resolveProductImageUrl(p) {
   // 画像URLが明示されている場合は従来の動作も維持
   if (stored) return stored;
 
-  // DBの image_path が NULL のワイン/カクテルにも対応
-  const range = IMAGE_ID_RANGES[p.category_code];
-  const productId = Number(p.product_id);
-  if (range && Number.isInteger(productId) &&
-      productId >= range.min && productId <= range.max) {
-    return `../assets/products/${productId + range.offset}.webp`;
-  }
-  return '';
+  // image_path が NULL のカテゴリは商品IDから画像番号を取得
+  return getCategoryImageUrl(p);
 }
 
 // 商品情報から「基本スペック」の行を組み立てる
@@ -73,8 +78,17 @@ function buildSpecRows(p, d, code) {
 
   if (code !== 'cocktail') {
     add('価格', p.price ? Number(p.price).toLocaleString() + '円' : null);
-    add('度数', p.abv ? p.abv + '%' : null);
-    add('年代', p.vintage ? p.vintage : null);
+    if (code === 'cigarette') {
+      add('ブランド', d.brand);
+      // 0mgも有効な値として扱い、未登録ならその旨を明示する
+      const mg = value => value == null || value === '' || !Number.isFinite(Number(value))
+        ? '未登録' : `${Number(value)}mg`;
+      add('タール', mg(d.tar_mg));
+      add('ニコチン', mg(d.nicotine_mg));
+    } else if (code !== 'vape') {
+      add('度数', p.abv ? p.abv + '%' : null);
+      add('年代', p.vintage ? p.vintage : null);
+    }
   }
 
   add('香り', dots(p.aroma_score));
@@ -117,7 +131,7 @@ function renderProduct(data) {
 
   // 上部メタ情報：カテゴリ | メーカー | 製造国(日本酒は都道府県)
   const origin = code === 'sake' ? d.prefecture : p.country_name;
-  const meta = [CATEGORY_NAMES[code] || 'お酒', p.maker_name, origin].filter(Boolean).join(' | ');
+  const meta = [CATEGORY_NAMES[code] || '商品', p.maker_name, origin].filter(Boolean).join(' | ');
   setText('detailMeta', meta);
 
   // タイトル
@@ -132,12 +146,26 @@ function renderProduct(data) {
       const img = document.createElement('img');
       img.alt = `${p.product_name}の商品画像`;
       img.decoding = 'async';
-      img.onerror = () => { imgBox.textContent = '画像なし'; };
+      img.onerror = () => {
+        // DBに古い画像パスが登録されていても、同梱の紙タバコ画像を試す
+        const fallback = code === 'cigarette' ? getCategoryImageUrl(p) : '';
+        if (fallback && img.getAttribute('src') !== fallback) {
+          img.src = fallback;
+        } else {
+          imgBox.textContent = '画像なし';
+        }
+      };
       imgBox.replaceChildren(img);
       img.src = imageUrl;
     } else {
       imgBox.textContent = '画像なし';
     }
+  }
+
+  // 口コミ入力欄は紙タバコにも使える表現に切り替える
+  const reviewInput = document.getElementById('commentTextarea');
+  if (reviewInput && code === 'cigarette') {
+    reviewInput.placeholder = 'この商品の感想を入力...';
   }
 
   // スペック表 + おすすめの飲み方

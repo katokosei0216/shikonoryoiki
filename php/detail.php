@@ -52,6 +52,12 @@ try {
         case 'wine':
             $stmt = $pdo->prepare('SELECT wine_type, grape FROM wine_details WHERE product_id = ?');
             break;
+        case 'cigarette':
+            // 紙タバコのタール・ニコチン含有量は tobacco_details に保存済み
+            $stmt = $pdo->prepare(
+                'SELECT brand, tar_mg, nicotine_mg FROM tobacco_details WHERE product_id = ?'
+            );
+            break;
         case 'cocktail':
             $stmt = $pdo->prepare(
                 'SELECT cd.method, cd.is_smoke, cd.glass_size, f.fruit_name, bl.base_liquor_name
