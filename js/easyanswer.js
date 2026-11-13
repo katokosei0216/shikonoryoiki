@@ -100,7 +100,7 @@ function renderResults(results) {
   results.forEach((r, i) => {
     const a = document.createElement('a');
     a.className = 'answer-card';
-    a.href = 'detail.html?id=' + encodeURIComponent(r.product_id);
+    a.href = 'detail.html?id=' + encodeURIComponent(r.product_id) + '&from=easyanswer';
 
     const name = document.createElement('strong');
     name.textContent = `${i + 1}. ${r.product_name}`;

@@ -2,6 +2,8 @@
 const DETAIL_API = '../php/detail.php';
 // review.php の場所（口コミ・評価）
 const REVIEW_API = '../php/review.php';
+// 商品のお気に入り状態をMySQLに保存するAPI
+const FAVORITES_API = '../php/favorites.php';
 
 const CATEGORY_NAMES = {
   whisky: 'ウイスキー',
@@ -110,6 +112,8 @@ function renderProduct(data) {
   const p = data.product;
   const d = data.details || {};
   const code = p.category_code;
+  // URLにカテゴリがない直接アクセスでも、検索に戻る際のカテゴリを商品データから確定する。
+  if (typeof updateDetailBackLink === 'function') updateDetailBackLink(code);
 
   // 上部メタ情報：カテゴリ | メーカー | 製造国(日本酒は都道府県)
   const origin = code === 'sake' ? d.prefecture : p.country_name;
@@ -488,10 +492,111 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 口コミ・評価(一覧の表示、投稿、更新、削除)
   initReviews();
+
+  // 商品のお気に入り状態の読み込み
+  initFavorite();
 });
 
-// お気に入りボタン（現状は未ログイン扱いで常にログイン誘導）
-function toggleFavorite() {
-  setText('loginPromptText', 'お気に入り機能を利用するにはログインが必要です。');
-  openModal('loginPromptModal');
+// ====================================================================
+// お気に入り: favorites.php に保存し、マイページの一覧へ反映する
+// ====================================================================
+const favoriteState = {
+  productId: null,
+  csrf: '',
+  isFavorite: false,
+  ready: false,
+  busy: false
+};
+
+function renderFavorite() {
+  const button = document.getElementById('favoriteBtn');
+  if (!button) return;
+  button.disabled = !favoriteState.ready || favoriteState.busy;
+  button.classList.toggle('is-favorite', favoriteState.isFavorite);
+  button.setAttribute('aria-pressed', String(favoriteState.isFavorite));
+  button.textContent = favoriteState.isFavorite
+    ? '♥ お気に入り解除'
+    : '♡ お気に入り';
+}
+
+function updateFavoriteCount(count) {
+  const label = document.getElementById('favoriteCount');
+  if (label && Number.isFinite(Number(count))) {
+    label.textContent = Number(count).toLocaleString('ja-JP');
+  }
+}
+
+async function fetchFavoriteState() {
+  if (!favoriteState.productId) return;
+  try {
+    const res = await fetch(
+      FAVORITES_API + '?product_id=' + encodeURIComponent(favoriteState.productId),
+      { credentials: 'same-origin', cache: 'no-store' }
+    );
+    if (res.status === 401) {
+      showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
+      return;
+    }
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.message || 'お気に入り情報の取得に失敗しました。');
+    favoriteState.csrf = data.csrf;
+    favoriteState.isFavorite = data.is_favorite === true;
+    favoriteState.ready = true;
+    updateFavoriteCount(data.count);
+  } catch (e) {
+    console.error('お気に入り取得エラー:', e);
+    setText('favoriteCount', '取得失敗');
+  } finally {
+    renderFavorite();
+  }
+}
+
+// HTMLの「お気に入り」ボタンから呼ばれる
+async function toggleFavorite() {
+  if (!favoriteState.productId || favoriteState.busy) return;
+  if (!favoriteState.ready) {
+    await fetchFavoriteState();
+    if (!favoriteState.ready) {
+      alert('お気に入り情報の取得に失敗しました。再読み込みしてお試しください。');
+    }
+    return;
+  }
+
+  favoriteState.busy = true;
+  renderFavorite();
+  try {
+    const res = await fetch(FAVORITES_API, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        csrf: favoriteState.csrf,
+        product_id: favoriteState.productId,
+        action: favoriteState.isFavorite ? 'remove' : 'add'
+      })
+    });
+    if (res.status === 401) {
+      showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
+      return;
+    }
+    const data = await res.json();
+    if (!res.ok || !data.ok) throw new Error(data.message || 'お気に入りの保存に失敗しました。');
+    favoriteState.isFavorite = data.is_favorite === true;
+    favoriteState.csrf = data.csrf;
+    updateFavoriteCount(data.count);
+  } catch (e) {
+    console.error('お気に入り保存エラー:', e);
+    alert(e.message || 'お気に入りの更新に失敗しました。');
+  } finally {
+    favoriteState.busy = false;
+    renderFavorite();
+  }
+}
+
+function initFavorite() {
+  const id = new URLSearchParams(window.location.search).get('id');
+  if (!id || !/^\d+$/.test(id) || Number(id) < 1) return;
+  favoriteState.productId = Number(id);
+  renderFavorite();
+  fetchFavoriteState();
 }

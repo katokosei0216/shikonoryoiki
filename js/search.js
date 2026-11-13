@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
           p.abv ? p.abv + '%' : null
         ].filter(Boolean).join(' / ');
         return `
-          <a href="detail.html?id=${encodeURIComponent(p.product_id)}" class="answer-card">
+          <a href="detail.html?id=${encodeURIComponent(p.product_id)}&amp;from=search&amp;category=${encodeURIComponent(category)}" class="answer-card">
             <span style="font-size:11px;color:var(--gold);">${esc(category.toUpperCase())}</span>
             <strong style="font-size:16px;color:var(--cream);">${esc(p.product_name)}</strong>
             <span style="font-size:12px;color:#aaa;">${esc(sub)}</span>

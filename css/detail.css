@@ -28,3 +28,6 @@
     color: var(--gold-light); padding: 4px 10px; font-size: 11px; margin: 0 5px 5px 0;
 }
 @media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+/* お気に入り登録済み・通信中の状態 */
+.heart-btn.is-favorite { background: rgba(156,22,30,.18); color: #ff6b76; }
+.heart-btn:disabled { opacity: .6; cursor: wait; }

@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFilter('commentModal', renderCommentModal);
 
   await loadMypage();
+  // お気に入りの詳細から戻ったときは一覧を開いて復元する。
+  if (window.location.hash === '#favorites') openModal('favModal');
 });
 
 // ===== 小さな部品 =====
@@ -93,7 +95,7 @@ function renderFavMini() {
     const card = el('div', 'mini-item-card');
     card.style.cursor = 'pointer';
     card.addEventListener('click', () => {
-      location.href = 'detail.html?id=' + f.product_id;
+      location.href = 'detail.html?id=' + encodeURIComponent(f.product_id) + '&from=mypage&category=' + encodeURIComponent(f.category_code);
     });
     card.appendChild(document.createTextNode(f.product_name));
     card.appendChild(document.createElement('br'));
@@ -116,7 +118,7 @@ function renderFavModal() {
 
   list.forEach(f => {
     const a = el('a', 'answer-card');
-    a.href = 'detail.html?id=' + f.product_id;
+    a.href = 'detail.html?id=' + encodeURIComponent(f.product_id) + '&from=mypage&category=' + encodeURIComponent(f.category_code);
     const strong = el('strong', '', f.product_name);
     strong.style.color = 'var(--gold-light)';
     a.appendChild(strong);

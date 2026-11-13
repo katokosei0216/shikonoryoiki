@@ -7,6 +7,48 @@ const PUBLIC_PAGE_CLASSES = ['login-page', 'register-page'];
 // ログインの確認が終わるまで、ページの中身を見せない
 document.documentElement.style.visibility = 'hidden';
 
+// 詳細ページのカテゴリ/遷移元はURLパラメータを優先する。
+// 旧URL(detail.html?id=...)にも対応するため、同一オリジンの参照元も調べる。
+const DETAIL_CATEGORY_CODES = ['whisky', 'cocktail', 'sake', 'wine', 'paper', 'vape', 'cigarette'];
+function validDetailCategory(code) {
+  return DETAIL_CATEGORY_CODES.includes(code);
+}
+
+function getDetailReturnContext() {
+  const params = new URLSearchParams(window.location.search);
+  let from = params.get('from');
+  let category = params.get('category');
+
+  // 別サイトのreferrerは信用せず、同じサイト内の画面遷移だけを見る。
+  try {
+    const ref = new URL(document.referrer);
+    if (ref.origin === window.location.origin) {
+      if (!['search', 'mypage', 'easyanswer'].includes(from)) {
+        if (ref.pathname.endsWith('/mypage.html')) from = 'mypage';
+        else if (ref.pathname.endsWith('/easyanswer.html')) from = 'easyanswer';
+        else if (ref.pathname.endsWith('/search.html')) from = 'search';
+      }
+      if (!validDetailCategory(category) && ref.pathname.endsWith('/search.html')) {
+        category = ref.searchParams.get('category');
+      }
+    }
+  } catch (e) { /* 参照元がない場合 */ }
+
+  return {
+    from: ['search', 'mypage', 'easyanswer'].includes(from) ? from : 'search',
+    category: validDetailCategory(category) ? category : null
+  };
+}
+
+// 商品取得後のカテゴリがURLと異なる場合も、検索の戻り先を正しく設定する。
+// detail.js の方が先にAPI応答を受け取った場合は buildHeader から参照される。
+function updateDetailBackLink(category) {
+  if (!validDetailCategory(category)) return;
+  window.detailCategoryCode = category;
+  const link = document.getElementById('detailBackLink');
+  if (link) link.href = 'search.html?category=' + encodeURIComponent(category);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   let redirecting = false;
   try {
@@ -43,24 +85,28 @@ function buildHeader(isPublicPage, loggedIn) {
   // ログイン画面、新規登録画面、マイページかどうか
   const isAuthOrMyPage = isPublicPage || document.body.classList.contains('mypage-page');
 
-  // --- 左側のボタン群を生成 ---
+  // 商品詳細の戻り先は、開いた画面から引き継ぐ。
+  // 以前の search.html (カテゴリ指定なし) はウイスキー検索に固定されてしまう。
   let leftButtonsHtml = '';
   const pathname = window.location.pathname;
-  const referrer = document.referrer || '';
 
   if (!isHome) {
-    // 1. 常に「← ホーム」ボタン
     leftButtonsHtml += '<a href="index.html" class="back-button">← ホーム</a>';
 
-    // 2. ページに応じた追加の戻るボタン
-    if (pathname.endsWith('easyanswer.html')) {
+    if (pathname.endsWith('/easyanswer.html')) {
       leftButtonsHtml += '<a href="easysearch.html" class="back-button">← 簡単検索へ</a>';
-    }
-    else if (pathname.endsWith('detail.html')) {
-      if (referrer.includes('easyanswer')) {
+    } else if (pathname.endsWith('/detail.html')) {
+      const context = getDetailReturnContext();
+      if (context.from === 'mypage') {
+        leftButtonsHtml += '<a href="mypage.html#favorites" class="back-button">← お気に入りへ</a>';
+      } else if (context.from === 'easyanswer') {
         leftButtonsHtml += '<a href="easyanswer.html" class="back-button">← 検索結果へ</a>';
       } else {
-        leftButtonsHtml += '<a href="search.html" class="back-button">← 検索へ</a>';
+        const category = context.category || window.detailCategoryCode;
+        const href = validDetailCategory(category)
+          ? 'search.html?category=' + encodeURIComponent(category)
+          : 'index.html'; // API応答前または取得失敗時はウイスキーに飛ばさずホームへ
+        leftButtonsHtml += `<a href="${href}" id="detailBackLink" class="back-button">← 検索へ</a>`;
       }
     }
   }

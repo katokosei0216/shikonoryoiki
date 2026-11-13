@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>商品詳細 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
-<link rel="stylesheet" href="../css/detail.css?v=20261112">
+<link rel="stylesheet" href="../css/detail.css?v=20261112-fav1">
 </head>
 <body class="subpage-body">
 <header id="siteHeader"></header>
@@ -19,8 +19,8 @@
         <div class="detail-image-box" id="detailImage"></div>
 
         <div class="fav-action-bar">
-          <button class="heart-btn" onclick="toggleFavorite()">♡ お気に入り</button>
-          <span style="font-size:13px;color:var(--muted);">登録数: <strong style="color:var(--gold-light);">1,280</strong></span>
+          <button type="button" id="favoriteBtn" class="heart-btn" onclick="toggleFavorite()" aria-pressed="false" disabled>♡ お気に入り</button>
+          <span style="font-size:13px;color:var(--muted);">登録数: <strong id="favoriteCount" style="color:var(--gold-light);">取得中...</strong></span>
         </div>
 
         <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
@@ -138,7 +138,7 @@
   </div>
 </div>
 
-<script src="../js/common.js"></script>
-<script src="../js/detail.js?v=20261112"></script>
+<script src="../js/common.js?v=20261112-backfix1"></script>
+<script src="../js/detail.js?v=20261112-backfix1"></script>
 </body>
 </html>
