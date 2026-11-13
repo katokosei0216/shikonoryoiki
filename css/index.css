@@ -31,30 +31,25 @@
 .vape { background: linear-gradient(145deg, #166d4d, #19a56c 50%, #0c3f2e); }
 .sake .card-name, .sake .card-sub { text-shadow: none; }
 
-.whisky-bottle, .sake-bottle, .wine-bottle {
-    position: absolute; z-index: 2; bottom: 26px; left: 50%; width: 38px; height: 91px;
-    border-radius: 7px 7px 4px 4px; transform: translateX(-12%); box-shadow: 5px 8px 10px #0005;
+/* 既存の .whisky-bottle ～ .vape-device:after を削除して以下に置き換え */
+.card-icon {
+    position: absolute;
+    z-index: 2;
+    right: 16px;
+    bottom: 16px;
+    width: 112px;
+    height: 112px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(3px 6px 8px rgba(0, 0, 0, 0.45));
+    transition: transform 0.2s ease;
 }
-.whisky-bottle { background: linear-gradient(90deg, #3b2104, #e0a934 48%, #5b3507); }
-.whisky-bottle:before, .sake-bottle:before, .wine-bottle:before {
-    content: ""; position: absolute; left: 9px; top: -17px; width: 19px; height: 20px;
-    border: 2px solid currentColor; border-bottom: 0; background: #1c160c; border-radius: 3px 3px 0 0;
+
+.preference-card:hover .card-icon {
+    transform: scale(1.05);
 }
-.whisky-bottle:after { content: ""; position: absolute; left: 6px; right: 6px; top: 37px; height: 26px; background: #f0d77a; }
-.rocks-glass {
-    position: absolute; z-index: 2; bottom: 25px; left: 54%; width: 49px; height: 46px;
-    border: 2px solid #e5eeeccc; border-top: 0; border-radius: 0 0 8px 8px; transform: skew(-5deg);
-}
-.rocks-glass:after { content: ""; position: absolute; width: 11px; height: 9px; background: #f6f2de77; left: 8px; top: 12px; transform: rotate(20deg); }
-.martini-glass { position: absolute; z-index: 2; left: 51%; bottom: 27px; width: 65px; height: 63px; }
-.martini-glass:before {
-    content: ""; position: absolute; left: 0; top: 0; width: 49px; height: 36px;
-    border: 2px solid #e7f6ffcc; border-top: 0; clip-path: polygon(0 0, 100% 0, 60% 100%, 40% 100%); background: #d95a8d99;
-}
-.martini-glass:after {
-    content: ""; position: absolute; left: 24px; top: 34px; width: 2px; height: 27px; background: #e7f6ffcc;
-    box-shadow: -9px 27px 0 -0.5px #e7f6ffcc, 9px 27px 0 -0.5px #e7f6ffcc;
-}
+
+
 .lemon { position: absolute; z-index: 2; left: 71%; top: 58px; width: 20px; height: 20px; border: 2px solid #ffd55d; border-radius: 50%; }
 .sake-bottle { background: linear-gradient(90deg, #e9e8e2, #fff 48%, #c9c9c3); border: 1px solid #aaa; }
 .sake-bottle:before { background: #eee; color: #aaa; }

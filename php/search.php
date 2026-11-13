@@ -62,7 +62,7 @@ try {
     $categoryId = $stmt->fetchColumn();
     if ($categoryId === false) fail(400, 'invalid category');
 
-        // ---- 絞り込み候補の取得（mode=options）----
+    // ---- 絞り込み候補の取得（mode=options）----
     if (in_str('mode') === 'options') {
         if ($category === 'sake') {
             // 日本酒: 製造都道府県
@@ -97,9 +97,24 @@ try {
         $stmt->execute([(int)$categoryId]);
         $makers = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
+        // 紙たばこ: ブランド候補
+        $brands = [];
+        if ($category === 'cigarette') {
+            $stmt = $pdo->prepare(
+                'SELECT DISTINCT td.brand AS name
+                 FROM products p
+                 JOIN tobacco_details td ON td.product_id = p.product_id
+                 WHERE p.category_id = ? AND td.brand <> \'\'
+                 ORDER BY td.brand'
+            );
+            $stmt->execute([(int)$categoryId]);
+            $brands = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
         echo json_encode([
             'countries' => $countries,
             'makers'    => $makers,
+            'brands'    => $brands,
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -192,6 +207,40 @@ try {
             if ($types) {
                 $where[] = 'wid.wine_type IN (' . placeholders($types) . ')';
                 array_push($params, ...$types);
+            }
+            break;
+
+        case 'cigarette':
+            $joins[] = 'LEFT JOIN tobacco_details td ON td.product_id = p.product_id';
+            $extraSelect = ', td.brand, td.tar_mg, td.nicotine_mg, td.flavor_type';
+
+            // ブランド
+            if (($b = in_str('brand')) !== '') {
+                $where[]  = 'td.brand LIKE ?';
+                $params[] = like($b);
+            }
+
+            // タール量・ニコチン量（範囲）
+            foreach ([
+                ['tar_min', 'tar_max', 'td.tar_mg'],
+                ['nic_min', 'nic_max', 'td.nicotine_mg'],
+            ] as [$minKey, $maxKey, $col]) {
+                if (($v = in_num($minKey)) !== null) { $where[] = "$col >= ?"; $params[] = $v; }
+                if (($v = in_num($maxKey)) !== null) { $where[] = "$col <= ?"; $params[] = $v; }
+            }
+
+            // 香味・サイズ・パッケージ（グループ内はOR、グループ同士はAND）
+            $groups = [
+                'paper_flavor' => ['regular' => 'td.is_regular', 'menthol' => 'td.is_menthol',
+                                   'capsule' => 'td.is_capsule', 'flavor'  => 'td.is_flavor'],
+                'paper_size'   => ['short' => 'td.is_short', 'king' => 'td.is_king',
+                                   'long'  => 'td.is_long',  'slim' => 'td.is_slim'],
+                'paper_pack'   => ['soft' => 'td.is_soft', 'box' => 'td.is_box'],
+            ];
+            foreach ($groups as $key => $map) {
+                $conds = [];
+                foreach (in_list($key, array_keys($map)) as $t) $conds[] = "{$map[$t]} = 1";
+                if ($conds) $where[] = '(' . implode(' OR ', $conds) . ')';
             }
             break;
 
