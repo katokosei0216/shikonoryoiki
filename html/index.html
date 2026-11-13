@@ -6,6 +6,133 @@
 <title>嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/index.css">
+<script>window.__shikoHomeEffectsBootstrap = true; window.__shikoHomeEffectsInstalled = true;</script>
+<style id="shiko-inline-effects-css">
+/* 嗜好の領域 | ホーム限定の隠し演出。既存の index.css は変更しません。 */
+.home-body .home-secret-trigger {
+  position: relative;
+  z-index: 1001;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-body .home-secret-trigger:focus-visible {
+  outline: 2px solid #f5d979;
+  outline-offset: 4px;
+}
+.home-body #siteHeader .header-title { z-index: 1001; }
+.home-body .header-title-text.home-secret-trigger { display: inline-block; }
+
+/* 虹色：元のカードの背景はそのままに虹色の光を重ねる */
+.home-body.secret-rainbow .secret-rainbow-surface {
+  position: relative;
+  isolation: isolate;
+  animation: home-secret-halo 2.8s linear infinite;
+}
+.home-body.secret-rainbow .secret-rainbow-surface::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background:
+    linear-gradient(112deg, transparent 28%, rgba(255,255,255,.46) 49%, transparent 68%),
+    linear-gradient(100deg,
+      rgba(255,42,68,.73), rgba(255,193,38,.64), rgba(247,243,59,.64),
+      rgba(42,246,125,.67), rgba(45,198,255,.69), rgba(120,81,255,.69),
+      rgba(246,40,208,.7), rgba(255,42,68,.73));
+  background-size: 260% 100%, 330% 100%;
+  background-position: 100% 0, 0 0;
+  opacity: .85;
+  mix-blend-mode: screen;
+  animation: home-secret-rainbow-flow 2.6s linear infinite;
+}
+/* 白い日本酒カードには乗算で色を見せる */
+.home-body.secret-rainbow .sake.secret-rainbow-surface::before { mix-blend-mode: multiply; opacity: .58; }
+.home-body.secret-rainbow .login-button.secret-rainbow-surface {
+  overflow: hidden;
+  background: linear-gradient(110deg, #4d1835, #253d76, #126251, #594a13, #4d1835);
+  background-size: 260% 100%;
+  animation: home-secret-halo 2.8s linear infinite, home-secret-rainbow-flow 2.6s linear infinite;
+}
+@keyframes home-secret-halo {
+  0%, 100% { box-shadow: 0 0 12px #fa529a99, 0 0 26px #ae68ef70, 0 8px 22px #0006; }
+  25% { box-shadow: 0 0 12px #ffe24bba, 0 0 28px #fb8e3670, 0 8px 22px #0006; }
+  50% { box-shadow: 0 0 12px #42f699b8, 0 0 28px #36d5ee78, 0 8px 22px #0006; }
+  75% { box-shadow: 0 0 12px #628dffbb, 0 0 28px #a462ff78, 0 8px 22px #0006; }
+}
+@keyframes home-secret-rainbow-flow {
+  to { background-position: -160% 0, 300% 0; }
+}
+
+/* 回転は独立した rotate を使用。DVD移動の transform と同時に使える */
+.home-body.secret-spinning .secret-motion-target {
+  transform-origin: center;
+  animation: home-secret-rapid-spin .95s linear infinite;
+}
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface {
+  animation: home-secret-rapid-spin .95s linear infinite,
+             home-secret-halo 2.8s linear infinite;
+}
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface.login-button {
+  animation: home-secret-rapid-spin .95s linear infinite,
+             home-secret-halo 2.8s linear infinite,
+             home-secret-rainbow-flow 2.6s linear infinite;
+}
+@keyframes home-secret-rapid-spin {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
+
+/* 元のグリッドを保持しながら、ボタンだけを画面全体で跳ね返らせる */
+.home-body .home-secret-placeholder { visibility: hidden; pointer-events: none; }
+.home-body .home-secret-flyer {
+  position: fixed !important;
+  inset: auto !important;
+  left: 0 !important;
+  top: 0 !important;
+  margin: 0 !important;
+  z-index: 210 !important;
+  transition: none !important;
+  will-change: transform;
+}
+.home-body .home-secret-flyer:hover { filter: brightness(1.1); }
+
+
+
+/* Explicitly enabled animation should still run when the OS requests reduced motion. */
+.home-body.secret-spinning .secret-motion-target { animation-duration: .85s; }
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface { animation-duration: .85s, 2.8s; }
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface.login-button { animation-duration: .85s, 2.8s, 2.6s; }
+#shiko-secret-status {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  z-index: 2147483000; padding: 10px 18px; border: 1px solid #c8a96d;
+  background: #181914ed; color: #f1dfa3; font: 14px system-ui, sans-serif;
+  border-radius: 6px; opacity: 0; pointer-events: none;
+  transition: opacity .18s ease; white-space: nowrap;
+}
+#shiko-secret-status.visible { opacity: 1; }
+
+
+.home-body .paper-card-container { position: relative; min-width: 0; }
+.home-body .paper-card-container > .preference-card { display: block; width: 100%; }
+.home-body #donaldSecretButton {
+  position: absolute; left: -76px; top: 50%; transform: translateY(-50%);
+  width: 70px; height: 105px; border: 0; padding: 0;
+  background: transparent; color: transparent; cursor: pointer;
+  z-index: 4;
+}
+.home-body #donaldSecretButton:focus-visible { outline: 2px solid #e1c766; }
+.home-body #donaldOverlay {
+  position: fixed; inset: 0; width: 100vw; height: 100dvh; background: black;
+  z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.home-body #donaldOverlay[hidden] { display: none !important; }
+.home-body #donaldOverlay img { width:100%; height:100%; object-fit: cover; user-select:none; }
+
+</style>
 </head>
 <body class="home-body">
 <header id="siteHeader"></header>
@@ -38,11 +165,14 @@
   <section class="category-section tobacco-section">
     <div class="section-label"><span class="label-diamond">◆</span>タバコ</div>
     <div class="card-grid tobacco-grid">
-      <a class="preference-card paper" href="search.html?category=paper">
+      <div class="paper-card-container">
+        <a class="preference-card paper" href="search.html?category=paper">
         <span class="card-name">紙</span>
         <span class="card-sub">CIGARETTE</span>
         <img class="card-icon" src="../aikon/cigarette.png" alt="紙タバコ">
-      </a>
+        </a>
+        <button type="button" id="donaldSecretButton" aria-label="隠し画像を表示"></button>
+      </div>
       <a class="preference-card vape" href="search.html?category=vape">
         <span class="card-name">電子</span>
         <span class="card-sub">e-cigarette</span>
@@ -79,7 +209,306 @@
       <span class="panel-arrow">→</span>
     </a>
   </section>
+</main>
+<div id="donaldOverlay" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="ドナルド画像">
+  <img src="../assets/donald.webp" alt="ドナルド・マクドナルド">
+</div>
 <script src="../js/common.js?v=20261112-backfix1"></script>
 <script src="../js/index.js"></script>
+<script id="shiko-inline-effects-js">
+/*
+ * 嗜好の領域：ホーム限定の隠し演出
+ * 嗜好の領域 x3 -> 全ボタン虹色
+ * お酒 x3       -> 全ボタン回転（0.85秒/周）
+ * タバコ x3     -> 全ボタンDVD反射移動（毎秒620〜836px）
+ * どれも同じ場所をもう3回押すと解除。三機能同時発動可能。
+ */
+(() => {
+  'use strict';
+  if (!document.body.classList.contains('home-body')) return;
+  // 同じスクリプトが二度読み込まれてもクリックイベントを重複登録しない。
+  if (window.__shikoFixedEffectsInstalled) return;
+  window.__shikoFixedEffectsInstalled = true;
+
+  const body = document.body;
+  const header = document.getElementById('siteHeader');
+  const alcohol = document.querySelector('.alcohol-section .section-label');
+  const tobacco = document.querySelector('.tobacco-section .section-label');
+  if (!alcohol || !tobacco) return;
+
+
+  const selector = [
+    '.alcohol-grid > .preference-card',
+    '.tobacco-grid > .paper-card-container',
+    '.tobacco-grid > .preference-card',
+    '.bottom-navigation > .bottom-panel',
+  ].join(', ');
+  const registered = new Set();
+  let moving = false;
+  let frames = [];
+  let animationId = null;
+  let prevFrame = 0;
+
+  function addTarget(node) {
+    if (registered.has(node)) return;
+    registered.add(node);
+    node.classList.add('secret-motion-target');
+    // 紙たばこの透明ドナルドボタンがある場合は、コンテナを回して
+    // 発光はその中の紙たばこカードにだけ適用する。
+    const surface = node.matches('.paper-card-container')
+      ? node.querySelector('.preference-card')
+      : node;
+    if (surface) surface.classList.add('secret-rainbow-surface');
+    if (moving) fly(node);
+  }
+
+  function scanTargets() {
+    document.querySelectorAll(selector).forEach(addTarget);
+    const userButton = header?.querySelector('.header-user .login-button');
+    if (userButton) addTarget(userButton);
+  }
+
+  // タイトルは共通JSで後から挿入されるため、イベントを親に委譲する。
+  const recent = new Map();
+  function triple(key, toggle) {
+    const now = performance.now();
+    const state = recent.get(key) || {count: 0, last: -9999};
+    state.count = now - state.last < 2000 ? state.count + 1 : 1;
+    state.last = now;
+    if (state.count >= 3) {
+      state.count = 0;
+      state.last = -9999;
+      toggle();
+    }
+    recent.set(key, state);
+  }
+  function setPressed(el, enabled) { el.setAttribute('aria-pressed', String(enabled)); }
+  let toastTimer;
+  function notice(message) {
+    let toast = document.getElementById('shiko-secret-status');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'shiko-secret-status';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.classList.add('visible');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('visible'), 1200);
+  }
+  function makeTrigger(node, label) {
+    node.classList.add('home-secret-trigger');
+    node.setAttribute('role', 'button');
+    node.setAttribute('tabindex', '0');
+    node.setAttribute('aria-label', label);
+    setPressed(node, false);
+  }
+
+  function toggleRainbow() {
+    const on = body.classList.toggle('secret-rainbow');
+    notice(`虹色モード ${on ? 'ON' : 'OFF'}`);
+    const title = header?.querySelector('.header-title-text');
+    if (title) setPressed(title, on);
+  }
+  function toggleSpin() {
+    scanTargets();
+    const on = body.classList.toggle('secret-spinning');
+    notice(`回転モード ${on ? 'ON' : 'OFF'}`);
+    setPressed(alcohol, on);
+    if (moving) clampFrames();
+  }
+
+  // 細長い角度のまま真っすぐ移動し、端に当たったら反射する。
+  function velocityFor(index) {
+    const angle = ((24 + Math.random() * 36) + (index % 4) * 90) * Math.PI / 180;
+    const speed = 620 + (index % 5) * 42 + Math.random() * 48;
+    return { vx: speed * Math.cos(angle), vy: speed * Math.sin(angle) };
+  }
+
+  function boundary(item) {
+    const diagonal = Math.hypot(item.w, item.h);
+    const rotating = body.classList.contains('secret-spinning');
+    const mx = Math.max(item.isPaperWrapper ? 90 : 5,
+      rotating ? (diagonal - item.w) / 2 + 6 : 5);
+    const my = Math.max(5, rotating ? (diagonal - item.h) / 2 + 6 : 5);
+    const minX = Math.min(mx, Math.max(0, (innerWidth - item.w) / 2));
+    const minY = Math.min(my, Math.max(0, (innerHeight - item.h) / 2));
+    return {
+      minX, minY,
+      maxX: Math.max(minX, innerWidth - item.w - mx),
+      maxY: Math.max(minY, innerHeight - item.h - my),
+    };
+  }
+  function place(item) {
+    item.el.style.translate = `${item.x.toFixed(2)}px ${item.y.toFixed(2)}px`;
+  }
+  function clampFrames() {
+    for (const item of frames) {
+      const b = boundary(item);
+      item.x = Math.max(b.minX, Math.min(b.maxX, item.x));
+      item.y = Math.max(b.minY, Math.min(b.maxY, item.y));
+      place(item);
+    }
+  }
+  function fly(el) {
+    if (frames.some(item => item.el === el)) return;
+    const rect = el.getBoundingClientRect();
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    if (w < 1 || h < 1) return;
+
+    const parent = el.parentNode;
+    if (!parent) return;
+    const placeholder = document.createElement('span');
+    placeholder.className = 'home-secret-placeholder';
+    placeholder.style.display = getComputedStyle(el).display === 'inline' ? 'inline-block' : 'block';
+    placeholder.style.width = `${w}px`;
+    placeholder.style.height = `${h}px`;
+    parent.insertBefore(placeholder, el);
+
+    const originalStyle = el.getAttribute('style');
+    // アニメーション中の要素を別親へ移動すると、Chromium が以前の描画座標を
+    // キャッシュする場合があるため、一度停止して移動後に再起動する。
+    el.style.setProperty('animation', 'none', 'important');
+    void el.offsetWidth;
+    el.style.width = `${w}px`;
+    el.style.height = `${h}px`;
+    el.classList.add('home-secret-flyer');
+    body.appendChild(el);
+
+    const vector = velocityFor(frames.length);
+    const item = {
+      el, placeholder, originalStyle,
+      w, h, isPaperWrapper: el.classList.contains('paper-card-container'),
+      x: rect.left + (rect.width - w) / 2,
+      y: rect.top + (rect.height - h) / 2,
+      ...vector,
+    };
+    frames.push(item);
+    clampFrames();
+    void el.offsetWidth;
+    if (originalStyle && /(?:^|;)\s*animation\s*:/.test(originalStyle)) {
+      // 元からインライン指定されていた animation があれば戻す。
+      const temp = document.createElement('div');
+      temp.setAttribute('style', originalStyle);
+      el.style.setProperty('animation', temp.style.getPropertyValue('animation'), temp.style.getPropertyPriority('animation'));
+    } else {
+      el.style.removeProperty('animation');
+    }
+  }
+  function animate(time) {
+    if (!moving) return;
+    const delta = prevFrame ? Math.min((time - prevFrame) / 1000, .045) : 0;
+    prevFrame = time;
+    for (const item of frames) {
+      const b = boundary(item);
+      item.x += item.vx * delta;
+      item.y += item.vy * delta;
+      if (item.x < b.minX) { item.x = b.minX + (b.minX - item.x); item.vx = Math.abs(item.vx); }
+      if (item.x > b.maxX) { item.x = b.maxX - (item.x - b.maxX); item.vx = -Math.abs(item.vx); }
+      if (item.y < b.minY) { item.y = b.minY + (b.minY - item.y); item.vy = Math.abs(item.vy); }
+      if (item.y > b.maxY) { item.y = b.maxY - (item.y - b.maxY); item.vy = -Math.abs(item.vy); }
+      item.x = Math.max(b.minX, Math.min(b.maxX, item.x));
+      item.y = Math.max(b.minY, Math.min(b.maxY, item.y));
+      place(item);
+    }
+    animationId = requestAnimationFrame(animate);
+  }
+  function stopMoving() {
+    if (!moving) return;
+    moving = false;
+    cancelAnimationFrame(animationId);
+    animationId = null;
+    prevFrame = 0;
+    for (const item of frames) {
+      if (item.placeholder.parentNode) {
+        item.placeholder.parentNode.insertBefore(item.el, item.placeholder);
+        item.placeholder.remove();
+      }
+      item.el.classList.remove('home-secret-flyer');
+      if (item.originalStyle === null) item.el.removeAttribute('style');
+      else item.el.setAttribute('style', item.originalStyle);
+    }
+    frames = [];
+    body.classList.remove('secret-moving');
+    setPressed(tobacco, false);
+  }
+  function toggleMove() {
+    if (moving) { stopMoving(); notice('DVD移動モード OFF'); return; }
+    moving = true;
+    body.classList.add('secret-moving');
+    notice('DVD移動モード ON');
+    setPressed(tobacco, true);
+    scanTargets();
+    for (const el of [...registered]) if (el.isConnected) fly(el);
+    prevFrame = 0;
+    animationId = requestAnimationFrame(animate);
+  }
+
+  makeTrigger(alcohol, 'お酒：3回クリックで全ボタンの回転を切り替え');
+  makeTrigger(tobacco, 'タバコ：3回クリックで全ボタンの高速DVD風移動を切り替え');
+  alcohol.addEventListener('click', () => triple('spin', toggleSpin));
+  tobacco.addEventListener('click', () => triple('move', toggleMove));
+  for (const node of [alcohol, tobacco]) {
+    node.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        node.click();
+      }
+    });
+  }
+  function prepareTitle() {
+    const title = header?.querySelector('.header-title-text');
+    if (title && !title.classList.contains('home-secret-trigger')) {
+      makeTrigger(title, '嗜好の領域：3回クリックで全ボタンの虹色発光を切り替え');
+      setPressed(title, body.classList.contains('secret-rainbow'));
+    }
+  }
+  header?.addEventListener('click', event => {
+    if (event.target instanceof Element && event.target.closest('.header-title-text')) {
+      triple('rainbow', toggleRainbow);
+    }
+  });
+  header?.addEventListener('keydown', event => {
+    const title = event.target instanceof Element && event.target.closest('.header-title-text');
+    if (title && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
+      title.click();
+    }
+  });
+  const observer = header && new MutationObserver(() => {
+    scanTargets();
+    prepareTitle();
+  });
+  observer?.observe(header, {childList: true, subtree: true});
+  window.addEventListener('resize', clampFrames);
+  window.addEventListener('pagehide', stopMoving);
+  scanTargets();
+  prepareTitle();
+  window.shikoEffectsReady = true;
+})();
+
+
+(() => {
+  const button = document.getElementById('donaldSecretButton');
+  const overlay = document.getElementById('donaldOverlay');
+  if (!button || !overlay) return;
+  let lastFocus = null;
+  button.addEventListener('click', () => {
+    lastFocus = document.activeElement;
+    overlay.hidden = false;
+    overlay.focus();
+  });
+  const close = () => {
+    if (overlay.hidden) return;
+    overlay.hidden = true;
+    if (lastFocus && lastFocus.isConnected) lastFocus.focus();
+  };
+  overlay.addEventListener('click', close);
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+})();
+</script>
 </body>
 </html>

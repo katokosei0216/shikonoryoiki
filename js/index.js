@@ -106,3 +106,22 @@ function closeModal(id) {
 
 // ログイン状態(ヘッダー表示時にサーバーの結果で更新される)
 let isLoggedIn = false;
+
+
+/* ─── ホーム画面専用：虹色・高速回転・DVD風移動ギミック（差し替え版） ─── */
+(() => {
+  if (!document.body.classList.contains('home-body')) return;
+  if (window.__shikoHomeEffectsBootstrap) return;
+  window.__shikoHomeEffectsBootstrap = true;
+
+  const css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = '../css/home-effects.css?v=20261113-fast4';
+  css.dataset.shikoHomeEffects = 'style';
+  document.head.appendChild(css);
+
+  const script = document.createElement('script');
+  script.src = '../js/home-effects.js?v=20261113-fast4';
+  script.dataset.shikoHomeEffects = 'script';
+  document.body.appendChild(script);
+})();

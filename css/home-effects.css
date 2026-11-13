@@ -1,0 +1,100 @@
+/* 嗜好の領域 | ホーム限定の隠し演出。既存の index.css は変更しません。 */
+.home-body .home-secret-trigger {
+  position: relative;
+  z-index: 1001;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-body .home-secret-trigger:focus-visible {
+  outline: 2px solid #f5d979;
+  outline-offset: 4px;
+}
+.home-body #siteHeader .header-title { z-index: 1001; }
+.home-body .header-title-text.home-secret-trigger { display: inline-block; }
+
+/* 虹色：元のカードの背景はそのままに虹色の光を重ねる */
+.home-body.secret-rainbow .secret-rainbow-surface {
+  position: relative;
+  isolation: isolate;
+  animation: home-secret-halo 2.8s linear infinite;
+}
+.home-body.secret-rainbow .secret-rainbow-surface::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background:
+    linear-gradient(112deg, transparent 28%, rgba(255,255,255,.46) 49%, transparent 68%),
+    linear-gradient(100deg,
+      rgba(255,42,68,.73), rgba(255,193,38,.64), rgba(247,243,59,.64),
+      rgba(42,246,125,.67), rgba(45,198,255,.69), rgba(120,81,255,.69),
+      rgba(246,40,208,.7), rgba(255,42,68,.73));
+  background-size: 260% 100%, 330% 100%;
+  background-position: 100% 0, 0 0;
+  opacity: .85;
+  mix-blend-mode: screen;
+  animation: home-secret-rainbow-flow 2.6s linear infinite;
+}
+/* 白い日本酒カードには乗算で色を見せる */
+.home-body.secret-rainbow .sake.secret-rainbow-surface::before { mix-blend-mode: multiply; opacity: .58; }
+.home-body.secret-rainbow .login-button.secret-rainbow-surface {
+  overflow: hidden;
+  background: linear-gradient(110deg, #4d1835, #253d76, #126251, #594a13, #4d1835);
+  background-size: 260% 100%;
+  animation: home-secret-halo 2.8s linear infinite, home-secret-rainbow-flow 2.6s linear infinite;
+}
+@keyframes home-secret-halo {
+  0%, 100% { box-shadow: 0 0 12px #fa529a99, 0 0 26px #ae68ef70, 0 8px 22px #0006; }
+  25% { box-shadow: 0 0 12px #ffe24bba, 0 0 28px #fb8e3670, 0 8px 22px #0006; }
+  50% { box-shadow: 0 0 12px #42f699b8, 0 0 28px #36d5ee78, 0 8px 22px #0006; }
+  75% { box-shadow: 0 0 12px #628dffbb, 0 0 28px #a462ff78, 0 8px 22px #0006; }
+}
+@keyframes home-secret-rainbow-flow {
+  to { background-position: -160% 0, 300% 0; }
+}
+
+/* 回転は独立した rotate を使用。DVD移動の transform と同時に使える */
+.home-body.secret-spinning .secret-motion-target {
+  transform-origin: center;
+  animation: home-secret-rapid-spin .95s linear infinite;
+}
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface {
+  animation: home-secret-rapid-spin .95s linear infinite,
+             home-secret-halo 2.8s linear infinite;
+}
+.home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface.login-button {
+  animation: home-secret-rapid-spin .95s linear infinite,
+             home-secret-halo 2.8s linear infinite,
+             home-secret-rainbow-flow 2.6s linear infinite;
+}
+@keyframes home-secret-rapid-spin {
+  from { rotate: 0deg; }
+  to   { rotate: 360deg; }
+}
+
+/* 元のグリッドを保持しながら、ボタンだけを画面全体で跳ね返らせる */
+.home-body .home-secret-placeholder { visibility: hidden; pointer-events: none; }
+.home-body .home-secret-flyer {
+  position: fixed !important;
+  inset: auto !important;
+  left: 0 !important;
+  top: 0 !important;
+  margin: 0 !important;
+  z-index: 210 !important;
+  transition: none !important;
+  will-change: transform;
+}
+.home-body .home-secret-flyer:hover { filter: brightness(1.1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-body.secret-rainbow .secret-rainbow-surface,
+  .home-body.secret-spinning .secret-motion-target,
+  .home-body.secret-spinning.secret-rainbow .secret-motion-target.secret-rainbow-surface,
+  .home-body.secret-rainbow .secret-rainbow-surface::before {
+    animation: none !important;
+  }
+  .home-body.secret-spinning .secret-motion-target { rotate: none !important; }
+}
