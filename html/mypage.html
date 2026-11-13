@@ -6,7 +6,7 @@
 <title>マイページ | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/easyanswer.css">
-<link rel="stylesheet" href="../css/mypage.css">
+<link rel="stylesheet" href="../css/mypage.css?v=20261113-wrap4">
 </head>
 <body class="subpage-body mypage-page">
 <header id="siteHeader"></header>
@@ -61,12 +61,12 @@
       </div>
 
       <!-- 画面右下：コメント -->
-      <div class="box-card">
+      <div class="box-card" id="comments">
         <div class="card-header-flex">
-          <h2 class="card-title">投稿コメント履歴</h2>
-          <button type="button" class="icon-btn" onclick="openModal('commentModal')">拡大 ⤢</button>
+          <h2 class="card-title">投稿コメント履歴 <span id="myReviewCount" class="review-total"></span></h2>
+          <button type="button" class="icon-btn" onclick="openModal('commentModal')">一覧を見る ⤢</button>
         </div>
-        <div class="comment-list-mini" id="commentMini"></div>
+        <div class="comment-list-mini" id="commentMini"><p>読み込み中...</p></div>
       </div>
     </div>
   </div>
@@ -141,7 +141,7 @@
   </div>
 </div>
 
-<script src="../js/common.js?v=20261112-backfix1"></script>
-<script src="../js/mypage.js?v=20261112-backfix1"></script>
+<script src="../js/common.js?v=20261113-reviewfix2"></script>
+<script src="../js/mypage.js?v=20261113-reviewfix2"></script>
 </body>
 </html>

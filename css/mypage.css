@@ -54,3 +54,49 @@
     padding: 4px;
     line-height: 1;
   }
+/* 投稿履歴の商品名から詳細ページへ戻れるようにする */
+.review-total { color: var(--muted); font-size: 12px; font-weight: normal; }
+.comment-product-link { color: var(--gold-light); text-decoration: none; font-weight: bold; }
+.comment-product-link:hover, .comment-product-link:focus-visible { text-decoration: underline; }
+.mini-comment-card p { overflow-wrap: anywhere; white-space: pre-wrap; }
+
+/* 投稿履歴のカード全体から商品ページへアクセス可能 */
+.comment-card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: border-color .2s, background-color .2s;
+}
+.comment-card-link:hover, .comment-card-link:focus-visible {
+    border-color: var(--gold-light);
+    background: #19170f;
+    outline: 1px solid var(--gold-light);
+    outline-offset: 1px;
+}
+.comment-card-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.comment-stars { color: #e5dfcc; white-space: nowrap; }
+.comment-body { color: #ccc; margin: 6px 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.comment-view-link { margin-top: 8px; color: var(--gold-light); text-align: right; font-size: 11px; }
+
+/* マイページの投稿履歴：長いコメントでも横スクロール・画面崩れを防ぐ */
+.mypage-grid { grid-template-columns: 320px minmax(0, 1fr); }
+.mypage-grid > *, .comment-list-mini, #commentList, .mini-comment-card {
+    min-width: 0;
+    max-width: 100%;
+}
+.comment-body, .comment-product-link {
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+/* マイページの小一覧では4行プレビュー、拡大表示では全文を読める */
+#commentMini .comment-body {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+}
+@media (max-width: 768px) {
+    .mypage-grid { grid-template-columns: minmax(0, 1fr); }
+}

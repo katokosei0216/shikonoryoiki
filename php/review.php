@@ -161,13 +161,24 @@ try {
             out(['ok' => false, 'message' => 'コメントが正しくありません。'], 400);
         }
         $comment = trim($comment);
+        if ($comment === '') {
+            out(['ok' => false, 'message' => 'コメントを入力してください。'], 400);
+        }
         if (mb_strlen($comment) > MAX_COMMENT) {
             out(['ok' => false, 'message' => 'コメントは' . MAX_COMMENT . '文字以内で入力してください。'], 400);
         }
         if (!product_exists($pdo, $pid)) {
             out(['ok' => false, 'message' => '商品が見つかりません。'], 404);
         }
-        $commentValue = ($comment === '') ? null : $comment;
+        // 同じユーザーから同時投稿されても、商品ごとに重複しないようにユーザー行をロック。
+        // SQLスキーマを変更せず、既存のレビュー保存形式を維持する。
+        $pdo->beginTransaction();
+        $lock = $pdo->prepare('SELECT user_id FROM users WHERE user_id = ? FOR UPDATE');
+        $lock->execute([$uid]);
+        if (!$lock->fetchColumn()) {
+            $pdo->rollBack();
+            out(['ok' => false, 'message' => 'ログインし直してください。'], 401);
+        }
 
         // 自分がこの商品に書いた口コミがあるか
         $stmt = $pdo->prepare('SELECT review_id FROM reviews WHERE user_id = ? AND product_id = ? ORDER BY review_id DESC LIMIT 1');
@@ -176,13 +187,16 @@ try {
 
         if ($existingId !== false) {
             $stmt = $pdo->prepare('UPDATE reviews SET rating = ?, comment = ? WHERE review_id = ? AND user_id = ?');
-            $stmt->execute([$rating, $commentValue, $existingId, $uid]);
+            $stmt->execute([$rating, $comment, $existingId, $uid]);
+            $pdo->commit();
             out(['ok' => true, 'message' => '口コミを更新しました。', 'review_id' => (int)$existingId]);
         }
 
         $stmt = $pdo->prepare('INSERT INTO reviews (user_id, product_id, rating, comment) VALUES (?, ?, ?, ?)');
-        $stmt->execute([$uid, $pid, $rating, $commentValue]);
-        out(['ok' => true, 'message' => '口コミを投稿しました。', 'review_id' => (int)$pdo->lastInsertId()]);
+        $stmt->execute([$uid, $pid, $rating, $comment]);
+        $newId = (int)$pdo->lastInsertId();
+        $pdo->commit();
+        out(['ok' => true, 'message' => '口コミを投稿しました。', 'review_id' => $newId]);
     }
 
     // ---------- 削除 ----------
@@ -204,6 +218,7 @@ try {
     out(['ok' => false, 'message' => '不正なリクエストです。'], 400);
 
 } catch (PDOException $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
     // 同時に投稿されて、1人1商品1件の制限(UNIQUE)に当たった場合
     if ($e->getCode() === '23000') {
         out(['ok' => false, 'message' => '既に投稿済みです。ページを再読み込みしてください。'], 409);

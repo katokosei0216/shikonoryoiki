@@ -18,6 +18,7 @@ function getDetailReturnContext() {
   const params = new URLSearchParams(window.location.search);
   let from = params.get('from');
   let category = params.get('category');
+  let section = params.get('section');
 
   // 別サイトのreferrerは信用せず、同じサイト内の画面遷移だけを見る。
   try {
@@ -31,12 +32,16 @@ function getDetailReturnContext() {
       if (!validDetailCategory(category) && ref.pathname.endsWith('/search.html')) {
         category = ref.searchParams.get('category');
       }
+      if (section !== 'comments' && ref.pathname.endsWith('/mypage.html') && ref.hash === '#comments') {
+        section = 'comments';
+      }
     }
   } catch (e) { /* 参照元がない場合 */ }
 
   return {
     from: ['search', 'mypage', 'easyanswer'].includes(from) ? from : 'search',
-    category: validDetailCategory(category) ? category : null
+    category: validDetailCategory(category) ? category : null,
+    section: section === 'comments' ? 'comments' : 'favorites' 
   };
 }
 
@@ -98,7 +103,9 @@ function buildHeader(isPublicPage, loggedIn) {
     } else if (pathname.endsWith('/detail.html')) {
       const context = getDetailReturnContext();
       if (context.from === 'mypage') {
-        leftButtonsHtml += '<a href="mypage.html#favorites" class="back-button">← お気に入りへ</a>';
+        leftButtonsHtml += context.section === 'comments'
+          ? '<a href="mypage.html#comments" class="back-button">← 投稿コメント履歴へ</a>'
+          : '<a href="mypage.html#favorites" class="back-button">← お気に入りへ</a>';
       } else if (context.from === 'easyanswer') {
         leftButtonsHtml += '<a href="easyanswer.html" class="back-button">← 検索結果へ</a>';
       } else {

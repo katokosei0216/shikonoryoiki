@@ -203,7 +203,8 @@ const reviewState = {
   csrf: '',          // 保存・削除に必要な合言葉(review.php から受け取る)
   summary: { count: 0, average: null },
   mine: null,        // 自分の口コミ { review_id, rating, comment } / まだなら null
-  reviews: []        // 口コミ一覧
+  reviews: [],       // この商品への口コミ一覧
+  showAll: false     // 最新5件と、取得済み一覧の表示を切り替える
 };
 
 const starText = n => '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -257,30 +258,57 @@ function currentStars() {
   return Array.from(getStarEls()).filter(s => s.classList.contains('active')).length;
 }
 function setStars(n) {
-  getStarEls().forEach((s, idx) => s.classList.toggle('active', idx < n));
+  getStarEls().forEach((s, idx) => {
+    const active = idx < n;
+    s.classList.toggle('active', active);
+    s.setAttribute('aria-pressed', String(active));
+  });
+}
+
+function setReviewFeedback(message, isError = false) {
+  const box = document.getElementById('reviewFeedback');
+  if (!box) return;
+  box.textContent = message;
+  box.classList.toggle('is-error', isError);
+}
+
+function updateCommentCounter() {
+  const textarea = document.getElementById('commentTextarea');
+  setText('commentCounter', `${textarea ? Array.from(textarea.value).length : 0} / 1000文字`);
 }
 
 // ----- 一覧の取得 -----
 async function loadReviews() {
-  const data = await callReviewApi(
-    REVIEW_API + '?product_id=' + encodeURIComponent(reviewState.productId),
-    { credentials: 'same-origin', cache: 'no-store' }
-  );
-  if (!data) return;
+  const refresh = document.getElementById('refreshReviewsBtn');
+  if (refresh) refresh.disabled = true;
+  try {
+    // 常に商品IDを指定し、キャッシュを使用せず最新の口コミを取得する。
+    const data = await callReviewApi(
+      REVIEW_API + '?product_id=' + encodeURIComponent(reviewState.productId),
+      { credentials: 'same-origin', cache: 'no-store' }
+    );
+    if (!data) {
+      setText('reviewListCount', 'ログイン後に口コミを確認できます。');
+      return;
+    }
 
-  if (!data.ok) {
-    showReviewMessage(data.message || '口コミを取得できませんでした。');
-    return;
+    if (!data.ok) {
+      showReviewMessage(data.message || '口コミを取得できませんでした。');
+      setText('reviewListCount', '口コミの取得に失敗しました。');
+      return;
+    }
+
+    reviewState.csrf = data.csrf;
+    reviewState.summary = data.summary;
+    reviewState.mine = data.mine;
+    reviewState.reviews = Array.isArray(data.reviews) ? data.reviews : [];
+
+    renderReviewSummary();
+    renderReviewLists();
+    fillReviewForm();
+  } finally {
+    if (refresh) refresh.disabled = false;
   }
-
-  reviewState.csrf = data.csrf;
-  reviewState.summary = data.summary;
-  reviewState.mine = data.mine;
-  reviewState.reviews = data.reviews;
-
-  renderReviewSummary();
-  renderReviewLists();
-  fillReviewForm();
 }
 
 // 一覧の場所にメッセージを出す
@@ -312,13 +340,14 @@ function buildReviewCard(r, truncated) {
 
   const user = mk('div', 'comment-user');
   user.appendChild(mk('div', 'avatar-img'));
-  user.appendChild(document.createTextNode(
+  user.appendChild(mk('span', 'comment-user-text',
     ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + '　' + starText(r.rating)
   ));
   card.appendChild(user);
 
   const text = mk('div', 'comment-text' + (truncated ? ' truncated' : ''), r.comment || '（コメントなし）');
-  text.style.whiteSpace = 'pre-wrap';
+  // 改行・長い連続文字の折り返しはCSSが担当する。
+  // ここでインラインのwhite-spaceを指定すると通常一覧の省略表示を上書きしてしまう。
   card.appendChild(text);
 
   const meta = mk('div', '', formatDate(r.created_at));
@@ -338,21 +367,40 @@ function buildReviewCard(r, truncated) {
   return card;
 }
 
-// 画面の小さい一覧 と 拡大モーダルの一覧
+// この商品の口コミを最大5件プレビュー。6件以上なら全件表示へ切り替え可能。
 function renderReviewLists() {
   const all = reviewState.reviews;
-
+  const total = Math.max(0, Number(reviewState.summary.count) || 0);
+  const visible = reviewState.showAll ? all : all.slice(0, MINI_REVIEW_COUNT);
   const mini = document.getElementById('reviewListMini');
+  const toggle = document.getElementById('toggleReviewListBtn');
+
   if (mini) {
     mini.replaceChildren();
     if (all.length === 0) {
-      const p = mk('p', '', 'まだ口コミはありません。最初の投稿者になりましょう。');
+      const p = mk('p', '', 'この商品への口コミはまだありません。最初の投稿者になりましょう。');
       p.style.fontSize = '13px';
       p.style.color = 'var(--muted)';
       mini.appendChild(p);
     } else {
-      all.slice(0, MINI_REVIEW_COUNT).forEach(r => mini.appendChild(buildReviewCard(r, true)));
+      visible.forEach(r => mini.appendChild(buildReviewCard(r, !reviewState.showAll)));
     }
+  }
+
+  // 「最新5件」は必ず5件あるという意味ではなく、最大5件の意味。
+  setText('reviewListHeading', reviewState.showAll
+    ? 'みんなの口コミ（この商品の一覧）'
+    : 'みんなの口コミ（この商品の最新5件）');
+  const shownCount = visible.length;
+  setText('reviewListCount', `この商品への口コミ：全${total}件／${shownCount}件表示` +
+    (total > all.length && reviewState.showAll ? `（取得できるのは最新${all.length}件まで）` : ''));
+
+  if (toggle) {
+    toggle.hidden = all.length <= MINI_REVIEW_COUNT;
+    toggle.textContent = reviewState.showAll
+      ? '最新5件に戻す'
+      : `もっと見る（残り${all.length - MINI_REVIEW_COUNT}件）`;
+    toggle.setAttribute('aria-expanded', String(reviewState.showAll));
   }
 
   renderReviewModalList();
@@ -397,39 +445,59 @@ function fillReviewForm() {
 
   setStars(mine ? mine.rating : 0);
   if (textarea) textarea.value = mine && mine.comment ? mine.comment : '';
+  updateCommentCounter();
   if (submit) submit.textContent = mine ? '更新する' : '投稿する';
   if (del) del.style.display = mine ? '' : 'none';
 }
 
 // ----- 投稿・更新 -----
+// 投稿の成否は #reviewFeedback に表示する。ブラウザー上部の alert は出さない。
 async function saveReview() {
   const rating = currentStars();
   if (rating < 1) {
-    alert('星の数を選んでください。');
+    setReviewFeedback('星の数を1〜5から選んでください。', true);
     return;
   }
   const textarea = document.getElementById('commentTextarea');
   const comment = textarea ? textarea.value.trim() : '';
-  if (comment.length > 1000) {
-    alert('コメントは1000文字以内で入力してください。');
+  if (!comment) {
+    setReviewFeedback('コメントを入力してください。', true);
+    if (textarea) textarea.focus();
+    return;
+  }
+  if (Array.from(comment).length > 1000) {
+    setReviewFeedback('コメントは1000文字以内で入力してください。', true);
     return;
   }
 
   const submit = document.getElementById('submitCommentBtn');
-  if (submit) submit.disabled = true;   // 二重送信の防止
+  if (submit && submit.disabled) return;
+  if (submit) submit.disabled = true;
+  setReviewFeedback('保存中...');
 
-  const data = await postReview({
-    action: 'save',
-    product_id: Number(reviewState.productId),
-    rating: rating,
-    comment: comment
-  });
-
-  if (submit) submit.disabled = false;
-  if (!data) return;
-
-  alert(data.message || (data.ok ? '保存しました。' : '保存に失敗しました。'));
-  if (data.ok) await loadReviews();
+  try {
+    const data = await postReview({
+      action: 'save',
+      product_id: Number(reviewState.productId),
+      rating,
+      comment
+    });
+    if (!data) {
+      setReviewFeedback('ログイン後に投稿してください。', true);
+      return;
+    }
+    if (!data.ok) {
+      setReviewFeedback(data.message || '投稿に失敗しました。', true);
+      return;
+    }
+    await loadReviews();
+    setReviewFeedback((data.message || '口コミを保存しました。') + ' マイページでも確認できます。');
+  } catch (error) {
+    console.error('口コミの保存・再読み込みに失敗しました:', error);
+    setReviewFeedback('口コミの処理中にエラーが発生しました。再読み込みして投稿履歴を確認してください。', true);
+  } finally {
+    if (submit) submit.disabled = false;
+  }
 }
 
 // ----- 削除(自分の口コミだけ) -----
@@ -439,8 +507,12 @@ async function deleteReview(reviewId) {
   const data = await postReview({ action: 'delete', review_id: Number(reviewId) });
   if (!data) return;
 
-  alert(data.message || (data.ok ? '削除しました。' : '削除に失敗しました。'));
-  if (data.ok) await loadReviews();   // 一覧を取り直す(入力欄も空に戻る)
+  if (data.ok) {
+    await loadReviews();
+    setReviewFeedback('口コミを削除しました。');
+  } else {
+    setReviewFeedback(data.message || '削除に失敗しました。', true);
+  }
 }
 
 function initReviews() {
@@ -465,12 +537,24 @@ function initReviews() {
       if (reviewState.mine) deleteReview(reviewState.mine.review_id);
     });
   }
+  const textarea = document.getElementById('commentTextarea');
+  if (textarea) textarea.addEventListener('input', updateCommentCounter);
+  updateCommentCounter();
 
   // 拡大モーダルの絞り込み
   const starFilter = document.getElementById('reviewStarFilter');
   if (starFilter) starFilter.addEventListener('change', renderReviewModalList);
   const keyword = document.getElementById('reviewKeyword');
   if (keyword) keyword.addEventListener('input', renderReviewModalList);
+
+  // 別の利用者による新規投稿を手動で取得できるようにする。
+  const refresh = document.getElementById('refreshReviewsBtn');
+  if (refresh) refresh.addEventListener('click', loadReviews);
+  const toggle = document.getElementById('toggleReviewListBtn');
+  if (toggle) toggle.addEventListener('click', () => {
+    reviewState.showAll = !reviewState.showAll;
+    renderReviewLists();
+  });
 
   loadReviews();
 }
@@ -484,9 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
     star.addEventListener('click', () => {
       const isLastActive = star.classList.contains('active') &&
         (index === stars.length - 1 || !stars[index + 1].classList.contains('active'));
-      stars.forEach((s, idx) => {
-        s.classList.toggle('active', !isLastActive && idx <= index);
-      });
+      setStars(isLastActive ? 0 : index + 1);
+      setReviewFeedback('');
     });
   });
 

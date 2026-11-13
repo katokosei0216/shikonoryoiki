@@ -14,8 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFilter('commentModal', renderCommentModal);
 
   await loadMypage();
-  // お気に入りの詳細から戻ったときは一覧を開いて復元する。
+  // 詳細ページから戻ったときは、戻り元の一覧を開く。
   if (window.location.hash === '#favorites') openModal('favModal');
+  if (window.location.hash === '#comments') openModal('commentModal');
 });
 
 // ===== 小さな部品 =====
@@ -73,7 +74,9 @@ async function loadMypage() {
   initialData.email = d.user.email;
 
   allFavorites = d.favorites;
-  allReviews = d.reviews;
+  allReviews = Array.isArray(d.reviews) ? d.reviews : [];
+  const count = document.getElementById('myReviewCount');
+  if (count) count.textContent = `（${allReviews.length}件）`;
 
   renderFavMini();
   renderCommentMini();
@@ -129,20 +132,33 @@ function renderFavModal() {
 
 // ===== 投稿コメント =====
 function buildCommentCard(r) {
-  const card = el('div', 'mini-comment-card');
-  card.style.marginBottom = '10px';
+  // 小一覧・拡大一覧どちらもカード全体をリンクにする。
+  // product_id は profile.php が返す実際のIDを使用するので、カクテルも正しい商品に飛ぶ。
+  const card = el('a', 'mini-comment-card comment-card-link');
+  const productId = Number(r.product_id);
+  if (Number.isSafeInteger(productId) && productId > 0) {
+    const params = new URLSearchParams({
+      id: String(productId),
+      from: 'mypage',
+      section: 'comments',
+      category: String(r.category_code || '')
+    });
+    card.href = 'detail.html?' + params.toString();
+    card.setAttribute('aria-label', r.product_name + 'の商品ページを見る');
+  } else {
+    card.removeAttribute('href');
+  }
 
-  const name = el('strong', '', r.product_name);
-  name.style.color = 'var(--gold-light)';
-  card.appendChild(name);
-  card.appendChild(document.createTextNode(' ' + starString(r.rating)));
+  const top = el('div', 'comment-card-top');
+  top.appendChild(el('strong', 'comment-product-link', r.product_name));
+  top.appendChild(el('span', 'comment-stars', starString(r.rating)));
+  card.appendChild(top);
 
-  const p = el('p', '', r.comment || '');
-  p.style.margin = '4px 0 0';
-  p.style.color = '#ccc';
+  const p = el('p', 'comment-body', r.comment || '（コメントなし）');
   card.appendChild(p);
-
-  card.appendChild(el('div', 'mini-comment-date', formatDate(r.created_at)));
+  card.appendChild(el('div', 'mini-comment-date',
+    (r.category_name || '') + ' ・ 投稿日: ' + formatDate(r.created_at)));
+  card.appendChild(el('div', 'comment-view-link', '商品ページを見る ›'));
   return card;
 }
 
@@ -151,7 +167,8 @@ function renderCommentMini() {
   box.replaceChildren();
 
   if (allReviews.length === 0) {
-    box.appendChild(el('p', '', '投稿したコメントはまだありません。'));
+    const msg = el('p', '', '投稿したコメントはまだありません。商品詳細ページから投稿できます。');
+    box.appendChild(msg);
     return;
   }
   allReviews.slice(0, MINI_COMMENT_COUNT).forEach(r => box.appendChild(buildCommentCard(r)));

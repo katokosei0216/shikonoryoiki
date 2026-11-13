@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>商品詳細 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
-<link rel="stylesheet" href="../css/detail.css?v=20261112-fav1">
+<link rel="stylesheet" href="../css/detail.css?v=20261113-wrap4">
 </head>
 <body class="subpage-body">
 <header id="siteHeader"></header>
@@ -25,36 +25,41 @@
 
         <div style="border-top:1px solid var(--gold-dark);padding-top:15px;">
           <h3 style="font-size:16px;color:var(--gold-light);margin-top:0;">口コミ・評価</h3>
-          <!-- ① 口コミ・評価の見出しの下に平均を出す場所を足す -->
-          <div id="reviewSummary" style="font-size:13px;color:var(--gold-light);margin-bottom:10px;"></div>
-          <div style="margin-bottom:20px;background:#10110e;padding:12px;border:1px solid #2d2618;">
-            <div style="font-size:12px;color:var(--muted);margin-bottom:5px;">評価をつける</div>
-            <div class="star-rating-select">
-              <span class="star" data-index="1">★</span><span class="star" data-index="2">★</span><span class="star" data-index="3">★</span><span class="star" data-index="4">★</span><span class="star" data-index="5">★</span>
+          <div id="reviewSummary" style="font-size:13px;color:var(--gold-light);margin-bottom:10px;">読み込み中...</div>
+          <div class="review-form-box">
+            <div class="review-field-label">星評価（必須）</div>
+            <div class="star-rating-select" role="group" aria-label="星評価を選択">
+              <button type="button" class="star" data-index="1" aria-label="1つ星" aria-pressed="false">★</button>
+              <button type="button" class="star" data-index="2" aria-label="2つ星" aria-pressed="false">★</button>
+              <button type="button" class="star" data-index="3" aria-label="3つ星" aria-pressed="false">★</button>
+              <button type="button" class="star" data-index="4" aria-label="4つ星" aria-pressed="false">★</button>
+              <button type="button" class="star" data-index="5" aria-label="5つ星" aria-pressed="false">★</button>
             </div>
-            <textarea class="form-control" id="commentTextarea" placeholder="コメントを入力..."></textarea>
-            <div style="display:flex; align-items:center;">
-              <button class="gold-button" id="submitCommentBtn" style="margin-top:8px;padding:6px 12px;font-size:11px;">投稿する</button>
-              <!-- ② 投稿するボタンの右に削除ボタンを足す -->
-              <button class="icon-btn" id="deleteReviewBtn" type="button" style="display:none;margin-top:8px;margin-left:8px;">削除する</button>
+            <label class="review-field-label" for="commentTextarea">コメント（必須・1000文字以内）</label>
+            <textarea class="form-control" id="commentTextarea" maxlength="1000" rows="4" placeholder="このお酒を飲んだ感想を入力..."></textarea>
+            <div class="review-form-footer">
+              <span id="commentCounter" class="review-count">0 / 1000文字</span>
+              <div class="review-form-actions">
+                <button type="button" class="gold-button" id="submitCommentBtn">投稿する</button>
+                <button type="button" class="icon-btn" id="deleteReviewBtn" style="display:none;">削除する</button>
+              </div>
             </div>
+            <p id="reviewFeedback" class="review-feedback" role="status" aria-live="polite"></p>
           </div>
 
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:12px;color:var(--muted);">みんなの口コミ (3〜5件表示)</span>
-            <button class="icon-btn" onclick="openModal('detailCommentModal')">拡大 ⤢</button>
+          <div class="review-heading-row">
+            <span id="reviewListHeading">みんなの口コミ（この商品の最新5件）</span>
+            <div class="review-heading-actions">
+              <a class="icon-btn" href="mypage.html#comments">自分の投稿履歴</a>
+              <button type="button" class="icon-btn" id="refreshReviewsBtn">更新 ↻</button>
+              <button type="button" class="icon-btn" onclick="openModal('detailCommentModal')">拡大 ⤢</button>
+            </div>
           </div>
-          <!-- ③ 画面の小さい一覧に id を付ける -->
+          <p id="reviewListCount" class="review-list-count" aria-live="polite">この商品の口コミを読み込み中...</p>
           <div class="comment-list-mini" id="reviewListMini" style="margin-top:10px;">
-            <div class="comment-card">
-              <div class="comment-user"><div class="avatar-img"></div> ユーザーA</div>
-              <div class="comment-text truncated">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。</div>
-            </div>
-            <div class="comment-card">
-              <div class="comment-user"><div class="avatar-img"></div> ユーザーB</div>
-              <div class="comment-text truncated">ロックにすると甘みが引き立ちます。特別な日に飲みたい一杯。</div>
-            </div>
+            <p class="review-loading">読み込み中...</p>
           </div>
+          <button type="button" id="toggleReviewListBtn" class="icon-btn review-show-more" hidden>もっと見る</button>
         </div>
       </div>
 
@@ -117,12 +122,7 @@
       <input type="text" class="form-control" id="reviewKeyword" style="flex:1;" placeholder="コメント・ユーザー名で検索...">
     </div>
     <!-- ④ 拡大モーダルの3か所に id を付ける (3つ目) -->
-    <div id="reviewListModal">
-      <div class="comment-card">
-        <div class="comment-user"><div class="avatar-img"></div> ユーザーA ★★★★★</div>
-        <p style="font-size:13px;color:#eee;margin:5px 0;">ストレートで飲むと華やかな香りが口いっぱいに広がります。非常に飲みやすいです。後味も余韻が長く続きます。</p>
-      </div>
-    </div>
+    <div id="reviewListModal"><p class="review-loading">読み込み中...</p></div>
   </div>
 </div>
 
@@ -138,7 +138,7 @@
   </div>
 </div>
 
-<script src="../js/common.js?v=20261112-backfix1"></script>
-<script src="../js/detail.js?v=20261112-backfix1"></script>
+<script src="../js/common.js?v=20261113-wrap4"></script>
+<script src="../js/detail.js?v=20261113-wrap4"></script>
 </body>
 </html>

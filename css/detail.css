@@ -1,4 +1,6 @@
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+/* 長い口コミによりGrid列が最小内容幅まで広がるのを防止 */
+.detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; }
+.detail-grid > div { min-width: 0; }
 .detail-meta { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
 .detail-title { font-size: 28px; color: var(--gold-light); margin: 0 0 15px; }
 .detail-image-box {
@@ -21,13 +23,69 @@
 .comment-card { border-bottom: 1px solid #2d2719; padding: 12px 0; }
 .comment-user { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 5px; }
 .comment-user .avatar-img { width: 24px; height: 24px; border-radius: 50%; }
-.comment-text.truncated { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-size: 13px; color: #ccc; }
+/* 口コミ本文：改行を保存し、URLや半角英数字1000文字でも横にはみ出さない */
+.comment-card { min-width: 0; max-width: 100%; }
+.comment-text {
+    min-width: 0; max-width: 100%;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.75;
+    font-size: 13px;
+    color: #ccc;
+}
+/* 通常表示は4行まで。拡大表示では省略せず全文を表示 */
+.comment-text.truncated {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+}
+.comment-user { min-width: 0; flex-wrap: wrap; }
+.comment-user-text { min-width: 0; overflow-wrap: anywhere; }
+#reviewListMini, #reviewListModal { min-width: 0; max-width: 100%; }
 
 .tag-badge {
     display: inline-block; border: 1px solid var(--gold-dark); background: #181712;
     color: var(--gold-light); padding: 4px 10px; font-size: 11px; margin: 0 5px 5px 0;
 }
-@media (max-width: 768px) { .detail-grid { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .detail-grid { grid-template-columns: minmax(0, 1fr); } }
 /* お気に入り登録済み・通信中の状態 */
 .heart-btn.is-favorite { background: rgba(156,22,30,.18); color: #ff6b76; }
 .heart-btn:disabled { opacity: .6; cursor: wait; }
+
+/* 口コミの投稿フォーム：既存の黒×ゴールドの配色に合わせる */
+.review-form-box { margin-bottom: 20px; background: #10110e; padding: 12px; border: 1px solid #2d2618; }
+.review-field-label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 7px; }
+.star-rating-select .star { appearance: none; border: 0; padding: 0; background: transparent; color: #666; font: inherit; cursor: pointer; line-height: 1.3; }
+.star-rating-select .star:hover, .star-rating-select .star:focus-visible { color: var(--gold-light); }
+.star-rating-select .star:focus-visible { outline: 1px solid var(--gold-light); outline-offset: 3px; }
+.review-form-box textarea { box-sizing: border-box; width: 100%; resize: vertical; min-height: 85px; }
+.review-form-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.review-form-actions { display: flex; align-items: center; gap: 8px; }
+.review-form-actions .gold-button { padding: 7px 16px; font-size: 12px; }
+.review-count { color: var(--muted); font-size: 11px; }
+.review-feedback { font-size: 12px; color: var(--gold-light); margin: 8px 0 0; min-height: 1em; }
+.review-feedback.is-error { color: #f48c8c; }
+.review-heading-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; color: var(--muted); font-size: 12px; }
+.review-heading-actions { display: flex; align-items: center; gap: 8px; }
+.review-heading-actions a.icon-btn { text-decoration: none; }
+.review-loading { font-size: 13px; color: var(--muted); }
+
+/* 商品別口コミ：件数を明示し、6件目以降の展開操作を追加 */
+.review-list-count { margin: 6px 0 8px; font-size: 12px; color: var(--muted); }
+.review-show-more { display: block; margin: 10px auto 0; padding: 7px 18px; }
+.review-show-more[hidden] { display: none; }
+.review-heading-actions button:disabled { opacity: 0.5; cursor: wait; }
+
+/* 入力中の長文も、フォーム幅内で自然に折り返す */
+.review-form-box, .review-form-box textarea, .review-feedback {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+.review-form-box textarea { white-space: pre-wrap; word-break: normal; }
+/* 拡大モーダルも長い口コミで横に伸びない */
+#detailCommentModal .modal-content { min-width: 0; max-width: 100%; }
+#reviewListModal .comment-text { white-space: pre-wrap; }
