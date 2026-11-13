@@ -190,3 +190,26 @@ function resetFilters() {
     if (window.runSearch) window.runSearch(1);
   }
 }
+
+//上に戻るボタン
+document.addEventListener('DOMContentLoaded', () => {
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (!scrollTopBtn) return;
+
+    // スクロール量に応じて表示・非表示を切り替え
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 250) {
+            scrollTopBtn.classList.add('is-visible');
+        } else {
+            scrollTopBtn.classList.remove('is-visible');
+        }
+    }, { passive: true });
+
+    // クリックでスムーズに一番上へ移動
+    scrollTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});
