@@ -6,6 +6,12 @@
 <title>詳細検索 | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css">
 <link rel="stylesheet" href="../css/search.css">
+<style>
+  /* どのカテゴリーでも検索結果一覧の見出しが画面上部に綺麗に収まる余白調整 */
+  #resultHeading {
+    scroll-margin-top: 24px;
+  }
+</style>
 </head>
 <body class="subpage-body">
 <header id="siteHeader"></header>
@@ -209,7 +215,7 @@
               <label class="checkbox-item"><input type="checkbox" name="whisky_type[]" value="blended"> ブレンデッド</label>
             </div>
 
-            <!-- おすすめの飲み方 (折りたたみ) ※valueは drink_styles.style_name と一致させる -->
+            <!-- おすすめの飲み方 (折りたたみ) -->
             <details class="filter-accordion" style="margin-top:10px;">
               <summary>おすすめの飲み方</summary>
               <div class="accordion-content">
@@ -236,7 +242,6 @@
               <label class="checkbox-item"><input type="checkbox" name="sake_type[]" value="sweet"> 甘口</label>
             </div>
 
-            <!-- おすすめの飲み方 (折りたたみ) -->
             <details class="filter-accordion" style="margin-top:10px;">
               <summary>おすすめの飲み方</summary>
               <div class="accordion-content">
@@ -260,7 +265,6 @@
               <label class="checkbox-item"><input type="checkbox" name="wine_type[]" value="ロゼ"> ロゼ</label>
             </div>
 
-            <!-- おすすめの飲み方 (折りたたみ) -->
             <details class="filter-accordion" style="margin-top:10px;">
               <summary>おすすめの飲み方</summary>
               <div class="accordion-content">
@@ -280,7 +284,6 @@
 
           <!-- カクテル固有 -->
           <div id="cocktailSpecific" style="display:none;">
-            <!-- 製法 (折りたたみ) ※valueはPHP側のコードと対応 -->
             <details class="filter-accordion">
               <summary>製法</summary>
               <div class="accordion-content">
@@ -298,7 +301,6 @@
               </div>
             </details>
 
-            <!-- 素材 (折りたたみ) ※valueは fruits.fruit_name / tags.tag_name と一致させる -->
             <details class="filter-accordion" style="margin-top:8px;">
               <summary>素材</summary>
               <div class="accordion-content">
@@ -328,7 +330,6 @@
               </div>
             </details>
 
-            <!-- ベース酒 (折りたたみ) ※valueは base_liquors.base_liquor_name と一致 -->
             <details class="filter-accordion" style="margin-top:8px;">
               <summary>ベース酒</summary>
               <div class="accordion-content">
@@ -355,7 +356,6 @@
 
           <!-- 紙たばこ固有 -->
           <div id="paperSpecific" style="display:none;">
-            <!-- ブランド -->
             <div class="form-group">
               <label>ブランド</label>
               <input type="text" class="form-control" name="brand" list="brandDatalist" placeholder="入力または選択...">
@@ -364,7 +364,6 @@
               </datalist>
             </div>
 
-            <!-- タール量 -->
             <div class="form-group">
               <label>タール量（mg）</label>
               <div class="range-group">
@@ -390,7 +389,6 @@
               </div>
             </div>
 
-            <!-- ニコチン量 -->
             <div class="form-group">
               <label>ニコチン量（mg）</label>
               <div class="range-group">
@@ -415,7 +413,6 @@
               </div>
             </div>
 
-            <!-- 香味 ※valueはPHP側のコードと対応 -->
             <div class="filter-section-title" style="margin-top:8px;">香味</div>
             <div class="checkbox-group">
               <label class="checkbox-item"><input type="checkbox" name="paper_flavor[]" value="regular"> レギュラー</label>
@@ -424,7 +421,6 @@
               <label class="checkbox-item"><input type="checkbox" name="paper_flavor[]" value="flavor"> 香り付き</label>
             </div>
 
-            <!-- サイズ・パッケージ (折りたたみ) -->
             <details class="filter-accordion" style="margin-top:10px;">
               <summary>サイズ・パッケージ</summary>
               <div class="accordion-content">
@@ -451,7 +447,7 @@
   </div>
 
   <!-- 絞り込み結果一覧 -->
-  <div class="subpage-heading">
+  <div class="subpage-heading" id="resultHeading">
     <span></span>
     <h1>検索結果一覧</h1>
     <span></span>
@@ -464,6 +460,40 @@
 
 <script src="../js/common.js?v=20261112-backfix1"></script>
 <script src="../js/search.js?v=20261113-paper3"></script>
+<script>
+  // どのカテゴリー（ウイスキー・ワイン・日本酒・カクテル等）であっても検索ボタン押下で確実にスクロール
+  document.getElementById('searchForm').addEventListener('click', function(e) {
+    if (e.target.closest('button[type="submit"]')) {
+      executeScroll();
+    }
+  });
+
+  document.getElementById('searchForm').addEventListener('submit', function(e) {
+    executeScroll();
+  });
+
+  function executeScroll() {
+    setTimeout(function() {
+      const target = document.getElementById('resultHeading');
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 50);
+
+    setTimeout(function() {
+      const target = document.getElementById('resultHeading');
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }, 300);
+  }
+</script>
 </body>
 
 <!-- 一番上に戻るボタン -->
