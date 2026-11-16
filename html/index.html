@@ -48,8 +48,25 @@
   mix-blend-mode: screen;
   animation: home-secret-rainbow-flow 2.6s linear infinite;
 }
-/* 白い日本酒カードには乗算で色を見せる */
-.home-body.secret-rainbow .sake.secret-rainbow-surface::before { mix-blend-mode: multiply; opacity: .58; }
+/* 日本酒の白いカードは乗算で彩度が落ちていたため、色を強く表示する */
+.home-body.secret-rainbow .sake.secret-rainbow-surface::before {
+  mix-blend-mode: normal;
+  opacity: .85;
+}
+.home-body.secret-rainbow .sake.secret-rainbow-surface {
+  border-color: rgba(255,255,255,.9);
+  animation: home-secret-sake-glow 1.9s linear infinite;
+}
+@keyframes home-secret-sake-glow {
+  0%, 100% { box-shadow: inset 0 0 0 2px #ff458dcc, 0 0 16px 6px #ff458dcc, 0 0 38px 10px #ff458d88; }
+  25% { box-shadow: inset 0 0 0 2px #f8df36dd, 0 0 16px 6px #f8df36cc, 0 0 38px 10px #f8df3688; }
+  50% { box-shadow: inset 0 0 0 2px #35e5a6dd, 0 0 16px 6px #35e5a6cc, 0 0 38px 10px #35e5a688; }
+  75% { box-shadow: inset 0 0 0 2px #638affdd, 0 0 16px 6px #638affcc, 0 0 38px 10px #638aff88; }
+}
+/* 回転との併用中も日本酒専用の強い発光を維持する */
+.home-body.secret-spinning.secret-rainbow .sake.secret-motion-target.secret-rainbow-surface {
+  animation: home-secret-rapid-spin .85s linear infinite, home-secret-sake-glow 1.9s linear infinite;
+}
 .home-body.secret-rainbow .login-button.secret-rainbow-surface {
   overflow: hidden;
   background: linear-gradient(110deg, #4d1835, #253d76, #126251, #594a13, #4d1835);
@@ -132,6 +149,32 @@
 .home-body #donaldOverlay[hidden] { display: none !important; }
 .home-body #donaldOverlay img { width:100%; height:100%; object-fit: cover; user-select:none; }
 
+
+/* マイページカード直下の秘密ボタン。画面からは見えず、位置は固定。 */
+.home-body .bottom-navigation { position: relative; }
+.home-body #shikoAllEffectsToggle {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 57px); /* 高さ98pxのマイページカードの8px下 */
+  transform: translateX(-50%);
+  width: calc((100% - 28px) / 3);
+  min-width: 105px;
+  height: 40px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  z-index: 1002;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.home-body #shikoAllEffectsToggle:focus-visible {
+  outline: 2px dashed #e1c766;
+  outline-offset: 2px;
+}
 </style>
 </head>
 <body class="home-body">
@@ -208,6 +251,8 @@
       </span>
       <span class="panel-arrow">→</span>
     </a>
+    <!-- マイページの下：1クリックで虹色・回転・DVD移動をまとめて切り替え -->
+    <button type="button" id="shikoAllEffectsToggle" aria-label="すべての隠し演出を一括でオン・オフ" aria-pressed="false"></button>
   </section>
 </main>
 <div id="donaldOverlay" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="ドナルド画像">
@@ -222,6 +267,7 @@
  * お酒 x3       -> 全ボタン回転（0.85秒/周）
  * タバコ x3     -> 全ボタンDVD反射移動（毎秒620〜836px）
  * どれも同じ場所をもう3回押すと解除。三機能同時発動可能。
+ * マイページ下の透明ボタン1回で、3機能をまとめてON/OFF。
  */
 (() => {
   'use strict';
@@ -234,6 +280,7 @@
   const header = document.getElementById('siteHeader');
   const alcohol = document.querySelector('.alcohol-section .section-label');
   const tobacco = document.querySelector('.tobacco-section .section-label');
+  const masterButton = document.getElementById('shikoAllEffectsToggle');
   if (!alcohol || !tobacco) return;
 
 
@@ -306,11 +353,20 @@
     setPressed(node, false);
   }
 
+  // 3機能すべて有効になっている場合だけ、一括ボタンをONとして扱う。
+  function allEffectsAreOn() {
+    return body.classList.contains('secret-rainbow') &&
+           body.classList.contains('secret-spinning') && moving;
+  }
+  function syncMasterButton() {
+    if (masterButton) masterButton.setAttribute('aria-pressed', String(allEffectsAreOn()));
+  }
   function toggleRainbow() {
     const on = body.classList.toggle('secret-rainbow');
     notice(`虹色モード ${on ? 'ON' : 'OFF'}`);
     const title = header?.querySelector('.header-title-text');
     if (title) setPressed(title, on);
+    syncMasterButton();
   }
   function toggleSpin() {
     scanTargets();
@@ -318,6 +374,7 @@
     notice(`回転モード ${on ? 'ON' : 'OFF'}`);
     setPressed(alcohol, on);
     if (moving) clampFrames();
+    syncMasterButton();
   }
 
   // 細長い角度のまま真っすぐ移動し、端に当たったら反射する。
@@ -434,6 +491,7 @@
     frames = [];
     body.classList.remove('secret-moving');
     setPressed(tobacco, false);
+    syncMasterButton();
   }
   function toggleMove() {
     if (moving) { stopMoving(); notice('DVD移動モード OFF'); return; }
@@ -445,7 +503,20 @@
     for (const el of [...registered]) if (el.isConnected) fly(el);
     prevFrame = 0;
     animationId = requestAnimationFrame(animate);
+    syncMasterButton();
   }
+
+  // マイページ下の透明ボタンはワンクリックで3つの状態を揃える。
+  // 一部だけONなら全部ONにし、全部ONなら全部OFFにする。
+  masterButton?.addEventListener('click', () => {
+    const enable = !allEffectsAreOn();
+    if (body.classList.contains('secret-rainbow') !== enable) toggleRainbow();
+    if (body.classList.contains('secret-spinning') !== enable) toggleSpin();
+    if (moving !== enable) toggleMove();
+    syncMasterButton();
+    notice(`全演出 ${enable ? 'ON' : 'OFF'}`);
+  });
+  syncMasterButton();
 
   makeTrigger(alcohol, 'お酒：3回クリックで全ボタンの回転を切り替え');
   makeTrigger(tobacco, 'タバコ：3回クリックで全ボタンの高速DVD風移動を切り替え');
