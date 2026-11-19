@@ -48,36 +48,45 @@
   mix-blend-mode: screen;
   animation: home-secret-rainbow-flow 2.6s linear infinite;
 }
-/* 日本酒の白いカードは乗算で彩度が落ちていたため、色を強く表示する */
+/* 白背景の日本酒カードは虹色を保ちつつ、発光強度をほかのカードと統一する。 */
 .home-body.secret-rainbow .sake.secret-rainbow-surface::before {
   mix-blend-mode: normal;
-  opacity: .85;
+  opacity: .65;
 }
-.home-body.secret-rainbow .sake.secret-rainbow-surface {
-  border-color: rgba(255,255,255,.9);
-  animation: home-secret-sake-glow 1.9s linear infinite;
-}
-@keyframes home-secret-sake-glow {
-  0%, 100% { box-shadow: inset 0 0 0 2px #ff458dcc, 0 0 16px 6px #ff458dcc, 0 0 38px 10px #ff458d88; }
-  25% { box-shadow: inset 0 0 0 2px #f8df36dd, 0 0 16px 6px #f8df36cc, 0 0 38px 10px #f8df3688; }
-  50% { box-shadow: inset 0 0 0 2px #35e5a6dd, 0 0 16px 6px #35e5a6cc, 0 0 38px 10px #35e5a688; }
-  75% { box-shadow: inset 0 0 0 2px #638affdd, 0 0 16px 6px #638affcc, 0 0 38px 10px #638aff88; }
-}
-/* 回転との併用中も日本酒専用の強い発光を維持する */
-.home-body.secret-spinning.secret-rainbow .sake.secret-motion-target.secret-rainbow-surface {
-  animation: home-secret-rapid-spin .85s linear infinite, home-secret-sake-glow 1.9s linear infinite;
-}
+/* 日本酒専用の強い box-shadow と専用アニメーションは廃止。
+   共通の home-secret-halo を使用することで全カードの光量を揃える。 */
 .home-body.secret-rainbow .login-button.secret-rainbow-surface {
   overflow: hidden;
   background: linear-gradient(110deg, #4d1835, #253d76, #126251, #594a13, #4d1835);
   background-size: 260% 100%;
   animation: home-secret-halo 2.8s linear infinite, home-secret-rainbow-flow 2.6s linear infinite;
 }
+/* 全10ボタン共通：日本酒を含め、虹色モード中はすべて同じ強さで発光 */
 @keyframes home-secret-halo {
-  0%, 100% { box-shadow: 0 0 12px #fa529a99, 0 0 26px #ae68ef70, 0 8px 22px #0006; }
-  25% { box-shadow: 0 0 12px #ffe24bba, 0 0 28px #fb8e3670, 0 8px 22px #0006; }
-  50% { box-shadow: 0 0 12px #42f699b8, 0 0 28px #36d5ee78, 0 8px 22px #0006; }
-  75% { box-shadow: 0 0 12px #628dffbb, 0 0 28px #a462ff78, 0 8px 22px #0006; }
+  0%, 100% {
+    box-shadow:
+      0 0 14px 5px #fa529aee,
+      0 0 35px 11px #ae68efc5,
+      0 0 61px 17px #fa529a75;
+  }
+  25% {
+    box-shadow:
+      0 0 14px 5px #ffe24bee,
+      0 0 35px 11px #fb8e36c5,
+      0 0 61px 17px #ffe24b75;
+  }
+  50% {
+    box-shadow:
+      0 0 14px 5px #42f699ee,
+      0 0 35px 11px #36d5eec5,
+      0 0 61px 17px #42f69975;
+  }
+  75% {
+    box-shadow:
+      0 0 14px 5px #628dffee,
+      0 0 35px 11px #a462ffc5,
+      0 0 61px 17px #628dff75;
+  }
 }
 @keyframes home-secret-rainbow-flow {
   to { background-position: -160% 0, 300% 0; }
