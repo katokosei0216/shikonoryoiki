@@ -251,13 +251,16 @@ function showLoginPrompt(text) {
   openModal('loginPromptModal');
 }
 
-// review.php を呼ぶ。失敗しても { ok:false, message } を返す(401 はログイン案内を出して null)
-async function callReviewApi(url, init) {
+// review.php を呼ぶ。失敗しても { ok:false, message } を返す
+// promptOn401 が true のときだけログイン案内モーダルを出す（操作時のみ true にする）
+async function callReviewApi(url, init, promptOn401 = false) {
   try {
     const res = await fetch(url, init);
     if (res.status === 401) {
-      showLoginPrompt('口コミを利用するにはログインが必要です。');
-      return null;
+      if (promptOn401) {
+        showLoginPrompt('口コミを利用するにはログインが必要です。');
+      }
+      return { ok: false, unauthorized: true, message: 'ログインが必要です。' };
     }
     try {
       return await res.json();
@@ -275,7 +278,7 @@ function postReview(payload) {
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(Object.assign({ csrf: reviewState.csrf }, payload))
-  });
+  }, true);
 }
 
 // ----- 星の入力欄 -----
@@ -310,13 +313,15 @@ async function loadReviews() {
   const refresh = document.getElementById('refreshReviewsBtn');
   if (refresh) refresh.disabled = true;
   try {
-    // 常に商品IDを指定し、キャッシュを使用せず最新の口コミを取得する。
+    // 初期読み込み時はモーダルを出さず、未ログインでも画面を開けるようにする
     const data = await callReviewApi(
       REVIEW_API + '?product_id=' + encodeURIComponent(reviewState.productId),
-      { credentials: 'same-origin', cache: 'no-store' }
+      { credentials: 'same-origin', cache: 'no-store' },
+      false
     );
-    if (!data) {
-      setText('reviewListCount', 'ログイン後に口コミを確認できます。');
+    if (!data || data.unauthorized) {
+      setText('reviewListCount', '口コミの閲覧・投稿にはログインが必要です。');
+      showReviewMessage('投稿や閲覧にはログインが必要です。');
       return;
     }
 
@@ -369,13 +374,11 @@ function buildReviewCard(r, truncated) {
   const user = mk('div', 'comment-user');
   user.appendChild(mk('div', 'avatar-img'));
   user.appendChild(mk('span', 'comment-user-text',
-    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + '　' + starText(r.rating)
+    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + ' ' + starText(r.rating)
   ));
   card.appendChild(user);
 
   const text = mk('div', 'comment-text' + (truncated ? ' truncated' : ''), r.comment || '（コメントなし）');
-  // 改行・長い連続文字の折り返しはCSSが担当する。
-  // ここでインラインのwhite-spaceを指定すると通常一覧の省略表示を上書きしてしまう。
   card.appendChild(text);
 
   const meta = mk('div', '', formatDate(r.created_at));
@@ -415,7 +418,6 @@ function renderReviewLists() {
     }
   }
 
-  // 「最新5件」は必ず5件あるという意味ではなく、最大5件の意味。
   setText('reviewListHeading', reviewState.showAll
     ? 'みんなの口コミ（この商品の一覧）'
     : 'みんなの口コミ（この商品の最新5件）');
@@ -479,8 +481,12 @@ function fillReviewForm() {
 }
 
 // ----- 投稿・更新 -----
-// 投稿の成否は #reviewFeedback に表示する。ブラウザー上部の alert は出さない。
 async function saveReview() {
+  if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
+    showLoginPrompt('口コミの投稿を利用するにはログインが必要です。');
+    return;
+  }
+
   const rating = currentStars();
   if (rating < 1) {
     setReviewFeedback('星の数を1〜5から選んでください。', true);
@@ -510,7 +516,7 @@ async function saveReview() {
       rating,
       comment
     });
-    if (!data) {
+    if (!data || data.unauthorized) {
       setReviewFeedback('ログイン後に投稿してください。', true);
       return;
     }
@@ -533,7 +539,7 @@ async function deleteReview(reviewId) {
   if (!confirm('この口コミを削除しますか？')) return;
 
   const data = await postReview({ action: 'delete', review_id: Number(reviewId) });
-  if (!data) return;
+  if (!data || data.unauthorized) return;
 
   if (data.ok) {
     await loadReviews();
@@ -575,7 +581,6 @@ function initReviews() {
   const keyword = document.getElementById('reviewKeyword');
   if (keyword) keyword.addEventListener('input', renderReviewModalList);
 
-  // 別の利用者による新規投稿を手動で取得できるようにする。
   const refresh = document.getElementById('refreshReviewsBtn');
   if (refresh) refresh.addEventListener('click', loadReviews);
   const toggle = document.getElementById('toggleReviewListBtn');
@@ -590,10 +595,14 @@ function initReviews() {
 document.addEventListener('DOMContentLoaded', () => {
   loadProduct();
 
-  // 星評価：選択済みの最後の星をもう一度押すと解除
+  // 星評価：未ログインならボタンを押したときにログイン案内を出す
   const stars = document.querySelectorAll('.star-rating-select .star');
   stars.forEach((star, index) => {
     star.addEventListener('click', () => {
+      if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
+        showLoginPrompt('星評価を利用するにはログインが必要です。');
+        return;
+      }
       const isLastActive = star.classList.contains('active') &&
         (index === stars.length - 1 || !stars[index + 1].classList.contains('active'));
       setStars(isLastActive ? 0 : index + 1);
@@ -622,7 +631,8 @@ const favoriteState = {
 function renderFavorite() {
   const button = document.getElementById('favoriteBtn');
   if (!button) return;
-  button.disabled = !favoriteState.ready || favoriteState.busy;
+  // 未ログインでもボタンを押してログイン案内を出せるよう、ready が false でも押せるようにする
+  button.disabled = favoriteState.busy;
   button.classList.toggle('is-favorite', favoriteState.isFavorite);
   button.setAttribute('aria-pressed', String(favoriteState.isFavorite));
   button.textContent = favoriteState.isFavorite
@@ -645,7 +655,9 @@ async function fetchFavoriteState() {
       { credentials: 'same-origin', cache: 'no-store' }
     );
     if (res.status === 401) {
-      showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
+      // 初期表示ではログイン案内を出さず、ボタン押下時に案内する
+      favoriteState.isFavorite = false;
+      favoriteState.ready = false;
       return;
     }
     const data = await res.json();
@@ -665,10 +677,14 @@ async function fetchFavoriteState() {
 // HTMLの「お気に入り」ボタンから呼ばれる
 async function toggleFavorite() {
   if (!favoriteState.productId || favoriteState.busy) return;
+  if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
+    showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
+    return;
+  }
   if (!favoriteState.ready) {
     await fetchFavoriteState();
     if (!favoriteState.ready) {
-      alert('お気に入り情報の取得に失敗しました。再読み込みしてお試しください。');
+      showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
     }
     return;
   }

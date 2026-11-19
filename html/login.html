@@ -22,6 +22,8 @@
 
     <!-- login.php へPOST送信 -->
     <form id="loginForm" action="../php/login.php" method="POST">
+      <input type="hidden" name="redirect" id="loginRedirect" value="index.html">
+
       <div class="form-group">
         <label>メールアドレス</label>
         <input type="email" name="email" id="loginEmail" class="form-control" required maxlength="255" autocomplete="username" placeholder="example@domain.com">
@@ -41,7 +43,7 @@
     <div style="text-align:center;margin-top:20px;">
       <a href="javascript:void(0)" onclick="openModal('forgotModal')" style="color:#aaa18d;font-size:12px;">パスワードをお忘れの方はこちら</a>
     </div>
-    <a href="register.html" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">新規会員登録はこちら</a>
+    <a href="register.html" id="registerLink" class="gold-button" style="display:block;text-align:center;margin-top:15px;background:#11120f;">新規会員登録はこちら</a>
   </div>
 </main>
 
@@ -68,5 +70,29 @@
 
 <script src="../js/common.js?v=20261112-backfix1"></script>
 <script src="../js/login.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const rawRedirect = params.get('redirect') || '';
+  const safeRedirect = isSafeHtmlRedirect(rawRedirect) ? rawRedirect : 'index.html';
+
+  const hidden = document.getElementById('loginRedirect');
+  if (hidden) hidden.value = safeRedirect;
+
+  const regLink = document.getElementById('registerLink');
+  if (regLink && safeRedirect !== 'index.html') {
+    regLink.href = 'register.html?redirect=' + encodeURIComponent(safeRedirect);
+  }
+});
+
+function isSafeHtmlRedirect(val) {
+  if (typeof val !== 'string' || !val) return false;
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\\)/i.test(val) || /[\r\n]/.test(val)) return false;
+  const pathOnly = val.split(/[?#]/)[0];
+  if (!/^[A-Za-z0-9_-]+\.html$/.test(pathOnly)) return false;
+  if (pathOnly === 'login.html' || pathOnly === 'register.html') return false;
+  return true;
+}
+</script>
 </body>
 </html>

@@ -14,9 +14,31 @@ session_set_cookie_params([
 ]);
 session_start();
 
+// 戻り先を安全な同一フォルダ内のHTMLパスに限定する
+function resolve_login_redirect(?string $raw): string {
+    if (!is_string($raw) || $raw === '') {
+        return '../html/index.html';
+    }
+    if (preg_match('/^(?:[a-z][a-z0-9+.-]*:|\/\/|\\\\)/i', $raw) || preg_match('/[\r\n]/', $raw)) {
+        return '../html/index.html';
+    }
+    $pathOnly = parse_url($raw, PHP_URL_PATH);
+    if (!is_string($pathOnly) || !preg_match('/^[A-Za-z0-9_-]+\.html$/', $pathOnly)) {
+        return '../html/index.html';
+    }
+    if ($pathOnly === 'login.html' || $pathOnly === 'register.html') {
+        return '../html/index.html';
+    }
+    return '../html/' . $raw;
+}
+
 // ログイン画面へエラー付きで戻す
-function redirect_error(string $message): void {
-    header('Location: ../html/login.html?error=' . urlencode($message));
+function redirect_error(string $message, ?string $rawRedirect = null): void {
+    $query = 'error=' . urlencode($message);
+    if (is_string($rawRedirect) && $rawRedirect !== '') {
+        $query .= '&redirect=' . urlencode($rawRedirect);
+    }
+    header('Location: ../html/login.html?' . $query);
     exit;
 }
 
@@ -25,6 +47,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../html/login.html');
     exit;
 }
+
+$rawRedirect = $_POST['redirect'] ?? null;
 
 // ===== データベース接続設定 =====
 $host   = "localhost";
@@ -38,12 +62,12 @@ try {
         $user,
         $pass
     );
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);          // ★ATT_ → ATTR_ に修正
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 } catch (PDOException $e) {
     error_log('DB接続失敗: ' . $e->getMessage());
-    die("接続失敗：" . $e->getMessage());   // 公開するときは、詳細を画面に出さない固定の文にする
+    die("接続失敗：" . $e->getMessage());
 }
 
 $email    = trim($_POST['email'] ?? '');
@@ -51,36 +75,31 @@ $password = $_POST['password'] ?? '';
 
 // ===== 入力チェック =====
 if ($email === '' || $password === '') {
-    redirect_error('メールアドレスとパスワードを入力してください。');
+    redirect_error('メールアドレスとパスワードを入力してください。', $rawRedirect);
 }
 if (strlen($email) > 255 || strlen($password) > 1024) {
-    redirect_error('メールアドレスまたはパスワードが違います。');
+    redirect_error('メールアドレスまたはパスワードが違います。', $rawRedirect);
 }
 
 try {
-    // ★テーブル名は login ではなく users
     $sql  = "SELECT user_id, user_name, password_hash FROM users WHERE email = :email";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':email', $email);
     $stmt->execute();
 
-    // ★結果は $account に入れる($user はDB接続用のユーザー名なので上書きしない)
     $account = $stmt->fetch();
 
     if ($account) {
         $ok = password_verify($password, $account['password_hash']);
     } else {
-        // ユーザーがいなくても同じ時間をかける(メールの登録有無を時間から推測されないため)
         password_hash($password, PASSWORD_DEFAULT);
         $ok = false;
     }
 
     if (!$ok) {
-        // メールが違うのかパスワードが違うのかは、あえて教えない
-        redirect_error('メールアドレスまたはパスワードが違います。');
+        redirect_error('メールアドレスまたはパスワードが違います。', $rawRedirect);
     }
 
-    // ハッシュの強度が古くなっていたら、ログインのついでに更新する
     if (password_needs_rehash($account['password_hash'], PASSWORD_DEFAULT)) {
         $upd = $pdo->prepare('UPDATE users SET password_hash = ? WHERE user_id = ?');
         $upd->execute([password_hash($password, PASSWORD_DEFAULT), $account['user_id']]);
@@ -89,12 +108,13 @@ try {
     // ログイン成功: セッションIDを新しくしてから、ユーザー情報を保存する
     session_regenerate_id(true);
     $_SESSION['user_id']   = (int)$account['user_id'];
-    $_SESSION['user_name'] = $account['user_name'];   // ★$user_name['user_name'] → $account['user_name']
+    $_SESSION['user_name'] = $account['user_name'];
 
-    header('Location: ../html/index.html');
+    $redirectTo = resolve_login_redirect($rawRedirect);
+    header('Location: ' . $redirectTo);
     exit;
 
 } catch (PDOException $e) {
     error_log('ログインエラー: ' . $e->getMessage());
-    redirect_error('エラーが発生しました。しばらくしてからもう一度お試しください。');
+    redirect_error('エラーが発生しました。しばらくしてからもう一度お試しください。', $rawRedirect);
 }

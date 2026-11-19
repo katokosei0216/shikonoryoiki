@@ -1,11 +1,40 @@
+function sanitizeRedirect(val) {
+  if (typeof val !== 'string' || !val) return 'index.html';
+  if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\\)/i.test(val) || /[\r\n]/.test(val)) {
+    return 'index.html';
+  }
+  const cleanPath = val.split(/[?#]/)[0];
+  if (!/^[A-Za-z0-9_-]+\.html$/.test(cleanPath)) {
+    return 'index.html';
+  }
+  if (cleanPath === 'login.html' || cleanPath === 'register.html') {
+    return 'index.html';
+  }
+  return val;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('loginForm');
   if (form) {
     form.addEventListener('submit', handleLoginSubmit);
   }
 
+  const params = new URLSearchParams(window.location.search);
+  const rawRedirect = params.get('redirect') || '';
+  const safeRedirect = sanitizeRedirect(rawRedirect);
+
+  const redirectInput = document.getElementById('loginRedirect');
+  if (redirectInput) {
+    redirectInput.value = safeRedirect;
+  }
+
+  const registerLink = document.getElementById('registerLink') || document.querySelector('a[href="register.html"]');
+  if (registerLink && safeRedirect !== 'index.html') {
+    registerLink.href = 'register.html?redirect=' + encodeURIComponent(safeRedirect);
+  }
+
   // PHP からリダイレクトで渡されたエラーメッセージを表示する
-  const errorMsg = new URLSearchParams(window.location.search).get('error');
+  const errorMsg = params.get('error');
   if (errorMsg) {
     showError(errorMsg);
   }

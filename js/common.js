@@ -41,7 +41,7 @@ function getDetailReturnContext() {
   return {
     from: ['search', 'mypage', 'easyanswer'].includes(from) ? from : 'search',
     category: validDetailCategory(category) ? category : null,
-    section: section === 'comments' ? 'comments' : 'favorites' 
+    section: section === 'comments' ? 'comments' : 'favorites'
   };
 }
 
@@ -54,10 +54,44 @@ function updateDetailBackLink(category) {
   if (link) link.href = 'search.html?category=' + encodeURIComponent(category);
 }
 
+// 現在のページ（または指定URL）を安全な戻り先（例: "detail.html?id=10&from=search"）にする
+function getSafeReturnTarget(rawUrl) {
+  try {
+    const target = rawUrl ? new URL(rawUrl, window.location.origin) : new URL(window.location.href);
+    if (target.origin !== window.location.origin) return 'index.html';
+
+    const fileName = target.pathname.split('/').pop() || '';
+    if (!fileName || fileName === 'login.html' || fileName === 'register.html') {
+      return 'index.html';
+    }
+    if (!/^[A-Za-z0-9_-]+\.html$/.test(fileName)) {
+      return 'index.html';
+    }
+    return fileName + target.search + target.hash;
+  } catch (e) {
+    return 'index.html';
+  }
+}
+
+// 戻り先付きのログイン画面URLを組み立てる
+function buildLoginUrl(returnTarget) {
+  const safe = getSafeReturnTarget(returnTarget);
+  return 'login.html?redirect=' + encodeURIComponent(safe);
+}
+
+// ページ内の login.html リンクにも現在の画面を戻り先として付与する
+function applyReturnTargetsToLoginLinks() {
+  const loginHref = buildLoginUrl();
+  document.querySelectorAll('a[href="login.html"]').forEach(a => {
+    a.href = loginHref;
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   let redirecting = false;
   try {
     const isPublicPage = PUBLIC_PAGE_CLASSES.some(c => document.body.classList.contains(c));
+    const isMyPage = document.body.classList.contains('mypage-page');
 
     // ログイン状態はサーバーのセッションで判定する(localStorage は使わない)
     let loggedIn = false;
@@ -65,15 +99,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       loggedIn = await checkLogin();
       isLoggedIn = loggedIn;   // 他のスクリプトが参照する共通の変数にも反映
 
-      // ★ログインが必要なページ: 未ログインならログイン画面へ(中身は見せないまま移動する)
-      if (!loggedIn) {
+      // マイページだけはログイン必須にする（閲覧・検索は未ログインでもOK）
+      if (isMyPage && !loggedIn) {
         redirecting = true;
-        window.location.replace('login.html');
+        window.location.replace(buildLoginUrl());
         return;
       }
     }
 
     buildHeader(isPublicPage, loggedIn);
+    applyReturnTargetsToLoginLinks();
   } finally {
     // 移動しないときだけ、ページを表示する
     if (!redirecting) document.documentElement.style.visibility = '';
@@ -146,7 +181,7 @@ function buildHeader(isPublicPage, loggedIn) {
       handleLogout();
     });
   } else {
-    userArea.innerHTML = `<a href="login.html" class="login-button">ログイン</a>`;
+    userArea.innerHTML = `<a href="${buildLoginUrl()}" class="login-button">ログイン</a>`;
   }
 }
 
@@ -173,10 +208,10 @@ async function handleLogout() {
       body: '{}'
     });
   } catch (e) {
-    // 通信に失敗しても、画面はログイン画面へ戻す
+    // 通信に失敗しても、画面はホーム画面へ戻す
   }
   alert('ログアウトしました');
-  window.location.href = 'login.html';
+  window.location.href = 'index.html';
 }
 
 // モーダル開閉汎用関数
@@ -188,6 +223,5 @@ function closeModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('active');
 }
-
 // ログイン状態(ヘッダー表示時にサーバーの結果で更新される)
 let isLoggedIn = false;

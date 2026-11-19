@@ -41,13 +41,7 @@ function out(array $arr, int $code = 200): void {
     exit;
 }
 
-// ===== ログイン確認 =====
-if (empty($_SESSION['user_id'])) {
-    out(['ok' => false, 'message' => 'ログインしてください。'], 401);
-}
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    out(['ok' => false, 'message' => '許可されていないリクエストです。'], 405);
-}
+
 
 // ===== 回答の読み取りと、目標値の計算 =====
 $input   = json_decode(file_get_contents('php://input'), true);
