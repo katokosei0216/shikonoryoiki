@@ -210,3 +210,77 @@ textarea.form-control { height: 80px; padding: 10px; resize: vertical; }
         height: 40px;
     }
 }
+
+/* ---------- スマホ対応 (common.css) ---------- */
+@media (max-width: 768px) {
+    .site-header {
+        height: auto;
+        min-height: 64px;
+        max-height: none;
+        padding: 10px 12px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px 10px;
+    }
+
+    .header-title {
+        width: auto;
+        max-width: 100%;
+        height: 54px;
+        padding: 0 16px;
+        order: 1;
+    }
+
+    .header-title-text {
+        font-size: 22px;
+        letter-spacing: 0.14em;
+    }
+
+    /* 左側：「← ホーム」の下に「← 検索へ」が来るよう縦積み */
+    .header-left {
+        position: static;
+        transform: none;
+        order: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    /* 右側：「ログアウト」など */
+    .header-user {
+        position: static;
+        transform: none;
+        order: 3;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .back-button,
+    .login-button {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .subpage-main {
+        min-height: auto;
+        padding: 18px 12px 72px;
+    }
+
+    .box-card {
+        padding: 18px 14px;
+    }
+
+    .subpage-heading h1 {
+        font-size: 20px;
+        letter-spacing: 0.14em;
+    }
+
+    .modal-content {
+        padding: 22px 16px;
+    }
+}

@@ -179,3 +179,59 @@ details.filter-accordion .accordion-content {
     transition: .2s;
 }
 .answer-card:hover { border-color: var(--gold-light); transform: translateY(-3px); }
+
+
+
+/* ---------- スマホ対応 (search.css) ---------- */
+@media (max-width: 768px) {
+    .search-panel {
+        padding: 14px;
+        margin-bottom: 20px;
+    }
+
+    .search-header-bar {
+        gap: 12px;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+
+    .keyword-search-wrap {
+        min-width: 100%;
+    }
+
+    .filter-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .range-group {
+        flex-wrap: wrap;
+    }
+
+    .rating-btn label {
+        padding: 9px 0;
+        font-size: 13px;
+    }
+
+    .search-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .search-actions .clear-btn,
+    .search-actions .gold-button {
+        width: 100%;
+    }
+
+    .answer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .answer-card {
+        height: auto;
+        min-height: 150px;
+        padding: 14px 10px;
+    }
+}

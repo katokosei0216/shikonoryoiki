@@ -137,3 +137,89 @@
 .flag-icon { width: 44px; height: 48px; position: relative; display: block; flex-shrink: 0; }
 .flag-icon:before { content: ""; position: absolute; left: 7px; top: 2px; width: 3px; height: 44px; background: #f0c96a; }
 .flag-icon i { position: absolute; left: 10px; top: 7px; width: 33px; height: 24px; background: #ed3a42; clip-path: polygon(0 0, 100% 0, 77% 50%, 100% 100%, 0 100%); }
+
+
+
+
+/* ---------- スマホ対応 (index.css) ---------- */
+@media (max-width: 768px) {
+    .home-main {
+        height: auto;
+        min-height: calc(100vh - 70px);
+        padding: 12px 14px 76px;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+    }
+
+    .section-label {
+        height: 36px;
+        font-size: 13px;
+        padding: 0 16px;
+        margin-bottom: 12px;
+    }
+
+    .section-label:before,
+    .section-label:after {
+        width: 20px;
+    }
+
+    /* お酒：2列×2行 */
+    .alcohol-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    /* タバコ：2列横並び */
+    .tobacco-grid {
+        grid-template-columns: repeat(2, 1fr);
+        width: 100%;
+        gap: 10px;
+    }
+
+    .preference-card {
+        height: 124px;
+    }
+
+    .card-name {
+        left: 12px;
+        top: 20px;
+        font-size: 16px;
+        letter-spacing: 0.08em;
+    }
+
+    .card-sub {
+        left: 12px;
+        top: 44px;
+        font-size: 8px;
+        letter-spacing: 0.14em;
+    }
+
+    .card-icon {
+        right: 10px;
+        bottom: 10px;
+        width: 64px;
+        height: 64px;
+    }
+
+    /* 下部ナビゲーション：1列縦積み */
+    .bottom-navigation {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .bottom-panel {
+        height: 76px;
+        padding: 0 16px;
+        gap: 12px;
+    }
+
+    .panel-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .panel-text strong {
+        font-size: 14px;
+    }
+}
