@@ -13,11 +13,10 @@ function send_json(int $status, array $data): void {
     exit;
 }
 
-if (empty($_SESSION['user_id'])) {
-    send_json(401, ['ok' => false, 'message' => 'ログインしてください。']);
-}
-$userId = (int)$_SESSION['user_id'];
-if (empty($_SESSION['csrf'])) {
+// 登録件数のGET取得は公開。POSTの登録/解除のみ会員限定。
+$loggedIn = !empty($_SESSION['user_id']);
+$userId = $loggedIn ? (int)$_SESSION['user_id'] : null;
+if ($loggedIn && empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
@@ -30,6 +29,9 @@ if ($method !== 'GET' && $method !== 'POST') {
 if ($method === 'GET') {
     $input = $_GET;
 } else {
+    if (!$loggedIn) {
+        send_json(401, ['ok' => false, 'message' => 'ログインしてください。']);
+    }
     if (stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) {
         send_json(415, ['ok' => false, 'message' => 'JSON形式で送信してください。']);
     }
@@ -87,9 +89,12 @@ try {
         }
     }
 
-    $stmt = $pdo->prepare('SELECT 1 FROM favorites WHERE user_id = ? AND product_id = ?');
-    $stmt->execute([$userId, $productId]);
-    $isFavorite = (bool)$stmt->fetchColumn();
+    $isFavorite = false;
+    if ($loggedIn) {
+        $stmt = $pdo->prepare('SELECT 1 FROM favorites WHERE user_id = ? AND product_id = ?');
+        $stmt->execute([$userId, $productId]);
+        $isFavorite = (bool)$stmt->fetchColumn();
+    }
 
     $stmt = $pdo->prepare('SELECT COUNT(*) FROM favorites WHERE product_id = ?');
     $stmt->execute([$productId]);
@@ -100,7 +105,7 @@ try {
         'product_id' => (int)$productId,
         'is_favorite' => $isFavorite,
         'count' => $count,
-        'csrf' => $_SESSION['csrf'],
+        'csrf' => $loggedIn ? $_SESSION['csrf'] : '',
         'message' => $method === 'POST'
             ? ($isFavorite ? 'お気に入りに登録しました。' : 'お気に入りを解除しました。')
             : '',

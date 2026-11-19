@@ -36,6 +36,68 @@ const METHOD_LABELS = { shake: 'シェイク', build: 'ビルド', stir: 'ステ
 const GLASS_LABELS  = { short: 'ショート', long: 'ロング' };
 const WINE_LABELS   = { '泡': 'スパークリング' };
 
+// 電子タバコ48商品の商品名→画像番号。DBのAUTO_INCREMENTが501から始まらなくても、
+// 商品名で正しく画像を選ぶ（アイコス修正画像5点も差し替え済み）。
+// 全角・半角スペースや記号の違いを吸収して照合する。
+const normalizeVapeName = name => String(name ?? '')
+  .normalize('NFKC').replace(/[\s\u3000・･\-]/g, '').toLowerCase();
+const VAPE_IMAGE_BY_NAME = new Map([
+  ["テリア クリア レギュラー", 5001],
+  ["センティア バランスド イエロー", 5002],
+  ["センティア スムース ゴールド", 5003],
+  ["センティア クリア シルバー", 5004],
+  ["センティア ピュア ティーク", 5005],
+  ["センティア フレッシュ エメラルド", 5006],
+  ["テリア スムース レギュラー", 5007],
+  ["テリア バランスド レギュラー", 5008],
+  ["テリア ウォーム レギュラー", 5009],
+  ["テリア ミント", 5010],
+  ["センティア クール ジェイド", 5011],
+  ["テリア ブライト メンソール", 5012],
+  ["テリア ルビー レギュラー", 5013],
+  ["センティア スムース バイオレット", 5014],
+  ["テリア ブロッサム パール", 5015],
+  ["テリア ステラー パール", 5016],
+  ["テリア サン パール", 5017],
+  ["テリア オアシス パール", 5018],
+  ["テリア リビエラ パール", 5019],
+  ["テリア シャイン パール", 5020],
+  ["テリア ベルベット パール", 5021],
+  ["センティア パープル カプセル", 5022],
+  ["センティア パッション フルーツ カプセル", 5023],
+  ["テリア メンソール", 5024],
+  ["センティア フロスト グリーン", 5025],
+  ["センティア シトラス グリーン", 5026],
+  ["センティア フレッシュ コーラル", 5027],
+  ["センティア フレッシュ パープル", 5028],
+  ["センティア トロピカル イエロー", 5029],
+  ["センティア ジューシー レッド", 5030],
+  ["テリア レギュラー", 5031],
+  ["テリア イエロー メンソール", 5032],
+  ["テリア パープル メンソール", 5033],
+  ["テリア トロピカル メンソール", 5034],
+  ["テリア フュージョン メンソール", 5035],
+  ["センティア アイシー ブラック", 5036],
+  ["テリア ブラック メンソール", 5037],
+  ["テリア ブラック イエロー メンソール", 5038],
+  ["テリア ブラック サンシャイン メンソール", 5039],
+  ["センティア アイシー レッド", 5040],
+  ["センティア コバルト ブルー", 5041],
+  ["センティア ディープ ブロンズ", 5042],
+  ["テリア ブラック パープル メンソール", 5043],
+  ["テリア ブラック ルビー メンソール", 5044],
+  ["テリア ブラック フューシャ メンソール", 5045],
+  ["センティア アイシー パープル", 5046],
+  ["テリア リッチ レギュラー", 5047],
+  ["テリア ブラック ミント パール", 5048],
+].map(([name, id]) => [normalizeVapeName(name), id]));
+
+function getVapeImageUrl(p) {
+  if (p.category_code !== 'vape') return '';
+  const imageId = VAPE_IMAGE_BY_NAME.get(normalizeVapeName(p.product_name));
+  return imageId ? `../assets/products/${imageId}.webp` : '';
+}
+
 // 商品画像は assets/products/{画像番号}.webp に統一。
 // 既存DBではウイスキー/日本酒は image_path に画像番号が入り、
 // ワイン/カクテルは NULL のため商品IDとカテゴリから画像番号を補完する。
@@ -44,8 +106,11 @@ const IMAGE_ID_RANGES = {
   sake:     { min: 101, max: 200, offset: 1900 },
   wine:     { min: 201, max: 300, offset: 2800 },
   cocktail: { min: 301, max: 400, offset: 3700 },
-  // 紙タバコ: 商品ID 401〜500 に対して画像6001.webp〜6100.webp
-  cigarette: { min: 401, max: 500, offset: 5600 }
+  // 紙タバコ: 既存の画像対応は維持
+  cigarette: { min: 401, max: 500, offset: 5600 },
+  paper:     { min: 401, max: 500, offset: 5600 },
+  // 電子タバコ: 商品名による照合ができない場合の予備（DB IDが501〜548の場合）
+  vape:      { min: 501, max: 548, offset: 4500 }
 };
 
 function getCategoryImageUrl(p) {
@@ -57,6 +122,15 @@ function getCategoryImageUrl(p) {
 }
 
 function resolveProductImageUrl(p) {
+  // 電子タバコ画像はDBでimage_pathがNULLでも、銘柄名から画像を決定できる。
+  const vapeImage = getVapeImageUrl(p);
+  if (vapeImage) return vapeImage;
+  // 紙タバコの取り込みSQLは image_path を設定していないため、
+  // 商品ID 401〜500 -> 同梱画像 6001〜6100 を優先して必ず対応させる。
+  if (p.category_code === 'cigarette' || p.category_code === 'paper') {
+    const bundledImage = getCategoryImageUrl(p);
+    if (bundledImage) return bundledImage;
+  }
   const stored = String(p.image_path ?? '').trim();
   // DBに保存されている画像番号（例: 1001, 2099）
   if (/^\d{4}$/.test(stored)) {
@@ -77,24 +151,75 @@ function buildSpecRows(p, d, code) {
   };
 
   if (code !== 'cocktail') {
-    add('価格', p.price ? Number(p.price).toLocaleString() + '円' : null);
-    if (code === 'cigarette') {
-      add('ブランド', d.brand);
-      // 0mgも有効な値として扱い、未登録ならその旨を明示する
-      const mg = value => value == null || value === '' || !Number.isFinite(Number(value))
+    add('価格', p.price != null && p.price !== '' ? Number(p.price).toLocaleString() + '円' : null);
+    if (code === 'cigarette' || code === 'paper') {
+      // tobacco_details の表示用に意味のある項目はすべて掲載する。
+      // 数値 0、フラグ 0、未登録(NULL)を区別する。
+      const mg = value => value === null || value === undefined || value === '' || !Number.isFinite(Number(value))
         ? '未登録' : `${Number(value)}mg`;
+      const yesNo = value => value === null || value === undefined || value === ''
+        ? null : (Number(value) === 1 ? 'あり' : 'なし');
+      const selected = (flags) => {
+        if (!flags.some(([key]) => d[key] !== null && d[key] !== undefined)) return null;
+        const names = flags.filter(([key]) => Number(d[key]) === 1).map(([, label]) => label);
+        return names.length ? names.join('・') : '指定なし';
+      };
+      add('ブランド', d.brand);
+      add('メーカー', p.maker_name);
+      add('製造国', p.country_name);
+      add('香味タイプ', d.flavor_type);
       add('タール', mg(d.tar_mg));
       add('ニコチン', mg(d.nicotine_mg));
-    } else if (code !== 'vape') {
+      if (d.pack_count !== null && d.pack_count !== undefined && d.pack_count !== '') {
+        add('入数', `${Number(d.pack_count)}本入り`);
+      }
+      add('長さ・形状', selected([
+        ['is_short', 'ショート'], ['is_king', 'キングサイズ（KS）'],
+        ['is_long', 'ロング（100’s）'], ['is_slim', 'スリム']
+      ]));
+      add('包装タイプ', selected([['is_soft', 'ソフト'], ['is_box', 'ボックス']]));
+      // フラグの真偽も詳細画面で確認可能にし、DBに登録済みの条件を取りこぼさない。
+      add('ショート', yesNo(d.is_short));
+      add('標準（KS）', yesNo(d.is_king));
+      add('ロング（100’s）', yesNo(d.is_long));
+      add('スリム', yesNo(d.is_slim));
+      add('ソフト', yesNo(d.is_soft));
+      add('ボックス', yesNo(d.is_box));
+      add('レギュラー', yesNo(d.is_regular));
+      add('メンソール', yesNo(d.is_menthol));
+      add('香り付き', yesNo(d.is_flavor));
+      add('カプセル', yesNo(d.is_capsule));
+    } else if (code === 'vape') {
+      add('製品シリーズ', d.product_line);
+      add('種類', d.type_label);
+      add('メーカー', p.maker_name);
+      add('製造国', p.country_name);
+      const vapeYesNo = v => v === null || v === undefined || v === ''
+        ? '未登録' : (Number(v) === 1 ? 'あり' : 'なし');
+      const vapeCompatible = v => v === null || v === undefined || v === ''
+        ? '未登録' : (Number(v) === 1 ? '対応' : '非対応');
+      add('吸いごたえ', dots(d.strength_score) || '未評価');
+      add('IQOS ILUMA対応', vapeCompatible(d.is_iluma_compatible));
+      add('旧型IQOS対応', vapeCompatible(d.is_legacy_compatible));
+      add('レギュラー', vapeYesNo(d.is_regular));
+      add('メンソール', vapeYesNo(d.is_menthol));
+      add('フレーバー強め', vapeYesNo(d.is_strong_flavor));
+      add('カプセル入り', vapeYesNo(d.is_capsule));
+    } else {
       add('度数', p.abv ? p.abv + '%' : null);
       add('年代', p.vintage ? p.vintage : null);
     }
   }
 
-  add('香り', dots(p.aroma_score));
-  add('味（甘↔苦）', dots(p.taste_score));
-  add('酸味', dots(p.sour_score));
-  add('濃厚さ', dots(p.richness_score));
+  if (code === 'vape') {
+    add('香り', dots(p.aroma_score) || '未評価');
+    add('コク', dots(p.richness_score) || '未評価');
+  } else if (code !== 'cigarette' && code !== 'paper') {
+    add('香り', dots(p.aroma_score));
+    add('味（甘↔苦）', dots(p.taste_score));
+    add('酸味', dots(p.sour_score));
+    add('濃厚さ', dots(p.richness_score));
+  }
 
   if (code === 'whisky') {
     const t = [];
@@ -138,7 +263,7 @@ function renderProduct(data) {
   setText('detailTitle', p.product_name);
   document.title = p.product_name + ' | 嗜好の領域';
 
-  // 商品画像（4カテゴリ合計400商品に対応）
+  // 商品画像（紙タバコ・電子タバコを含む登録済み商品の画像を表示）
   const imgBox = document.getElementById('detailImage');
   if (imgBox) {
     const imageUrl = resolveProductImageUrl(p);
@@ -146,9 +271,10 @@ function renderProduct(data) {
       const img = document.createElement('img');
       img.alt = `${p.product_name}の商品画像`;
       img.decoding = 'async';
+      img.loading = 'eager';
       img.onerror = () => {
-        // DBに古い画像パスが登録されていても、同梱の紙タバコ画像を試す
-        const fallback = code === 'cigarette' ? getCategoryImageUrl(p) : '';
+        // DBに古い画像パスがあっても、カテゴリの同梱画像があれば試す。
+        const fallback = getCategoryImageUrl(p);
         if (fallback && img.getAttribute('src') !== fallback) {
           img.src = fallback;
         } else {
@@ -164,7 +290,7 @@ function renderProduct(data) {
 
   // 口コミ入力欄は紙タバコにも使える表現に切り替える
   const reviewInput = document.getElementById('commentTextarea');
-  if (reviewInput && code === 'cigarette') {
+  if (reviewInput && (code === 'cigarette' || code === 'paper' || code === 'vape')) {
     reviewInput.placeholder = 'この商品の感想を入力...';
   }
 
@@ -251,16 +377,16 @@ function showLoginPrompt(text) {
   openModal('loginPromptModal');
 }
 
-// review.php を呼ぶ。失敗しても { ok:false, message } を返す
-// promptOn401 が true のときだけログイン案内モーダルを出す（操作時のみ true にする）
-async function callReviewApi(url, init, promptOn401 = false) {
+// review.php を呼ぶ。失敗しても { ok:false, message } を返す(401 はログイン案内を出して null)
+async function callReviewApi(url, init) {
   try {
     const res = await fetch(url, init);
     if (res.status === 401) {
-      if (promptOn401) {
-        showLoginPrompt('口コミを利用するにはログインが必要です。');
+      // GET（一覧表示）はゲストにも公開。POST（投稿・編集・削除）だけ案内を出す。
+      if (init && (init.method || 'GET').toUpperCase() !== 'GET') {
+        showLoginPrompt('口コミの投稿・編集・削除にはログインが必要です。');
       }
-      return { ok: false, unauthorized: true, message: 'ログインが必要です。' };
+      return null;
     }
     try {
       return await res.json();
@@ -278,7 +404,7 @@ function postReview(payload) {
     credentials: 'same-origin',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(Object.assign({ csrf: reviewState.csrf }, payload))
-  }, true);
+  });
 }
 
 // ----- 星の入力欄 -----
@@ -313,15 +439,13 @@ async function loadReviews() {
   const refresh = document.getElementById('refreshReviewsBtn');
   if (refresh) refresh.disabled = true;
   try {
-    // 初期読み込み時はモーダルを出さず、未ログインでも画面を開けるようにする
+    // 常に商品IDを指定し、キャッシュを使用せず最新の口コミを取得する。
     const data = await callReviewApi(
       REVIEW_API + '?product_id=' + encodeURIComponent(reviewState.productId),
-      { credentials: 'same-origin', cache: 'no-store' },
-      false
+      { credentials: 'same-origin', cache: 'no-store' }
     );
-    if (!data || data.unauthorized) {
-      setText('reviewListCount', '口コミの閲覧・投稿にはログインが必要です。');
-      showReviewMessage('投稿や閲覧にはログインが必要です。');
+    if (!data) {
+      setText('reviewListCount', '口コミを取得できませんでした。更新ボタンで再試行できます。');
       return;
     }
 
@@ -374,11 +498,13 @@ function buildReviewCard(r, truncated) {
   const user = mk('div', 'comment-user');
   user.appendChild(mk('div', 'avatar-img'));
   user.appendChild(mk('span', 'comment-user-text',
-    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + ' ' + starText(r.rating)
+    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + '　' + starText(r.rating)
   ));
   card.appendChild(user);
 
   const text = mk('div', 'comment-text' + (truncated ? ' truncated' : ''), r.comment || '（コメントなし）');
+  // 改行・長い連続文字の折り返しはCSSが担当する。
+  // ここでインラインのwhite-spaceを指定すると通常一覧の省略表示を上書きしてしまう。
   card.appendChild(text);
 
   const meta = mk('div', '', formatDate(r.created_at));
@@ -418,6 +544,7 @@ function renderReviewLists() {
     }
   }
 
+  // 「最新5件」は必ず5件あるという意味ではなく、最大5件の意味。
   setText('reviewListHeading', reviewState.showAll
     ? 'みんなの口コミ（この商品の一覧）'
     : 'みんなの口コミ（この商品の最新5件）');
@@ -481,12 +608,12 @@ function fillReviewForm() {
 }
 
 // ----- 投稿・更新 -----
+// 投稿の成否は #reviewFeedback に表示する。ブラウザー上部の alert は出さない。
 async function saveReview() {
-  if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
-    showLoginPrompt('口コミの投稿を利用するにはログインが必要です。');
+  if (!isLoggedIn) {
+    showLoginPrompt('口コミを投稿するにはログインが必要です。');
     return;
   }
-
   const rating = currentStars();
   if (rating < 1) {
     setReviewFeedback('星の数を1〜5から選んでください。', true);
@@ -516,7 +643,7 @@ async function saveReview() {
       rating,
       comment
     });
-    if (!data || data.unauthorized) {
+    if (!data) {
       setReviewFeedback('ログイン後に投稿してください。', true);
       return;
     }
@@ -536,10 +663,14 @@ async function saveReview() {
 
 // ----- 削除(自分の口コミだけ) -----
 async function deleteReview(reviewId) {
+  if (!isLoggedIn) {
+    showLoginPrompt('口コミを削除するにはログインが必要です。');
+    return;
+  }
   if (!confirm('この口コミを削除しますか？')) return;
 
   const data = await postReview({ action: 'delete', review_id: Number(reviewId) });
-  if (!data || data.unauthorized) return;
+  if (!data) return;
 
   if (data.ok) {
     await loadReviews();
@@ -572,7 +703,15 @@ function initReviews() {
     });
   }
   const textarea = document.getElementById('commentTextarea');
-  if (textarea) textarea.addEventListener('input', updateCommentCounter);
+  if (textarea) {
+    textarea.addEventListener('focus', () => {
+      if (!isLoggedIn) {
+        textarea.blur();
+        showLoginPrompt('口コミを投稿するにはログインが必要です。');
+      }
+    });
+    textarea.addEventListener('input', updateCommentCounter);
+  }
   updateCommentCounter();
 
   // 拡大モーダルの絞り込み
@@ -581,6 +720,7 @@ function initReviews() {
   const keyword = document.getElementById('reviewKeyword');
   if (keyword) keyword.addEventListener('input', renderReviewModalList);
 
+  // 別の利用者による新規投稿を手動で取得できるようにする。
   const refresh = document.getElementById('refreshReviewsBtn');
   if (refresh) refresh.addEventListener('click', loadReviews);
   const toggle = document.getElementById('toggleReviewListBtn');
@@ -595,12 +735,12 @@ function initReviews() {
 document.addEventListener('DOMContentLoaded', () => {
   loadProduct();
 
-  // 星評価：未ログインならボタンを押したときにログイン案内を出す
+  // 星評価：選択済みの最後の星をもう一度押すと解除
   const stars = document.querySelectorAll('.star-rating-select .star');
   stars.forEach((star, index) => {
     star.addEventListener('click', () => {
-      if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
-        showLoginPrompt('星評価を利用するにはログインが必要です。');
+      if (!isLoggedIn) {
+        showLoginPrompt('口コミを投稿するにはログインが必要です。');
         return;
       }
       const isLastActive = star.classList.contains('active') &&
@@ -631,8 +771,7 @@ const favoriteState = {
 function renderFavorite() {
   const button = document.getElementById('favoriteBtn');
   if (!button) return;
-  // 未ログインでもボタンを押してログイン案内を出せるよう、ready が false でも押せるようにする
-  button.disabled = favoriteState.busy;
+  button.disabled = !favoriteState.ready || favoriteState.busy;
   button.classList.toggle('is-favorite', favoriteState.isFavorite);
   button.setAttribute('aria-pressed', String(favoriteState.isFavorite));
   button.textContent = favoriteState.isFavorite
@@ -655,9 +794,9 @@ async function fetchFavoriteState() {
       { credentials: 'same-origin', cache: 'no-store' }
     );
     if (res.status === 401) {
-      // 初期表示ではログイン案内を出さず、ボタン押下時に案内する
+      // 旧版APIが401を返しても、閲覧だけでモーダルを開かない。
+      favoriteState.ready = true;
       favoriteState.isFavorite = false;
-      favoriteState.ready = false;
       return;
     }
     const data = await res.json();
@@ -677,14 +816,14 @@ async function fetchFavoriteState() {
 // HTMLの「お気に入り」ボタンから呼ばれる
 async function toggleFavorite() {
   if (!favoriteState.productId || favoriteState.busy) return;
-  if (typeof isLoggedIn !== 'undefined' && !isLoggedIn) {
+  if (!isLoggedIn) {
     showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
     return;
   }
   if (!favoriteState.ready) {
     await fetchFavoriteState();
     if (!favoriteState.ready) {
-      showLoginPrompt('お気に入り機能を利用するにはログインが必要です。');
+      alert('お気に入り情報の取得に失敗しました。再読み込みしてお試しください。');
     }
     return;
   }

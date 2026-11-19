@@ -53,9 +53,24 @@ try {
             $stmt = $pdo->prepare('SELECT wine_type, grape FROM wine_details WHERE product_id = ?');
             break;
         case 'cigarette':
-            // 紙タバコのタール・ニコチン含有量は tobacco_details に保存済み
+            // 銘柄、香味、表示値、入数、サイズ、包材、香味のフラグを全取得する。
+            // 商品名・価格・メーカー・説明文は上の products JOIN から取得済み。
             $stmt = $pdo->prepare(
-                'SELECT brand, tar_mg, nicotine_mg FROM tobacco_details WHERE product_id = ?'
+                'SELECT brand, flavor_type, tar_mg, nicotine_mg, pack_count,
+                        is_short, is_king, is_long, is_slim,
+                        is_regular, is_menthol, is_flavor,
+                        is_soft, is_box, is_capsule
+                 FROM tobacco_details WHERE product_id = ?'
+            );
+            break;
+        case 'vape':
+            // IQOS用: vape_details の全商品属性とスコアを取得する。
+            // 香り・コク・説明文は products.* から取得済み。未評価は NULL のまま返す。
+            $stmt = $pdo->prepare(
+                'SELECT product_line, strength_score, is_iluma_compatible,
+                        is_legacy_compatible, is_regular, is_menthol,
+                        is_strong_flavor, is_capsule, type_label
+                 FROM vape_details WHERE product_id = ?'
             );
             break;
         case 'cocktail':

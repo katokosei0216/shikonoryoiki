@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>簡易検索 | 嗜好の領域</title>
-<link rel="stylesheet" href="../css/common.css">
-<link rel="stylesheet" href="../css/easysearch.css">
+<link rel="stylesheet" href="../css/common.css?v=20261119-guest1">
+<link rel="stylesheet" href="../css/easysearch.css?v=20261119-restored2">
 <style>
   /* 5択の選択肢を縦並びにして見やすくするスタイル */
   .radio-options {
@@ -26,10 +26,15 @@
   <div class="box-card" style="width:min(700px,100%);margin:0 auto;position:relative;padding-bottom:80px;">
     <div class="subpage-heading">
       <span></span>
-      <h1>嗜好診断 (10の質問)</h1>
+      <h1 id="easySearchTitle">嗜好診断 (10の質問)</h1>
       <span></span>
     </div>
-    <div class="question-list">
+    <nav id="tobaccoCategorySelector" class="easy-tobacco-switch" aria-label="タバコの種類" hidden>
+      <a href="easysearch.html?type=cigarette" class="easy-type-tab" data-type="cigarette">紙タバコ</a>
+      <a href="easysearch.html?type=vape" class="easy-type-tab" data-type="vape">電子タバコ</a>
+    </nav>
+    <p id="easySearchNote" class="easy-tobacco-note" hidden>10の質問に答えると、登録商品から条件に近い9件を表示します。</p>
+    <div class="question-list" id="easyQuestionList">
 
       <!-- Q1 -->
       <div class="question-item">
@@ -157,7 +162,7 @@
     </div>
   </div>
 </main>
-<script src="../js/common.js?v=20261112-backfix1"></script>
-<script src="../js/easysearch.js"></script>
+<script src="../js/common.js?v=20261119-guest1"></script>
+<script src="../js/easysearch.js?v=20261119-restored2"></script>
 </body>
 </html>

@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>詳細検索 | 嗜好の領域</title>
-<link rel="stylesheet" href="../css/common.css">
-<link rel="stylesheet" href="../css/search.css">
+<link rel="stylesheet" href="../css/common.css?v=20261119-guest1">
+<link rel="stylesheet" href="../css/search.css?v=20261119-restored2">
 <style>
   /* どのカテゴリーでも検索結果一覧の見出しが画面上部に綺麗に収まる余白調整 */
   #resultHeading {
@@ -19,7 +19,7 @@
 
   <!-- 絞り込みパネル -->
   <div class="search-panel box-card">
-    <form id="searchForm" onsubmit="return false;">
+    <form id="searchForm">
       
       <!-- 上部: 選んだ種別 + 商品名検索バー -->
       <div class="search-header-bar">
@@ -438,6 +438,40 @@
         </div>
       </div>
 
+      <!-- 電子タバコ専用条件。お酒用の製造国・年代・度数は表示しない -->
+      <div id="vapeFilterGrid" class="filter-grid vape-filter-grid" hidden>
+        <div>
+          <div class="filter-section-title">製品情報</div>
+          <div class="form-group">
+            <label>製品シリーズ</label>
+            <div id="vapeLineOptions" class="checkbox-group" aria-label="製品シリーズ">読み込み中...</div>
+          </div>
+          <div class="form-group">
+            <label>種類</label>
+            <div id="vapeTypeOptions" class="checkbox-group" aria-label="種類">読み込み中...</div>
+          </div>
+        </div>
+        <div>
+          <div class="filter-section-title">電子タバコの評価（5段階）</div>
+<div class="form-group"><label>香り（1: 弱い 〜 5: 強い）</label><div class="rating-options"><div class="rating-btn"><input type="radio" name="vape_aroma" id="vape_aroma1" value="1"><label for="vape_aroma1">1</label></div><div class="rating-btn"><input type="radio" name="vape_aroma" id="vape_aroma2" value="2"><label for="vape_aroma2">2</label></div><div class="rating-btn"><input type="radio" name="vape_aroma" id="vape_aroma3" value="3"><label for="vape_aroma3">3</label></div><div class="rating-btn"><input type="radio" name="vape_aroma" id="vape_aroma4" value="4"><label for="vape_aroma4">4</label></div><div class="rating-btn"><input type="radio" name="vape_aroma" id="vape_aroma5" value="5"><label for="vape_aroma5">5</label></div></div></div><div class="form-group"><label>コク（1: 軽い 〜 5: 濃厚）</label><div class="rating-options"><div class="rating-btn"><input type="radio" name="vape_richness" id="vape_richness1" value="1"><label for="vape_richness1">1</label></div><div class="rating-btn"><input type="radio" name="vape_richness" id="vape_richness2" value="2"><label for="vape_richness2">2</label></div><div class="rating-btn"><input type="radio" name="vape_richness" id="vape_richness3" value="3"><label for="vape_richness3">3</label></div><div class="rating-btn"><input type="radio" name="vape_richness" id="vape_richness4" value="4"><label for="vape_richness4">4</label></div><div class="rating-btn"><input type="radio" name="vape_richness" id="vape_richness5" value="5"><label for="vape_richness5">5</label></div></div></div><div class="form-group"><label>吸いごたえ（1: 軽い 〜 5: 強い）</label><div class="rating-options"><div class="rating-btn"><input type="radio" name="vape_strength" id="vape_strength1" value="1"><label for="vape_strength1">1</label></div><div class="rating-btn"><input type="radio" name="vape_strength" id="vape_strength2" value="2"><label for="vape_strength2">2</label></div><div class="rating-btn"><input type="radio" name="vape_strength" id="vape_strength3" value="3"><label for="vape_strength3">3</label></div><div class="rating-btn"><input type="radio" name="vape_strength" id="vape_strength4" value="4"><label for="vape_strength4">4</label></div><div class="rating-btn"><input type="radio" name="vape_strength" id="vape_strength5" value="5"><label for="vape_strength5">5</label></div></div></div>
+          <p class="vape-score-note">※ データ未評価の商品は、指定した5段階条件には一致しません。</p>
+        </div>
+        <div>
+          <div class="filter-section-title">香味・機能</div>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="vape_kind[]" value="regular"> レギュラー</label>
+            <label class="checkbox-item"><input type="checkbox" name="vape_kind[]" value="menthol"> メンソール</label>
+            <label class="checkbox-item"><input type="checkbox" name="vape_kind[]" value="strong_flavor"> フレーバー強め</label>
+            <label class="checkbox-item"><input type="checkbox" name="vape_kind[]" value="capsule"> カプセル入り</label>
+          </div>
+          <div class="filter-section-title" style="margin-top:20px;">対応機種</div>
+          <div class="checkbox-group">
+            <label class="checkbox-item"><input type="checkbox" name="vape_compat[]" value="iluma"> IQOS ILUMA対応</label>
+            <label class="checkbox-item"><input type="checkbox" name="vape_compat[]" value="legacy"> 旧型IQOS対応</label>
+          </div>
+        </div>
+      </div>
+
       <!-- 下部アクション -->
       <div class="search-actions">
         <button type="button" class="clear-btn" onclick="resetFilters()">条件をクリア</button>
@@ -458,8 +492,8 @@
 
 </main>
 
-<script src="../js/common.js?v=20261112-backfix1"></script>
-<script src="../js/search.js?v=20261113-paper3"></script>
+<script src="../js/common.js?v=20261119-guest1"></script>
+<script src="../js/search.js?v=20261119-restored2"></script>
 <script>
   // どのカテゴリー（ウイスキー・ワイン・日本酒・カクテル等）であっても検索ボタン押下で確実にスクロール
   document.getElementById('searchForm').addEventListener('click', function(e) {

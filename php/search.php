@@ -111,10 +111,34 @@ try {
             $brands = $stmt->fetchAll(PDO::FETCH_COLUMN);
         }
 
+        // 電子タバコの選択肢はDBの実際のシリーズ・種類から作る。
+        $vapeLines = [];
+        $vapeTypes = [];
+        if ($category === 'vape') {
+            $stmt = $pdo->prepare(
+                'SELECT DISTINCT vd.product_line FROM vape_details vd
+                 JOIN products p ON p.product_id = vd.product_id
+                 WHERE p.category_id = ? AND vd.product_line IS NOT NULL AND vd.product_line <> \'\'
+                 ORDER BY vd.product_line'
+            );
+            $stmt->execute([(int)$categoryId]);
+            $vapeLines = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $stmt = $pdo->prepare(
+                'SELECT DISTINCT vd.type_label FROM vape_details vd
+                 JOIN products p ON p.product_id = vd.product_id
+                 WHERE p.category_id = ? AND vd.type_label IS NOT NULL AND vd.type_label <> \'\'
+                 ORDER BY vd.type_label'
+            );
+            $stmt->execute([(int)$categoryId]);
+            $vapeTypes = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
         echo json_encode([
             'countries' => $countries,
             'makers'    => $makers,
             'brands'    => $brands,
+            'vape_lines' => $vapeLines,
+            'vape_types' => $vapeTypes,
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -241,6 +265,53 @@ try {
                 $conds = [];
                 foreach (in_list($key, array_keys($map)) as $t) $conds[] = "{$map[$t]} = 1";
                 if ($conds) $where[] = '(' . implode(' OR ', $conds) . ')';
+            }
+            break;
+
+        case 'vape':
+            $joins[] = 'LEFT JOIN vape_details vd ON vd.product_id = p.product_id';
+            $extraSelect = ', vd.product_line, vd.type_label, vd.strength_score,
+                             vd.is_iluma_compatible, vd.is_legacy_compatible,
+                             vd.is_regular, vd.is_menthol, vd.is_strong_flavor, vd.is_capsule,
+                             p.aroma_score, p.richness_score';
+
+            // シリーズとタイプ: それぞれグループ内は OR、グループ間は AND。
+            foreach ([
+                ['vape_line', 'vd.product_line'],
+                ['vape_type', 'vd.type_label'],
+            ] as [$key, $col]) {
+                $values = in_list($key);
+                if ($values) {
+                    $where[] = "$col IN (" . placeholders($values) . ")";
+                    array_push($params, ...$values);
+                }
+            }
+            // 1〜5のスコア。SQLでNULLは一致しないため未評価を誤って0点として扱わない。
+            if (($v = in_score('vape_aroma')) !== null) {
+                $where[] = 'p.aroma_score = ?'; $params[] = $v;
+            }
+            if (($v = in_score('vape_richness')) !== null) {
+                $where[] = 'p.richness_score = ?'; $params[] = $v;
+            }
+            if (($v = in_score('vape_strength')) !== null) {
+                $where[] = 'vd.strength_score = ?'; $params[] = $v;
+            }
+            $groups = [
+                'vape_kind' => [
+                    'regular' => 'vd.is_regular', 'menthol' => 'vd.is_menthol',
+                    'strong_flavor' => 'vd.is_strong_flavor', 'capsule' => 'vd.is_capsule'
+                ],
+                'vape_compat' => [
+                    'iluma' => 'vd.is_iluma_compatible',
+                    'legacy' => 'vd.is_legacy_compatible'
+                ],
+            ];
+            foreach ($groups as $key => $map) {
+                $conditions = [];
+                foreach (in_list($key, array_keys($map)) as $name) {
+                    $conditions[] = $map[$name] . ' = 1';
+                }
+                if ($conditions) $where[] = '(' . implode(' OR ', $conditions) . ')';
             }
             break;
 

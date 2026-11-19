@@ -235,3 +235,11 @@ details.filter-accordion .accordion-content {
         padding: 14px 10px;
     }
 }
+/* 電子タバコ専用検索: お酒用フィールドを非表示にし、3カラムを維持 */
+.vape-filter-grid[hidden] { display: none !important; }
+.vape-filter-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.vape-filter-grid > div { min-width: 0; }
+.vape-filter-grid .form-group { margin-bottom: 18px; }
+.vape-filter-grid .checkbox-group { align-items: center; }
+.vape-score-note { font-size: 12px; line-height: 1.6; color: var(--muted); }
+@media (max-width: 900px) { .vape-filter-grid { grid-template-columns: 1fr; } }

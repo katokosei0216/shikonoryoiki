@@ -28,14 +28,13 @@ function out(array $arr, int $code = 200): void {
     exit;
 }
 
-// ===== ログイン確認(ユーザーIDは必ずセッションから取る) =====
-if (empty($_SESSION['user_id'])) {
+// GET: 未ログインでも他の利用者の口コミと平均評価を閲覧可能。
+// POST: ログインした本人のみ投稿・更新・削除できる。
+$uid = empty($_SESSION['user_id']) ? null : (int)$_SESSION['user_id'];
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET' && $uid === null) {
     out(['ok' => false, 'message' => 'ログインしてください。'], 401);
 }
-$uid = (int)$_SESSION['user_id'];
-
-// 更新リクエストの正当性を確認するための合言葉(マイページと共通)
-if (empty($_SESSION['csrf'])) {
+if ($uid !== null && empty($_SESSION['csrf'])) {
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
@@ -94,25 +93,28 @@ try {
                 'rating'     => (int)$row['rating'],
                 'comment'    => $row['comment'],
                 'created_at' => $row['created_at'],
-                'is_mine'    => ((int)$row['user_id'] === $uid),   // 他のユーザーのIDは返さない
+                'is_mine'    => ($uid !== null && (int)$row['user_id'] === $uid),   // 他のユーザーのIDは返さない
             ];
         }
 
         // 自分の口コミ(一覧の件数制限に関係なく、必ず取得する)
-        $stmt = $pdo->prepare('
-            SELECT review_id, rating, comment FROM reviews
-             WHERE user_id = ? AND product_id = ?
-             ORDER BY review_id DESC LIMIT 1
-        ');
-        $stmt->execute([$uid, $pid]);
-        $mine = $stmt->fetch() ?: null;
+        $mine = null;
+        if ($uid !== null) {
+            $stmt = $pdo->prepare('
+                SELECT review_id, rating, comment FROM reviews
+                 WHERE user_id = ? AND product_id = ?
+                 ORDER BY review_id DESC LIMIT 1
+            ');
+            $stmt->execute([$uid, $pid]);
+            $mine = $stmt->fetch() ?: null;
+        }
         if ($mine) {
             $mine = ['review_id' => (int)$mine['review_id'], 'rating' => (int)$mine['rating'], 'comment' => $mine['comment']];
         }
 
         out([
             'ok'      => true,
-            'csrf'    => $_SESSION['csrf'],
+            'csrf'    => $uid !== null ? $_SESSION['csrf'] : '',
             'summary' => [
                 'count'   => (int)$sum['cnt'],
                 'average' => $sum['avg_rating'] === null ? null : round((float)$sum['avg_rating'], 1),

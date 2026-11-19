@@ -1,3 +1,18 @@
 .question-item { border-bottom: 1px solid #2a251a; padding: 15px 0; }
 .question-title { font-size: 14px; color: var(--gold-light); margin-bottom: 10px; }
 .radio-options { display: flex; gap: 15px; font-family: "Yu Gothic", sans-serif; font-size: 13px; }
+/* タバコ簡単検索。お酒のページの見た目を維持したまま切り替え */
+.easy-tobacco-switch { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:0 0 14px; }
+.easy-tobacco-switch[hidden],.easy-tobacco-note[hidden] { display:none !important; }
+.easy-type-tab { display:inline-flex; justify-content:center; padding:11px 20px; min-width:140px; border:1px solid var(--gold-dark); color:var(--cream); background:#0f100e; }
+.easy-type-tab:hover, .easy-type-tab.is-active { border-color:var(--gold-light); background:#4b3b18; color:var(--gold-light); }
+.easy-tobacco-note { color:var(--muted); text-align:center; font-size:13px; margin:8px auto 14px; line-height:1.7; }
+.easy-tobacco-question .radio-options { display:flex; flex-direction:column; gap:9px; }
+.easy-tobacco-question .radio-options label { display:flex; gap:9px; align-items:flex-start; line-height:1.65; padding:3px 0; font-size:14px; min-height:30px; cursor:pointer; }
+.easy-tobacco-question .radio-options input { width:16px; height:16px; margin:4px 2px 0 0; flex:none; accent-color:var(--gold); }
+@media(max-width:520px) {
+  .easy-type-tab { flex:1; min-width:0; }
+  .easy-tobacco-question .radio-options label { font-size:13px; }
+  .box-card:has(.easy-tobacco-question) { padding-left:18px; padding-right:18px; }
+  #showResult { width:100%; }
+}

@@ -1,11 +1,13 @@
 // ★ログイン状態の確認ログ(ブラウザの F12 → Console に出る)。直ったら false にする
-const DEBUG_AUTH = true;
+const DEBUG_AUTH = false;
 
 // ログインなしで見せてよいページ(<body> の class で判定する)
 const PUBLIC_PAGE_CLASSES = ['login-page', 'register-page'];
 
-// ログインの確認が終わるまで、ページの中身を見せない
-document.documentElement.style.visibility = 'hidden';
+// 公開ページはログイン照会が遅れてもすぐ表示する。会員情報を含むマイページだけ事前に隠す。
+if (document.body && document.body.classList.contains('mypage-page')) {
+  document.documentElement.style.visibility = 'hidden';
+}
 
 // 詳細ページのカテゴリ/遷移元はURLパラメータを優先する。
 // 旧URL(detail.html?id=...)にも対応するため、同一オリジンの参照元も調べる。
@@ -88,6 +90,8 @@ function applyReturnTargetsToLoginLinks() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // 同期的にリンクを保護し、認証照会が完了する前のタップも取りこぼさない。
+  attachGuestAccountLinks();
   let redirecting = false;
   try {
     const isPublicPage = PUBLIC_PAGE_CLASSES.some(c => document.body.classList.contains(c));
@@ -114,6 +118,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!redirecting) document.documentElement.style.visibility = '';
   }
 });
+
+// 未ログインでマイページ（個人設定・お気に入り・自分の投稿履歴）に進もうとした場合、
+// 詳細ページと同じデザインでログイン案内を表示する。検索・診断リンクは止めない。
+function showGuestAccountModal(message) {
+  let overlay = document.getElementById('guestAccountModal');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'guestAccountModal';
+    overlay.className = 'modal-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-labelledby', 'guestAccountTitle');
+    overlay.innerHTML = `
+      <div class="modal-content guest-account-dialog">
+        <button type="button" class="modal-close" aria-label="閉じる">×</button>
+        <div class="subpage-heading"><span></span><h1 id="guestAccountTitle">ログインが必要</h1><span></span></div>
+        <p id="guestAccountMessage" class="guest-account-message"></p>
+        <a class="gold-button guest-account-login" href="${buildLoginUrl()}">ログイン画面へ</a>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('.modal-close').addEventListener('click', () => overlay.classList.remove('active'));
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('active'); });
+    overlay.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('active'); });
+  }
+  overlay.querySelector('#guestAccountMessage').textContent = message || 'この機能を利用するにはログインが必要です。';
+  overlay.classList.add('active');
+  overlay.querySelector('.modal-close').focus();
+}
+function attachGuestAccountLinks() {
+  // ヘッダーのリンクは認証照会後に追加されるので、後から生成された要素にも対応する。
+  document.addEventListener('click', event => {
+    const link = event.target instanceof Element ? event.target.closest('a[href^="mypage.html"]') : null;
+    if (!link || isLoggedIn) return;
+    event.preventDefault();
+    const section = link.hash;
+    const msg = section === '#comments' ? '自分のコメント履歴を利用するにはログインが必要です。' :
+      section === '#favorites' ? 'お気に入り機能を利用するにはログインが必要です。' :
+      'マイページ（会員情報・お気に入り・コメント履歴）を利用するにはログインが必要です。';
+    showGuestAccountModal(msg);
+  }, true);
+}
 
 // ヘッダーを組み立てる
 function buildHeader(isPublicPage, loggedIn) {

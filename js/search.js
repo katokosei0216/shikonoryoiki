@@ -50,6 +50,27 @@ document.addEventListener('DOMContentLoaded', () => {
       if (countryList) countryList.innerHTML = toOptions(data.countries || []);
       if (makerList) makerList.innerHTML = toOptions(data.makers || []);
       if (brandList) brandList.innerHTML = toOptions(data.brands || []);
+      // シリーズ・種類はDBの登録値を選択肢にする（未登録の固定候補は出さない）
+      if (category === 'vape') {
+        const updateCheckboxes = (id, name, values) => {
+          const box = document.getElementById(id);
+          if (!box) return;
+          box.replaceChildren();
+          for (const value of values) {
+            const label = document.createElement('label');
+            label.className = 'checkbox-item';
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = name + '[]';
+            input.value = value;
+            label.append(input, document.createTextNode(' ' + value));
+            box.append(label);
+          }
+          if (!values.length) box.textContent = '登録データがありません';
+        };
+        updateCheckboxes('vapeLineOptions', 'vape_line', data.vape_lines || []);
+        updateCheckboxes('vapeTypeOptions', 'vape_type', data.vape_types || []);
+      }
     } catch (e) {
       console.error('候補の取得に失敗しました', e);
     }
@@ -77,6 +98,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (wineOpts) wineOpts.style.display = (category === 'wine') ? 'block' : 'none';
   if (cocktailOpts) cocktailOpts.style.display = (category === 'cocktail') ? 'block' : 'none';
   if (paperOpts) paperOpts.style.display = (category === 'cigarette') ? 'block' : 'none';
+
+  // 電子タバコは専用パネルだけを表示。お酒用の度数・年代・国・味/酸味は排除する。
+  const normalGrid = document.querySelector('#searchForm > .filter-grid');
+  const vapeGrid = document.getElementById('vapeFilterGrid');
+  if (category === 'vape') {
+    if (normalGrid) normalGrid.hidden = true;
+    if (normalGrid) normalGrid.style.display = 'none';
+    if (vapeGrid) vapeGrid.hidden = false;
+  }
 
   // 4-2. 紙たばこ: 不要な項目を隠し、値段の選択肢を紙たばこ向けに差し替える
   if (category === 'cigarette') {
@@ -160,6 +190,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function runSearch(page = 1) {
     const q = new URLSearchParams(new FormData(form));
+    // 電子タバコ検索では、非表示にしたお酒用入力欄をリクエストに送らない。
+    if (category === 'vape') {
+      for (const key of [...q.keys()]) {
+        if (key !== 'keyword' && !key.startsWith('vape_')) q.delete(key);
+      }
+    }
     q.set('category', category);
     q.set('page', page);
     try {
@@ -178,12 +214,19 @@ document.addEventListener('DOMContentLoaded', () => {
               p.brand,
               p.tar_mg != null ? `タール ${Number(p.tar_mg)}mg` : null,
               p.nicotine_mg != null ? `ニコチン ${Number(p.nicotine_mg)}mg` : null,
-              p.price ? p.price + '円' : null
+              p.price != null ? Number(p.price).toLocaleString() + '円' : null
             ].filter(Boolean).join(' / ')
-          : [
-              p.prefecture || p.country_name || p.base_liquor_name,
-              p.abv ? p.abv + '%' : null
-            ].filter(Boolean).join(' / ');
+          : (category === 'vape')
+            ? [
+                p.product_line, p.type_label,
+                p.strength_score != null ? `吸いごたえ ${Number(p.strength_score)}/5` : '吸いごたえ 未評価',
+                p.aroma_score != null ? `香り ${Number(p.aroma_score)}/5` : null,
+                p.richness_score != null ? `コク ${Number(p.richness_score)}/5` : null
+              ].filter(Boolean).join(' / ')
+            : [
+                p.prefecture || p.country_name || p.base_liquor_name,
+                p.abv ? p.abv + '%' : null
+              ].filter(Boolean).join(' / ');
         return `
           <a href="detail.html?id=${encodeURIComponent(p.product_id)}&amp;from=search&amp;category=${encodeURIComponent(category)}" class="answer-card">
             <span style="font-size:11px;color:var(--gold);">${esc(category.toUpperCase())}</span>
@@ -201,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.runSearch = runSearch;
-  form.addEventListener('submit', () => runSearch(1));
+  form.addEventListener('submit', e => { e.preventDefault(); runSearch(1); });
   loadOptions();
   runSearch(1); // 初期表示
 });

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>嗜好の領域</title>
-<link rel="stylesheet" href="../css/common.css">
+<link rel="stylesheet" href="../css/common.css?v=20261119-guest1">
 <link rel="stylesheet" href="../css/index.css">
 <script>window.__shikoHomeEffectsBootstrap = true; window.__shikoHomeEffectsInstalled = true;</script>
 <style id="shiko-inline-effects-css">
@@ -141,44 +141,45 @@
 #shiko-secret-status.visible { opacity: 1; }
 
 
-.home-body .paper-card-container { position: relative; min-width: 0; }
-.home-body .paper-card-container > .preference-card { display: block; width: 100%; }
-.home-body #donaldSecretButton {
-  position: absolute; left: -76px; top: 50%; transform: translateY(-50%);
-  width: 70px; height: 105px; border: 0; padding: 0;
-  background: transparent; color: transparent; cursor: pointer;
-  z-index: 4;
+/* マイページより下のフッター領域に配置。絶対位置指定を使わず、
+   スマホで3枚のナビゲーションカードが縦積みになっても重ならない。 */
+.home-body .home-secret-footer {
+  width: min(990px, calc(100% - 28px));
+  min-height: 64px;
+  padding: 10px 0;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
-.home-body #donaldSecretButton:focus-visible { outline: 2px solid #e1c766; }
-.home-body #donaldOverlay {
-  position: fixed; inset: 0; width: 100vw; height: 100dvh; background: black;
-  z-index: 2147483647; display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-}
-.home-body #donaldOverlay[hidden] { display: none !important; }
-.home-body #donaldOverlay img { width:100%; height:100%; object-fit: cover; user-select:none; }
-
-
-/* マイページカード直下の秘密ボタン。画面からは見えず、位置は固定。 */
-.home-body .bottom-navigation { position: relative; }
 .home-body #shikoAllEffectsToggle {
-  position: absolute;
-  left: 50%;
-  top: calc(50% + 57px); /* 高さ98pxのマイページカードの8px下 */
-  transform: translateX(-50%);
-  width: calc((100% - 28px) / 3);
-  min-width: 105px;
-  height: 40px;
+  position: static;
+  display: block;
+  width: clamp(120px, 24vw, 220px);
+  min-width: 120px;
+  min-height: 44px;
+  height: 44px;
   border: 0;
   padding: 0;
   margin: 0;
   background: transparent;
   color: transparent;
   cursor: pointer;
-  z-index: 1002;
+  touch-action: manipulation;
   appearance: none;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
+}
+@media (max-width: 768px) {
+  .home-body .home-secret-footer {
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+  }
+  .home-body #shikoAllEffectsToggle {
+    width: min(180px, 44vw);
+    min-height: 48px;
+    height: 48px;
+  }
 }
 .home-body #shikoAllEffectsToggle:focus-visible {
   outline: 2px dashed #e1c766;
@@ -217,14 +218,11 @@
   <section class="category-section tobacco-section">
     <div class="section-label"><span class="label-diamond">◆</span>タバコ</div>
     <div class="card-grid tobacco-grid">
-      <div class="paper-card-container">
-        <a class="preference-card paper" href="search.html?category=paper">
+      <a class="preference-card paper" href="search.html?category=paper">
         <span class="card-name">紙</span>
         <span class="card-sub">CIGARETTE</span>
         <img class="card-icon" src="../aikon/cigarette.png" alt="紙タバコ">
-        </a>
-        <button type="button" id="donaldSecretButton" aria-label="隠し画像を表示"></button>
-      </div>
+      </a>
       <a class="preference-card vape" href="search.html?category=vape">
         <span class="card-name">電子</span>
         <span class="card-sub">e-cigarette</span>
@@ -260,15 +258,15 @@
       </span>
       <span class="panel-arrow">→</span>
     </a>
-    <!-- マイページの下：1クリックで虹色・回転・DVD移動をまとめて切り替え -->
-    <button type="button" id="shikoAllEffectsToggle" aria-label="すべての隠し演出を一括でオン・オフ" aria-pressed="false"></button>
   </section>
 </main>
-<div id="donaldOverlay" hidden tabindex="-1" role="dialog" aria-modal="true" aria-label="ドナルド画像">
-  <img src="../assets/donald.webp" alt="ドナルド・マクドナルド">
-</div>
-<script src="../js/common.js?v=20261112-backfix1"></script>
-<script src="../js/index.js"></script>
+<!-- マイページの下にある、ホーム専用の透明な隠し演出スイッチ。
+     フッター内の通常フローに置くのでモバイルのカード操作を邪魔しない。 -->
+<footer class="home-secret-footer">
+  <button type="button" id="shikoAllEffectsToggle" aria-label="すべての隠し演出を一括でオン・オフ" aria-pressed="false"></button>
+</footer>
+<script src="../js/common.js?v=20261119-guest1"></script>
+<!-- ヘッダー・ログイン状態は common.js に一本化。重複生成を防止 -->
 <script id="shiko-inline-effects-js">
 /*
  * 嗜好の領域：ホーム限定の隠し演出
@@ -295,7 +293,6 @@
 
   const selector = [
     '.alcohol-grid > .preference-card',
-    '.tobacco-grid > .paper-card-container',
     '.tobacco-grid > .preference-card',
     '.bottom-navigation > .bottom-panel',
   ].join(', ');
@@ -309,12 +306,7 @@
     if (registered.has(node)) return;
     registered.add(node);
     node.classList.add('secret-motion-target');
-    // 紙たばこの透明ドナルドボタンがある場合は、コンテナを回して
-    // 発光はその中の紙たばこカードにだけ適用する。
-    const surface = node.matches('.paper-card-container')
-      ? node.querySelector('.preference-card')
-      : node;
-    if (surface) surface.classList.add('secret-rainbow-surface');
+    node.classList.add('secret-rainbow-surface');
     if (moving) fly(node);
   }
 
@@ -396,7 +388,7 @@
   function boundary(item) {
     const diagonal = Math.hypot(item.w, item.h);
     const rotating = body.classList.contains('secret-spinning');
-    const mx = Math.max(item.isPaperWrapper ? 90 : 5,
+    const mx = Math.max(5,
       rotating ? (diagonal - item.w) / 2 + 6 : 5);
     const my = Math.max(5, rotating ? (diagonal - item.h) / 2 + 6 : 5);
     const minX = Math.min(mx, Math.max(0, (innerWidth - item.w) / 2));
@@ -447,7 +439,7 @@
     const vector = velocityFor(frames.length);
     const item = {
       el, placeholder, originalStyle,
-      w, h, isPaperWrapper: el.classList.contains('paper-card-container'),
+      w, h,
       x: rect.left + (rect.width - w) / 2,
       y: rect.top + (rect.height - h) / 2,
       ...vector,
@@ -570,25 +562,6 @@
   window.shikoEffectsReady = true;
 })();
 
-
-(() => {
-  const button = document.getElementById('donaldSecretButton');
-  const overlay = document.getElementById('donaldOverlay');
-  if (!button || !overlay) return;
-  let lastFocus = null;
-  button.addEventListener('click', () => {
-    lastFocus = document.activeElement;
-    overlay.hidden = false;
-    overlay.focus();
-  });
-  const close = () => {
-    if (overlay.hidden) return;
-    overlay.hidden = true;
-    if (lastFocus && lastFocus.isConnected) lastFocus.focus();
-  };
-  overlay.addEventListener('click', close);
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
-})();
 </script>
 </body>
 </html>
