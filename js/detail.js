@@ -25,6 +25,29 @@ const setText = (id, text) => {
   return el;
 };
 
+// 「検索へ戻る」リンクの遷移先カテゴリーを更新
+function updateDetailBackLink(code) {
+  const link = document.getElementById('backToSearchLink');
+  if (!link) return;
+  const params = new URLSearchParams(window.location.search);
+  const from = params.get('from');
+  if (from === 'easy') {
+    const type = params.get('type') || 'alcohol';
+    link.href = `easyanswer.html?type=${encodeURIComponent(type)}`;
+    link.textContent = '← 診断結果へ戻る';
+    return;
+  }
+  if (from === 'mypage') {
+    link.href = 'mypage.html';
+    link.textContent = '← マイページへ戻る';
+    return;
+  }
+  const targetCat = code || params.get('category') || 'whisky';
+  const normalizedCat = (targetCat === 'paper') ? 'cigarette' : targetCat;
+  link.href = `search.html?category=${encodeURIComponent(normalizedCat)}`;
+  link.textContent = '← 検索へ戻る';
+}
+
 // 1〜5 を ●●●○○ 形式に
 const dots = n => {
   const v = Number(n);
@@ -366,7 +389,7 @@ function renderProduct(data) {
   const d = data.details || {};
   const code = p.category_code;
   // URLにカテゴリがない直接アクセスでも、検索に戻る際のカテゴリを商品データから確定する。
-  if (typeof updateDetailBackLink === 'function') updateDetailBackLink(code);
+  updateDetailBackLink(code);
 
   // 上部メタ情報：カテゴリ | メーカー | 製造国(日本酒は都道府県)
   const origin = code === 'sake' ? d.prefecture : p.country_name;
@@ -613,7 +636,7 @@ function buildReviewCard(r, truncated) {
   const user = mk('div', 'comment-user');
   user.appendChild(mk('div', 'avatar-img'));
   user.appendChild(mk('span', 'comment-user-text',
-    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + '　' + starText(r.rating)
+    ' ' + r.user_name + (r.is_mine ? '（あなた）' : '') + ' ' + starText(r.rating)
   ));
   card.appendChild(user);
 
@@ -848,6 +871,7 @@ function initReviews() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateDetailBackLink();
   loadProduct();
 
   // 星評価：選択済みの最後の星をもう一度押すと解除
