@@ -153,6 +153,84 @@ document.addEventListener('DOMContentLoaded', () => {
   const countEl = document.getElementById('resultCount');
   const pagerEl = document.getElementById('pager');
 
+  // カテゴリーごとに検索状態を sessionStorage に保存するキー
+  const STATE_STORAGE_KEY = `shikonoryoiki_search_state_${category}`;
+
+  function saveSearchState(page) {
+    if (!form) return;
+    const fields = [];
+    const elements = Array.from(form.elements);
+
+    for (const el of elements) {
+      if (!el.name) continue;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.checked) {
+          fields.push({ name: el.name, type: el.type, value: el.value });
+        }
+      } else {
+        fields.push({ name: el.name, type: el.type, value: el.value });
+      }
+    }
+
+    try {
+      sessionStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
+        category,
+        page: Number(page) || 1,
+        fields
+      }));
+    } catch (e) {
+      console.warn('検索状態の保存に失敗しました', e);
+    }
+  }
+
+  function restoreSearchState() {
+    let raw = null;
+    try {
+      raw = sessionStorage.getItem(STATE_STORAGE_KEY);
+    } catch (e) {
+      return 1;
+    }
+    if (!raw || !form) return 1;
+
+    try {
+      const saved = JSON.parse(raw);
+      if (!saved || saved.category !== category || !Array.isArray(saved.fields)) {
+        return 1;
+      }
+
+      // 一旦チェック系をリセットしてから復元
+      form.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(el => {
+        el.checked = false;
+        el.dataset.wasChecked = 'false';
+      });
+
+      for (const item of saved.fields) {
+        if (item.type === 'checkbox') {
+          const cb = Array.from(form.querySelectorAll(`input[type="checkbox"][name="${CSS.escape(item.name)}"]`))
+            .find(el => el.value === item.value);
+          if (cb) cb.checked = true;
+        } else if (item.type === 'radio') {
+          const rb = Array.from(form.querySelectorAll(`input[type="radio"][name="${CSS.escape(item.name)}"]`))
+            .find(el => el.value === item.value);
+          if (rb) {
+            rb.checked = true;
+            rb.dataset.wasChecked = 'true';
+          }
+        } else {
+          const el = form.elements.namedItem(item.name);
+          if (el && 'value' in el) {
+            el.value = item.value;
+          }
+        }
+      }
+
+      return Number(saved.page) > 0 ? Number(saved.page) : 1;
+    } catch (e) {
+      console.warn('検索状態の復元に失敗しました', e);
+      return 1;
+    }
+  }
+
   function renderPager(current, total) {
     pagerEl.innerHTML = '';
     if (total <= 1) return;
@@ -189,6 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function runSearch(page = 1) {
+    saveSearchState(page);
     const q = new URLSearchParams(new FormData(form));
     // 電子タバコ検索では、非表示にしたお酒用入力欄をリクエストに送らない。
     if (category === 'vape') {
@@ -245,8 +324,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.runSearch = runSearch;
   form.addEventListener('submit', e => { e.preventDefault(); runSearch(1); });
-  loadOptions();
-  runSearch(1); // 初期表示
+  loadOptions().then(() => {
+    const restoredPage = restoreSearchState();
+    runSearch(restoredPage);
+  });
 });
 
 function resetFilters() {
@@ -256,6 +337,12 @@ function resetFilters() {
     document.querySelectorAll('.rating-options input[type="radio"]').forEach(radio => {
       radio.dataset.wasChecked = "false";
     });
+    const params = new URLSearchParams(window.location.search);
+    const rawCategory = params.get('category') || 'whisky';
+    const category = (rawCategory === 'paper') ? 'cigarette' : rawCategory;
+    try {
+      sessionStorage.removeItem(`shikonoryoiki_search_state_${category}`);
+    } catch (e) {}
     if (window.runSearch) window.runSearch(1);
   }
 }
