@@ -209,9 +209,22 @@ function setupFilter(modalId, render) {
     });
   });
 
-  // 名称検索
-  const input = modal.querySelector('[data-product-filter]');
-  if (input) input.addEventListener('input', render);
+  // パスワードマネージャーが一般的な input をログイン欄と誤認識するのを防ぐため、
+  // 検索欄のみ編集可能なテキスト領域(contenteditable)で実装する。
+  const searchBox = modal.querySelector('[data-product-filter]');
+  if (searchBox) {
+    searchBox.addEventListener('input', render);
+    // 日本語IMEの変換確定(Enter)は妨げず、改行のみ防止する。
+    searchBox.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.isComposing && event.keyCode !== 229) {
+        event.preventDefault();
+      }
+    });
+    searchBox.addEventListener('blur', () => {
+      // 消去後、Chromiumが空の <br> を残した場合でもプレースホルダーを復元する。
+      if (!searchBox.textContent.trim()) searchBox.replaceChildren();
+    });
+  }
 }
 
 function matchesFilter(modalId, item) {
@@ -220,8 +233,9 @@ function matchesFilter(modalId, item) {
   const cats = [...modal.querySelectorAll('.cat-btn.active')].map(b => b.dataset.category);
   if (cats.length > 0 && !cats.includes(item.category_code)) return false;
 
-  const input = modal.querySelector('[data-product-filter]');
-  const kw = input ? input.value.trim().toLowerCase() : '';
+  const searchBox = modal.querySelector('[data-product-filter]');
+  // contenteditable には value がない。DOMの文字列を検索語として利用する。
+  const kw = searchBox ? searchBox.textContent.replace(/\s+/g, ' ').trim().toLowerCase() : '';
   if (kw !== '' && !String(item.product_name).toLowerCase().includes(kw)) return false;
 
   return true;

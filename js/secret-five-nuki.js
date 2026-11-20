@@ -19,6 +19,10 @@
   let previousFocus;
   let animationTimer = null;
   let animationInterval = null;
+  // 「チンチロモード」は出目を確認するだけの独立したミニゲーム。
+  // 特殊な7は各サイコロで1/200（0.5%）の確率。5抜きの出目には影響しない。
+  const chinchiro = { dice: [], busy: false, pending: null, timer: null, interval: null };
+  let currentMode = 'five';
   const $ = (selector) => overlay.querySelector(selector);
 
   function randomDie() {
@@ -115,8 +119,6 @@
     const valid = choosing && canRemove(selectedValues);
     $('[data-five-remove]').hidden = state.phase !== 'choosing';
     $('[data-five-remove]').disabled = !valid;
-    $('[data-five-hint]').hidden = state.phase !== 'choosing';
-    $('[data-five-hint]').disabled = !choosing;
     $('[data-five-roll]').hidden = state.phase !== 'ready';
     $('[data-five-roll]').disabled = state.busy;
     $('[data-five-roll]').textContent = state.rolls ? `残り${state.diceCount}個を振る` : 'サイコロを5個振る';
@@ -247,8 +249,111 @@
     }
   }
 
+  // 公平な整数乱数：cryptoを優先し、非対応環境ではMath.randomを使用する。
+  function randomIndex(maxExclusive) {
+    if (window.crypto?.getRandomValues) {
+      const result = new Uint32Array(1);
+      const range = 4294967296;
+      const limit = range - (range % maxExclusive);
+      do { window.crypto.getRandomValues(result); } while (result[0] >= limit);
+      return result[0] % maxExclusive;
+    }
+    return Math.floor(Math.random() * maxExclusive);
+  }
+
+  function randomChinchiroDie() {
+    return randomIndex(200) === 0 ? 7 : randomIndex(6) + 1;
+  }
+
+  // 架空の7の面は7つの黒い点を描く。見た目・演出は通常の面と同じ。
+  const SEVEN_PIPS = [0, 2, 3, 4, 5, 6, 8];
+
+  // サイコロの要素は再作成せずに点だけ更新し、短い揺れアニメーションを途切れさせない。
+  function renderChinchiroDice(values = chinchiro.dice) {
+    const dice = values.length === 3 ? values : [null, null, null];
+    const container = $('[data-chinchiro-dice]');
+    if (container.children.length !== 3) {
+      container.innerHTML = Array.from({ length: 3 }, () =>
+        '<div class="shiko-chinchiro-die" role="img"><span class="shiko-five-pips" aria-hidden="true"></span></div>'
+      ).join('');
+    }
+    Array.from(container.children).forEach((die, index) => {
+      const value = dice[index];
+      const pips = value ? Array.from({ length: 9 }, (_, cell) =>
+        `<span class="shiko-five-pip${(value === 7 ? SEVEN_PIPS : PIPS[value]).includes(cell) ? ' on' : ''}"></span>`
+      ).join('') : '<span class="shiko-five-question">?</span>';
+      die.setAttribute('aria-label', value ? `${index + 1}個目：${value}の目` : `${index + 1}個目：未確定`);
+      die.querySelector('.shiko-five-pips').innerHTML = pips;
+    });
+  }
+
+  function refreshChinchiro() {
+    renderChinchiroDice();
+    $('[data-chinchiro-roll]').disabled = chinchiro.busy;
+    const feedback = $('[data-chinchiro-feedback]');
+    feedback.textContent = chinchiro.busy ? '振っています…' : chinchiro.dice.length
+      ? `出目：${chinchiro.dice.join('・')}` : 'サイコロを振ってください。';
+  }
+
+  function finishChinchiroRoll() {
+    if (!chinchiro.busy) return;
+    if (chinchiro.interval !== null) window.clearInterval(chinchiro.interval);
+    if (chinchiro.timer !== null) window.clearTimeout(chinchiro.timer);
+    chinchiro.interval = null;
+    chinchiro.timer = null;
+    chinchiro.busy = false;
+    chinchiro.dice = chinchiro.pending;
+    chinchiro.pending = null;
+    $('[data-chinchiro-dice]').classList.remove('is-rolling');
+    refreshChinchiro();
+  }
+
+  function rollChinchiro() {
+    if (currentMode !== 'chinchiro' || overlay.hidden || chinchiro.busy) return;
+    const result = Array.from({ length: 3 }, randomChinchiroDie);
+    // 端末が「動きを減らす」設定なら結果をすぐに表示する。
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      chinchiro.dice = result;
+      refreshChinchiro();
+      return;
+    }
+    chinchiro.busy = true;
+    chinchiro.pending = result;
+    renderChinchiroDice(Array.from({ length: 3 }, () => randomIndex(6) + 1));
+    $('[data-chinchiro-dice]').classList.add('is-rolling');
+    $('[data-chinchiro-roll]').disabled = true;
+    $('[data-chinchiro-feedback]').textContent = '振っています…';
+    // 約0.45秒だけ1～6の仮の出目を切り替え、最後に確定済みの結果を表示する。
+    chinchiro.interval = window.setInterval(() => {
+      renderChinchiroDice(Array.from({ length: 3 }, () => randomIndex(6) + 1));
+    }, 90);
+    chinchiro.timer = window.setTimeout(finishChinchiroRoll, 450);
+  }
+
+  function setMode(mode) {
+    if (mode !== 'five' && mode !== 'chinchiro') return;
+    if (mode !== 'chinchiro') finishChinchiroRoll();
+    currentMode = mode;
+    overlay.querySelector('.shiko-five-panel').classList.toggle('is-chinchiro', mode === 'chinchiro');
+    $('[data-five-mode]').hidden = mode !== 'five';
+    $('[data-chinchiro-mode]').hidden = mode !== 'chinchiro';
+    $('[data-five-title]').textContent = mode === 'five' ? '伍抜き' : 'チンチロ';
+    $('[data-five-subtitle]').textContent = mode === 'five' ? 'FIVE NUKI' : 'CHINCHIRO';
+    $('[data-five-desc]').textContent = mode === 'five'
+      ? 'サイコロを5つ振って、5を抜く。最後の合計点が低い人の勝ち。'
+      : 'サイコロを3個振るだけ。';
+    for (const tab of overlay.querySelectorAll('[data-shiko-game-mode]')) {
+      const selected = tab.dataset.shikoGameMode === mode;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+    }
+    if (mode === 'chinchiro') refreshChinchiro();
+    else refresh();
+  }
+
   function close() {
     if (!overlay || overlay.hidden) return;
+    finishChinchiroRoll();
     overlay.hidden = true;
     document.body.classList.remove('shiko-five-open');
     if (previousFocus?.isConnected) previousFocus.focus();
@@ -264,8 +369,13 @@
       <section class="shiko-five-panel" role="dialog" aria-modal="true" aria-labelledby="shikoFiveTitle" aria-describedby="shikoFiveDesc">
         <button type="button" class="shiko-five-close" data-five-close aria-label="ゲームを閉じる">×</button>
         <p class="shiko-five-kicker">SECRET BAR / TABLE GAMES</p>
-        <h2 id="shikoFiveTitle">伍抜き <small>FIVE NUKI</small></h2>
-        <p class="shiko-five-description" id="shikoFiveDesc">サイコロを5つ振って、5を抜く。最後の合計点が低い人の勝ち。</p>
+        <h2 id="shikoFiveTitle"><span data-five-title>伍抜き</span><small data-five-subtitle>FIVE NUKI</small></h2>
+        <div class="shiko-five-modes" role="tablist" aria-label="ゲームモードの切り替え">
+          <button type="button" class="shiko-five-mode-tab" role="tab" id="shikoFiveTab" aria-controls="shikoFiveMode" aria-selected="true" data-shiko-game-mode="five">5抜き</button>
+          <button type="button" class="shiko-five-mode-tab" role="tab" id="shikoChinchiroTab" aria-controls="shikoChinchiroMode" aria-selected="false" tabindex="-1" data-shiko-game-mode="chinchiro">チンチロモード</button>
+        </div>
+        <p class="shiko-five-description" id="shikoFiveDesc" data-five-desc>サイコロを5つ振って、5を抜く。最後の合計点が低い人の勝ち。</p>
+        <div id="shikoFiveMode" role="tabpanel" aria-labelledby="shikoFiveTab" data-five-mode>
         <div data-five-setup>
           <div class="shiko-five-rulebox"><strong>HOW TO PLAY</strong>
             <p>① 5個のサイコロを振る。</p><p>②「5」の目、またはサイコロ2個で5になる組だけを抜く（1＋4、2＋3）。</p>
@@ -291,7 +401,6 @@
           <p class="shiko-five-feedback" data-five-feedback role="status" aria-live="polite"></p>
           <div class="shiko-five-actions">
             <button type="button" class="shiko-five-main" data-five-roll>サイコロを5個振る</button>
-            <button type="button" class="shiko-five-secondary" data-five-hint hidden>おまかせ選択</button>
             <button type="button" class="shiko-five-main" data-five-remove hidden>選んだ5を抜く</button>
             <button type="button" class="shiko-five-main" data-five-next hidden>次の人へ</button>
           </div>
@@ -307,19 +416,31 @@
           <button type="button" class="shiko-five-minor" data-five-reconfigure>メンバーを変更する</button>
         </div>
         <p class="shiko-five-disclaimer">勝負のお題は自由。飲酒は必須ではありません（ノンアルコールでも遊べます）。</p>
+        </div>
+        <div id="shikoChinchiroMode" class="shiko-chinchiro-mode" role="tabpanel" aria-labelledby="shikoChinchiroTab" data-chinchiro-mode hidden>
+          <div class="shiko-chinchiro-dice" data-chinchiro-dice role="group" aria-label="3つのサイコロ"></div>
+          <p class="shiko-chinchiro-feedback" data-chinchiro-feedback role="status" aria-live="polite">ボタンを押してサイコロを振ってください。</p>
+          <button type="button" class="shiko-five-main shiko-chinchiro-roll" data-chinchiro-roll>サイコロを3個振る</button>
+        </div>
       </section>`;
     document.body.appendChild(overlay);
+    overlay.querySelectorAll('[data-shiko-game-mode]').forEach(tab => {
+      tab.addEventListener('click', () => setMode(tab.dataset.shikoGameMode));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const next = tab.dataset.shikoGameMode === 'five' ? 'chinchiro' : 'five';
+        setMode(next);
+        overlay.querySelector(`[data-shiko-game-mode="${next}"]`).focus();
+      });
+    });
+    $('[data-chinchiro-roll]').addEventListener('click', rollChinchiro);
     $('[data-five-players-count]').addEventListener('change', refreshInputs);
     $('[data-five-start]').addEventListener('click', () => {
       const names = Array.from(overlay.querySelectorAll('[data-five-name]'), (input, i) => input.value.trim() || `プレイヤー${i + 1}`);
       startGame(names);
     });
     $('[data-five-roll]').addEventListener('click', roll);
-    $('[data-five-hint]').addEventListener('click', () => {
-      if (state.phase !== 'choosing' || state.busy) return;
-      state.selected = new Set(bestSelection(state.dice));
-      refresh();
-    });
     $('[data-five-remove]').addEventListener('click', removeDice);
     $('[data-five-next]').addEventListener('click', nextPlayer);
     $('[data-five-again]').addEventListener('click', () => startGame(state.players.slice()));
@@ -352,7 +473,7 @@
       }
     });
     refreshInputs();
-    refresh();
+    setMode('five');
   }
 
   window.shikoOpenSecretFiveNuki = () => {
@@ -360,7 +481,7 @@
     previousFocus = document.activeElement;
     overlay.hidden = false;
     document.body.classList.add('shiko-five-open');
-    refresh();
+    setMode(currentMode);
     $('[data-five-close]').focus();
   };
 })();

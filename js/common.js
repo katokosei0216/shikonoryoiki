@@ -242,7 +242,7 @@ function setupSecretFiveTrigger(trigger) {
   if (!trigger) return;
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
-  stylesheet.href = '../css/secret-five-nuki.css?v=20261120-5nuki1';
+  stylesheet.href = '../css/secret-five-nuki.css?v=20261120-chinchiro3';
   document.head.appendChild(stylesheet);
 
   let count = 0;
@@ -263,7 +263,7 @@ function setupSecretFiveTrigger(trigger) {
     if (loading) return;
     loading = true;
     const script = document.createElement('script');
-    script.src = '../js/secret-five-nuki.js?v=20261120-5nuki1';
+    script.src = '../js/secret-five-nuki.js?v=20261120-chinchiro3';
     script.onload = () => {
       loading = false;
       if (typeof window.shikoOpenSecretFiveNuki === 'function') window.shikoOpenSecretFiveNuki();

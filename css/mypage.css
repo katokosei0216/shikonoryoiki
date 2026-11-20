@@ -100,3 +100,24 @@
 @media (max-width: 768px) {
     .mypage-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* お気に入り・投稿コメント検索：ネイティブinputを使用しない自動入力誤判定対策 */
+.product-filter-search {
+    display: block;
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    line-height: 38px;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    cursor: text;
+    caret-color: #eee8d7;
+}
+.product-filter-search::-webkit-scrollbar { display: none; }
+.product-filter-search:empty::before {
+    content: attr(data-placeholder);
+    color: #777;
+    pointer-events: none;
+}

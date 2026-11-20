@@ -284,6 +284,9 @@ textarea.form-control { height: 80px; padding: 10px; resize: vertical; }
         padding: 22px 16px;
     }
 }
+/* ホームの隠し演出用の見出し(z-index:1001)よりログイン案内を前面へ。
+   同画面の演出トースト(2147483000)より上にし、5抜きゲーム(2147483640)とは競合させない。 */
+#guestAccountModal.modal-overlay { z-index: 2147483500; }
 /* 非会員のログイン案内（商品詳細と同一デザイン、スマホ対応） */
 .guest-account-dialog { width: min(400px, 100%); text-align: center; }
 .guest-account-message { font-size: 13px; color: var(--muted); margin: 0 0 20px; line-height: 1.8; }
