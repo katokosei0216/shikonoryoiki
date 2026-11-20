@@ -36,8 +36,9 @@ const METHOD_LABELS = { shake: 'シェイク', build: 'ビルド', stir: 'ステ
 const GLASS_LABELS  = { short: 'ショート', long: 'ロング' };
 const WINE_LABELS   = { '泡': 'スパークリング' };
 
-// 電子タバコ48商品の商品名→画像番号。DBのAUTO_INCREMENTが501から始まらなくても、
-// 商品名で正しく画像を選ぶ（アイコス修正画像5点も差し替え済み）。
+// 電子タバコ48商品の商品名→画像番号。新しいIQOS画像.zipの1.png～48.pngを
+// 登録SQLの48商品と既存の銘柄別画像に照合し、5001.webp～5048.webpへ差し替え。
+// DB商品IDが自動採番で変わっても商品名からのみ確定し、不明な名前は画像なしにする。
 // 全角・半角スペースや記号の違いを吸収して照合する。
 const normalizeVapeName = name => String(name ?? '')
   .normalize('NFKC').replace(/[\s\u3000・･\-]/g, '').toLowerCase();
@@ -99,8 +100,8 @@ function getVapeImageUrl(p) {
 }
 
 // 紙タバコ画像: 商品名と商品IDの二重チェックで取り違えを防ぐ。
-// ID=440は提供画像が「ID=442（ボックス）」と完全同一で、DB側はソフトタイプ。
-// 正しいソフトパッケージ画像が確認できるまで表示しない。
+// 更新画像では原本6042がソフトタイプ(ID=440)、原本6040がボックス(ID=442)。
+// 保存時はDBの商品IDに対応する6001～6100に正しく配置し直した。
 const normalizePaperName = name => String(name ?? '')
   .normalize('NFKC').replace(/[\s\u3000・･\-]/g, '').toLowerCase();
 const PAPER_IMAGE_BY_NAME = new Map([
@@ -143,6 +144,7 @@ const PAPER_IMAGE_BY_NAME = new Map([
   ['マールボロ・メンソール・4・ボックス', 6037],
   ['キャメル・クラフト・メンソール・ペアーカプセル・5・ボックス', 6038],
   ['キャメル・クラフト・メンソール・ベリーカプセル・5・ボックス', 6039],
+  ['ウィンストン・キャスター・ホワイト・5', 6040],
   ['ラーク・スーパー・KS・ボックス', 6041],
   ['ウィンストン・キャスター・ホワイト・5・ボックス', 6042],
   ['ウィンストン・キャビン・レッド・5・ボックス', 6043],
@@ -225,8 +227,7 @@ const IMAGE_ID_RANGES = {
   // 紙タバコ: 既存の画像対応は維持
   cigarette: { min: 401, max: 500, offset: 5600 },
   paper:     { min: 401, max: 500, offset: 5600 },
-  // 電子タバコ: 商品名による照合ができない場合の予備（DB IDが501〜548の場合）
-  vape:      { min: 501, max: 548, offset: 4500 }
+  // 電子タバコは名前が一致しなければ画像なし（誤表示を避ける）
 };
 
 function getCategoryImageUrl(p) {
@@ -238,9 +239,8 @@ function getCategoryImageUrl(p) {
 }
 
 function resolveProductImageUrl(p) {
-  // 電子タバコ画像はDBでimage_pathがNULLでも、銘柄名から画像を決定できる。
-  const vapeImage = getVapeImageUrl(p);
-  if (vapeImage) return vapeImage;
+  // 電子タバコ: 商品名が一致するときだけ表示。DBのIDや古いimage_pathを誤用しない。
+  if (p.category_code === 'vape') return getVapeImageUrl(p);
   // 紙タバコは番号だけではなくDBの商品名も照合する。画像不一致時の代替表示はしない。
   if (p.category_code === 'cigarette' || p.category_code === 'paper') {
     return getVerifiedPaperImageUrl(p);
@@ -387,8 +387,8 @@ function renderProduct(data) {
       img.decoding = 'async';
       img.loading = 'eager';
       img.onerror = () => {
-        // DBに古い画像パスがあっても、カテゴリの同梱画像があれば試す。
-        const fallback = (code === 'cigarette' || code === 'paper')
+        // 紙・電子タバコは失敗時のID推測フォールバック禁止（別商品の誤表示を防止）。
+        const fallback = (code === 'cigarette' || code === 'paper' || code === 'vape')
           ? '' : getCategoryImageUrl(p);
         if (fallback && img.getAttribute('src') !== fallback) {
           img.src = fallback;
