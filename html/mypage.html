@@ -6,7 +6,7 @@
 <title>マイページ | 嗜好の領域</title>
 <link rel="stylesheet" href="../css/common.css?v=20261119-guest1">
 <link rel="stylesheet" href="../css/easyanswer.css">
-<link rel="stylesheet" href="../css/mypage.css?v=20261113-wrap4">
+<link rel="stylesheet" href="../css/mypage.css?v=20261120-autofill-html-rebuild">
 </head>
 <body class="subpage-body mypage-page">
 <header id="siteHeader"></header>
@@ -90,7 +90,7 @@
       <button type="button" class="cat-btn cat-vape"     data-category="vape">電子</button>
     </div>
     <div class="form-group" style="margin-bottom:20px;">
-      <input type="search" id="favoriteProductSearch" name="favorite_product_search" class="form-control" placeholder="名称検索..." aria-label="お気に入りの商品名で検索" autocomplete="off" spellcheck="false" data-product-filter>
+      <div id="favoriteProductSearch" class="form-control product-filter-search" contenteditable="plaintext-only" role="searchbox" aria-label="お気に入りの商品名で検索" aria-multiline="false" data-placeholder="名称検索..." inputmode="search" enterkeyhint="search" spellcheck="false" data-product-filter></div>
     </div>
     <div class="answer-grid" id="favList" style="margin-top:0;"></div>
   </div>
@@ -114,7 +114,7 @@
       <button type="button" class="cat-btn cat-vape"     data-category="vape">電子</button>
     </div>
     <div class="form-group" style="margin-bottom:20px;">
-      <input type="search" id="reviewProductSearch" name="review_product_search" class="form-control" placeholder="名称検索..." aria-label="投稿コメントの商品名で検索" autocomplete="off" spellcheck="false" data-product-filter>
+      <div id="reviewProductSearch" class="form-control product-filter-search" contenteditable="plaintext-only" role="searchbox" aria-label="投稿コメントの商品名で検索" aria-multiline="false" data-placeholder="名称検索..." inputmode="search" enterkeyhint="search" spellcheck="false" data-product-filter></div>
     </div>
     <div id="commentList"></div>
   </div>
@@ -142,6 +142,6 @@
 </div>
 
 <script src="../js/common.js?v=20261120-chinchiro3"></script>
-<script src="../js/mypage.js?v=20261120-fav-comment-outside-close2"></script>
+<script src="../js/mypage.js?v=20261120-autofill-html-rebuild"></script>
 </body>
 </html>
