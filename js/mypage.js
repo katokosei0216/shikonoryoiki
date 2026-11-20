@@ -13,6 +13,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFilter('favModal', renderFavModal);
   setupFilter('commentModal', renderCommentModal);
 
+  // お気に入り・投稿コメント履歴：拡大ウィンドウの外側をクリックすると閉じる。
+  // モーダル本体や中のボタン／カードをクリックしても閉じない。
+  ['favModal', 'commentModal'].forEach((modalId) => {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) closeModal(modalId);
+    });
+  });
+
   await loadMypage();
   // 詳細ページから戻ったときは、戻り元の一覧を開く。
   if (window.location.hash === '#favorites') openModal('favModal');
@@ -200,7 +210,7 @@ function setupFilter(modalId, render) {
   });
 
   // 名称検索
-  const input = modal.querySelector('input[type="text"]');
+  const input = modal.querySelector('[data-product-filter]');
   if (input) input.addEventListener('input', render);
 }
 
@@ -210,7 +220,7 @@ function matchesFilter(modalId, item) {
   const cats = [...modal.querySelectorAll('.cat-btn.active')].map(b => b.dataset.category);
   if (cats.length > 0 && !cats.includes(item.category_code)) return false;
 
-  const input = modal.querySelector('input[type="text"]');
+  const input = modal.querySelector('[data-product-filter]');
   const kw = input ? input.value.trim().toLowerCase() : '';
   if (kw !== '' && !String(item.product_name).toLowerCase().includes(kw)) return false;
 
