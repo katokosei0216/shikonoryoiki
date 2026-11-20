@@ -63,7 +63,7 @@ async function loadResult() {
 
   let answers = null;
   try {
-    const key = tobacco ? 'easyAnswers_' + activeResultType : 'easyAnswers';
+    const key = tobacco ? 'easyAnswers_v2_' + activeResultType : 'easyAnswers';
     answers = JSON.parse(sessionStorage.getItem(key) || 'null');
   } catch (_) { /* no storage */ }
   if (!answers) {
@@ -89,7 +89,7 @@ async function loadResult() {
   const scoreLine = document.getElementById('scoreLine');
   if (scoreLine) {
     if (tobacco) {
-      const target = activeResultType === 'vape' ? 'シリーズ・香り・コク・吸いごたえ・種類・対応機器' : 'ブランド・香味・タール・ニコチン・サイズ・価格';
+      const target = activeResultType === 'vape' ? 'シリーズ・香り・コク・吸いごたえ・種類・フレーバー・メンソール' : '香味・タール・ニコチン・サイズ・パッケージ・カプセル・価格';
       scoreLine.textContent = '診断に使用した条件：' + target;
     } else {
       const t = data.target;

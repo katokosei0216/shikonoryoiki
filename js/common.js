@@ -220,14 +220,57 @@ function buildHeader(isPublicPage, loggedIn) {
 
   if (loggedIn) {
     // ログイン中: 「ログイン」ボタンと同じ見た目・同じ位置で「ログアウト」ボタンにする
-    userArea.innerHTML = `<a href="#" id="logoutBtn" class="login-button">ログアウト</a>`;
+    // ログアウトの直下に透明なクリック領域を作る（ログアウト自体は通常どおり動く）。
+    userArea.classList.add('has-five-trigger');
+    userArea.innerHTML = `
+      <a href="#" id="logoutBtn" class="login-button">ログアウト</a>
+      <button type="button" id="secretFiveTrigger" aria-label="秘密のゲームを開く（3回クリック）" title=""></button>`;
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
       e.preventDefault();
       handleLogout();
     });
+    setupSecretFiveTrigger(userArea.querySelector('#secretFiveTrigger'));
   } else {
     userArea.innerHTML = `<a href="${buildLoginUrl()}" class="login-button">ログイン</a>`;
   }
+}
+
+
+// 透明ボタンを1.2秒以内に3回クリックすると、5抜きゲームを開く。
+// ゲーム用ファイルは初めて隠し機能を使用したときだけ読み込む。
+function setupSecretFiveTrigger(trigger) {
+  if (!trigger) return;
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = '../css/secret-five-nuki.css?v=20261120-5nuki1';
+  document.head.appendChild(stylesheet);
+
+  let count = 0;
+  let last = 0;
+  let loading = false;
+  trigger.addEventListener('click', () => {
+    const now = performance.now();
+    count = now - last <= 1200 ? count + 1 : 1;
+    last = now;
+    if (count < 3) return;
+    count = 0;
+    last = 0;
+
+    if (typeof window.shikoOpenSecretFiveNuki === 'function') {
+      window.shikoOpenSecretFiveNuki();
+      return;
+    }
+    if (loading) return;
+    loading = true;
+    const script = document.createElement('script');
+    script.src = '../js/secret-five-nuki.js?v=20261120-5nuki1';
+    script.onload = () => {
+      loading = false;
+      if (typeof window.shikoOpenSecretFiveNuki === 'function') window.shikoOpenSecretFiveNuki();
+    };
+    script.onerror = () => { loading = false; script.remove(); };
+    document.head.appendChild(script);
+  });
 }
 
 // サーバーに問い合わせて、ログイン中かどうかを返す

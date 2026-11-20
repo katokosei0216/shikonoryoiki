@@ -1,7 +1,7 @@
 <?php
 /**
- * タバコ・電子タバコの10問簡単検索（POST JSON）。
- * リクエスト: { "category":"cigarette"|"vape", "answers": {"q1":"A", ..., "q10":"E"} }
+ * タバコ・電子タバコの8問簡単検索（POST JSON）。
+ * リクエスト: { "category":"cigarette"|"vape", "answers": {"q1":"A", ..., "q8":"E"} }
  * 回答とDBの実値を照合し、商品上位9件を返す。嗜好との一致度であり、安全性の評価ではない。
  */
 declare(strict_types=1);
@@ -28,8 +28,8 @@ $category = $input['category'] ?? null;
 if (!in_array($category, ['cigarette', 'vape'], true)) respond(['ok' => false, 'message' => 'カテゴリが不正です。'], 400);
 $answers = $input['answers'] ?? null;
 if (!is_array($answers)) respond(['ok' => false, 'message' => '回答が不正です。'], 400);
-$allowed = $category === 'cigarette' ? [5, 5, 5, 5, 5, 3, 3, 3, 5, 5] : [3, 5, 5, 5, 5, 3, 3, 3, 3, 5];
-for ($i = 1; $i <= 10; ++$i) {
+$allowed = $category === 'cigarette' ? [5, 5, 5, 5, 3, 3, 5, 5] : [3, 5, 5, 5, 5, 3, 3, 5];
+for ($i = 1; $i <= count($allowed); ++$i) {
     $choice = $answers['q' . $i] ?? null;
     if (!is_string($choice) || strlen($choice) !== 1 ||
         $choice < 'A' || $choice > chr(64 + $allowed[$i - 1])) {
@@ -52,35 +52,40 @@ function yesNo(float &$sum, float &$weightSum, float $weight, mixed $dbValue, bo
 
 function rateCigarette(array $p, array $a): float {
     $sum = 0.0; $max = 0.0;
-    $brand = ['A' => 'メビウス', 'B' => 'キャメル', 'C' => 'マールボロ', 'D' => 'ケント'];
-    if (isset($brand[$a['q1']])) addScore($sum, $max, 1.3, ($p['brand'] ?? '') === $brand[$a['q1']] ? 1 : 0);
-
     $flavor = ['A' => 'レギュラー', 'B' => 'メンソール', 'C' => '香り付きメンソール', 'D' => 'カプセル・メンソール'];
-    $flavorWeight = in_array($a['q10'], ['D'], true) ? 2.4 : 1.4;
-    if (isset($flavor[$a['q2']])) {
+    $flavorWeight = $a['q8'] === 'D' ? 2.4 : 1.4;
+    if (isset($flavor[$a['q1']])) {
         $actual = (string)($p['flavor_type'] ?? '');
-        $desired = $flavor[$a['q2']];
+        $desired = $flavor[$a['q1']];
         $closeness = $actual === $desired ? 1.0 :
             (($desired !== 'レギュラー' && $actual !== 'レギュラー') ? 0.3 : 0.0);
         addScore($sum, $max, $flavorWeight, $closeness);
     }
     $tarTargets = ['A' => 1, 'B' => 3, 'C' => 6, 'D' => 9, 'E' => 14];
     $nicTargets = ['A' => .15, 'B' => .35, 'C' => .55, 'D' => .8, 'E' => 1.1];
-    addScore($sum, $max, $a['q10'] === 'A' ? 3.0 : 1.7,
-        numericClose(isset($p['tar_mg']) ? (float)$p['tar_mg'] : null, $tarTargets[$a['q3']], 13.0));
-    addScore($sum, $max, $a['q10'] === 'B' ? 3.0 : 1.7,
-        numericClose(isset($p['nicotine_mg']) ? (float)$p['nicotine_mg'] : null, $nicTargets[$a['q4']], 1.1));
+    addScore($sum, $max, $a['q8'] === 'A' ? 3.0 : 1.7,
+        numericClose(isset($p['tar_mg']) ? (float)$p['tar_mg'] : null, $tarTargets[$a['q2']], 13.0));
+    addScore($sum, $max, $a['q8'] === 'B' ? 3.0 : 1.7,
+        numericClose(isset($p['nicotine_mg']) ? (float)$p['nicotine_mg'] : null, $nicTargets[$a['q3']], 1.1));
 
     $sizes = ['A' => 'is_short', 'B' => 'is_king', 'C' => 'is_long', 'D' => 'is_slim'];
-    if (isset($sizes[$a['q5']])) yesNo($sum, $max, 1.2, $p[$sizes[$a['q5']]] ?? 0, true);
-    if ($a['q6'] !== 'C') yesNo($sum, $max, 1.0, $p[$a['q6'] === 'A' ? 'is_soft' : 'is_box'] ?? 0, true);
-    if ($a['q7'] !== 'C') yesNo($sum, $max, 1.0, $p['is_capsule'] ?? 0, $a['q7'] === 'A');
-    if ($a['q8'] !== 'C') addScore($sum, $max, 0.9, (int)($p['pack_count'] ?? 0) === ($a['q8'] === 'A' ? 10 : 20) ? 1 : 0);
+    if (isset($sizes[$a['q4']])) yesNo($sum, $max, 1.2, $p[$sizes[$a['q4']]] ?? 0, true);
+    if ($a['q5'] !== 'C') yesNo($sum, $max, 1.0, $p[$a['q5'] === 'A' ? 'is_soft' : 'is_box'] ?? 0, true);
+    if ($a['q6'] !== 'C') yesNo($sum, $max, 1.0, $p['is_capsule'] ?? 0, $a['q6'] === 'A');
 
     $priceTargets = ['A' => 450, 'B' => 470, 'C' => 500, 'D' => 580, 'E' => 630];
-    addScore($sum, $max, $a['q10'] === 'C' ? 3.0 : 1.0,
-        numericClose(isset($p['price']) ? (float)$p['price'] : null, $priceTargets[$a['q9']], 190.0));
+    addScore($sum, $max, $a['q8'] === 'C' ? 3.0 : 1.0,
+        numericClose(isset($p['price']) ? (float)$p['price'] : null, $priceTargets[$a['q7']], 190.0));
     return $max > 0 ? $sum / $max : 0;
+}
+
+// 強メンソールを示す独立カラムがないため、既存の登録商品名・説明の明記情報を使う。
+function isStrongMenthol(array $p): bool {
+    if (!(bool)($p['is_menthol'] ?? false)) return false;
+    $name = (string)($p['product_name'] ?? '');
+    $description = (string)($p['description'] ?? '');
+    return preg_match('/ブラック|アイシー/u', $name) === 1 ||
+           preg_match('/強冷|強い冷涼感|強いメンソール|強めのメンソール|冷涼感が強く|刺激の強さ/u', $description) === 1;
 }
 
 function rateVape(array $p, array $a): float {
@@ -91,24 +96,23 @@ function rateVape(array $p, array $a): float {
     foreach (['q2' => ['aroma_score','A'], 'q3' => ['richness_score','B'], 'q4' => ['strength_score','C']] as $q => [$column, $focus]) {
         $value = $p[$column] === null ? null : (float)$p[$column];
         $target = ord($a[$q]) - 64;
-        addScore($sum, $max, $a['q10'] === $focus ? 3.0 : 1.6,
+        addScore($sum, $max, $a['q8'] === $focus ? 3.0 : 1.6,
             numericClose($value, $target, 4.0));
     }
-    $types = ['A' => 'レギュラー', 'B' => 'メンソール', 'C' => 'フレーバー・メンソール', 'D' => 'カプセル入りメンソール'];
-    if (isset($types[$a['q5']])) {
+    $types = ['A' => 'レギュラー', 'B' => 'メンソール', 'C' => 'フレーバー・メンソール'];
+    if ($a['q5'] === 'D') {
+        // 強メンソールは旧Dの「カプセル入りメンソール」と別条件で判定する。
+        $similar = isStrongMenthol($p) ? 1.0 : ((bool)($p['is_menthol'] ?? false) ? 0.3 : 0.0);
+        addScore($sum, $max, $a['q8'] === 'D' ? 3.0 : 1.5, $similar);
+    } elseif (isset($types[$a['q5']])) {
         $actual = (string)($p['type_label'] ?? '');
         $desired = $types[$a['q5']];
         $similar = $actual === $desired ? 1.0 :
             ($desired !== 'レギュラー' && $actual !== 'レギュラー' ? 0.3 : 0.0);
-        addScore($sum, $max, $a['q10'] === 'D' ? 3.0 : 1.5, $similar);
+        addScore($sum, $max, $a['q8'] === 'D' ? 3.0 : 1.5, $similar);
     }
-    if ($a['q6'] !== 'C') yesNo($sum, $max, 1.0, $p['is_capsule'] ?? 0, $a['q6'] === 'A');
-    if ($a['q7'] !== 'C') yesNo($sum, $max, 1.0, $p['is_strong_flavor'] ?? 0, $a['q7'] === 'A');
-    if ($a['q8'] !== 'C') yesNo($sum, $max, 1.0, $p['is_menthol'] ?? 0, $a['q8'] === 'A');
-    if ($a['q9'] !== 'C') {
-        $key = $a['q9'] === 'A' ? 'is_iluma_compatible' : 'is_legacy_compatible';
-        yesNo($sum, $max, 1.5, $p[$key] ?? 0, true);
-    }
+    if ($a['q6'] !== 'C') yesNo($sum, $max, 1.0, $p['is_strong_flavor'] ?? 0, $a['q6'] === 'A');
+    if ($a['q7'] !== 'C') yesNo($sum, $max, 1.0, $p['is_menthol'] ?? 0, $a['q7'] === 'A');
     return $max > 0 ? $sum / $max : 0;
 }
 
@@ -129,7 +133,7 @@ try {
                 WHERE c.category_code = ?';
         $params = ['cigarette'];
     } else {
-        $sql = 'SELECT p.product_id, p.product_name, p.aroma_score, p.richness_score,
+        $sql = 'SELECT p.product_id, p.product_name, p.description, p.aroma_score, p.richness_score,
                        c.category_name, vd.product_line, vd.strength_score, vd.type_label,
                        vd.is_regular, vd.is_menthol, vd.is_strong_flavor, vd.is_capsule,
                        vd.is_iluma_compatible, vd.is_legacy_compatible
@@ -138,9 +142,6 @@ try {
                 JOIN vape_details vd ON vd.product_id = p.product_id
                 WHERE c.category_code = ?';
         $params = ['vape'];
-        // 使用機器と不適合の製品は、たとえ他の回答が近くても推薦対象にしない。
-        if ($answers['q9'] === 'A') $sql .= ' AND vd.is_iluma_compatible = 1';
-        if ($answers['q9'] === 'B') $sql .= ' AND vd.is_legacy_compatible = 1';
     }
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -150,13 +151,8 @@ try {
     respond(['ok' => false, 'message' => 'データベースに接続できないか、商品テーブルを読み込めませんでした。'], 500);
 }
 
-if (!$products && $category === 'vape' && $answers['q9'] === 'B') {
-    respond(['ok' => true, 'category' => $category, 'total' => 0, 'results' => [],
-        'notice' => '登録されている電子タバコには従来のIQOS対応製品がありません。対応機器の条件を変更してください。']);
-}
-
 // 同点の商品の順番を、回答セットとIDから安定して決める。
-$seed = implode('', array_map(fn($i) => $answers['q' . $i], range(1, 10)));
+$seed = implode('', array_map(fn($i) => $answers['q' . $i], range(1, count($allowed))));
 foreach ($products as &$p) {
     $p['_similarity'] = $category === 'cigarette' ? rateCigarette($p, $answers) : rateVape($p, $answers);
     $p['_tie'] = sprintf('%u', crc32($seed . ':' . $p['product_id']));
